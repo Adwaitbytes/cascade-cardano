@@ -223,6 +223,17 @@ export interface PlanKeys {
   draftedBy?: "llm" | "code";
 }
 
+/**
+ * A source cannot price a slot for the plan's asset (a Masumi seller lists a lovelace price and P
+ * locks lovelace, so a Masumi slot in a tree funded in another asset can never be paid).
+ */
+export class UnpayableSlotError extends Error {
+  constructor(specId: string, reason: string) {
+    super(`${specId}: ${reason}`);
+    this.name = "UnpayableSlotError";
+  }
+}
+
 class MissingPurchaserError extends Error {
   constructor(specId: string) {
     super(`${specId}: a Masumi slot is paid through the purchase wallet P, and no masumiPurchaserHash was given (ADR 0001 section 8.1)`);
@@ -400,7 +411,7 @@ export function buildPlan(draftIn: PlanDraft, intake: JobIntake, agents: AgentSo
     try {
       children = buildChildren("root", hireable);
     } catch (e) {
-      if (e instanceof MissingVerifierKeysError || e instanceof MissingPurchaserError || e instanceof TestAgentRefusedError) return { ok: false, errors: [e.message] };
+      if (e instanceof MissingVerifierKeysError || e instanceof MissingPurchaserError || e instanceof TestAgentRefusedError || e instanceof UnpayableSlotError) return { ok: false, errors: [e.message] };
       if (e instanceof Unaffordable) return { ok: false, errors: [tooLow().message] };
       throw e;
     }

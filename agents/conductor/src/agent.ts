@@ -11,7 +11,8 @@ import { SCOUT_OUTPUT_SCHEMA } from "@cascade/agent-scout";
 import { SCRIBE_OUTPUT_SCHEMA } from "@cascade/agent-scribe";
 import { cascadeAgent, type AgentSigner, type CascadeAgent, type JsonValue, type PaymentRequirementsProvider, type PaymentVerifier, type JobStore } from "@cascade/agent";
 import type { AgentRuntime } from "@cascade/agent-kit";
-import { MASUMI_RESULT_SCHEMA, orchestratorApi, withoutTestAgents, planJob, planPolicyFor, RISK_PRESETS, type AgentNames, type AgentSource, type BuyerTxBuilder, type DraftTask, type PlanStore, type RiskPreset, type StructuralSizer, type VerifierKeyOf } from "@cascade/orchestrator";
+import { masumiCollateralLovelace, masumiMinUtxoLovelace } from "@cascade/shared";
+import { MASUMI_RESULT_SCHEMA, orchestratorApi, UnpayableSlotError, withoutTestAgents, planJob, planPolicyFor, RISK_PRESETS, type AgentNames, type AgentSource, type BuyerTxBuilder, type DraftTask, type PlanStore, type RiskPreset, type StructuralSizer, type VerifierKeyOf } from "@cascade/orchestrator";
 import type { LlmClient } from "@cascade/orchestrator/llm";
 import type { AgentRef, JsonValue as SpecJson } from "@cascade/shared/browser";
 
@@ -93,6 +94,39 @@ export const REFERENCE_LIST_PRICES: Partial<Record<HiredRole, string>> = {
   "checker-c": "1000000",
 };
 
+/**
+ * Lisan's registered Masumi price (scripts/register-agents.ts): one Fixed lovelace amount, which its
+ * payment service requests in the lock. The Conductor takes the live value from the directory, the
+ * same source the lock reads (`masumi_price_lovelace`); this is the fallback.
+ */
+export const LISAN_MASUMI_PRICE_LOVELACE = "10000000";
+
+/**
+ * Upper bound on the CBOR size of a `vested_pay` lock datum, in bytes. A lock for a 120-hex agent
+ * identifier and a COSE signature encodes to well under this (agents/conductor/test/demo-schemas.test.ts).
+ */
+const MASUMI_LOCK_DATUM_BYTES_BOUND = 1_200;
+
+/** coinsPerUtxoByte on preprod (and mainnet) since Babbage; the lock itself reads the live value. */
+export const PREPROD_COINS_PER_UTXO_BYTE = 4_310n;
+
+/**
+ * The lovelace P must lock to buy a Masumi job at `price`: the price plus any collateral the
+ * contract needs when the price is below the lock's post-submit min-UTxO (`masumiLockPlan`). The
+ * Masumi protocol fee is taken from the seller's side at withdrawal, so it adds nothing here. The
+ * plan's Masumi slot budget must reach this, or the Draw to P is refused
+ * (preprod tree e42afead: "the Masumi lock needs 10000000, above the plan's 6736842").
+ */
+export function masumiLockFloorLovelace(price: bigint, coinsPerUtxoByte: bigint = PREPROD_COINS_PER_UTXO_BYTE): bigint {
+  return price + masumiCollateralLovelace(price, masumiMinUtxoLovelace(MASUMI_LOCK_DATUM_BYTES_BOUND, 0, coinsPerUtxoByte));
+}
+
+export interface ReferenceSourceOptions {
+  /** Lisan's Masumi price in lovelace, as the lock reads it; `LISAN_MASUMI_PRICE_LOVELACE` when absent. */
+  masumiPriceLovelace?: string;
+  coinsPerUtxoByte?: bigint;
+}
+
 const highestListPrice = (roles: HiredRole[]): { list_price?: string } => {
   const prices = roles.map((r) => REFERENCE_LIST_PRICES[r]).filter((p): p is string => p !== undefined).map(BigInt);
   return prices.length === 0 ? {} : { list_price: prices.reduce((a, b) => (b > a ? b : a)).toString() };
@@ -131,11 +165,17 @@ export function referenceRoleFor(task: DraftTask): HiredRole {
  * schema. Real sourcing (PRD 10.1 steps 4 and 5) replaces this with ranked quotes from the Cascade
  * Directory.
  */
-export function referenceAgentSource(ids: ReferenceAgentIds, schemas: Record<HiredRole, Record<string, SpecJson>> = REFERENCE_OUTPUT_SCHEMAS): AgentSource {
+export function referenceAgentSource(ids: ReferenceAgentIds, schemas: Record<HiredRole, Record<string, SpecJson>> = REFERENCE_OUTPUT_SCHEMAS, options: ReferenceSourceOptions = {}): AgentSource {
   const testAgentIds = new Set([...TEST_AGENT_ROLES].map((r) => ids[r]));
-  return withoutTestAgents((task) => {
+  const masumiFloor = masumiLockFloorLovelace(BigInt(options.masumiPriceLovelace ?? LISAN_MASUMI_PRICE_LOVELACE), options.coinsPerUtxoByte).toString();
+  return withoutTestAgents((task, spec) => {
     if (task === "root") return { primary: ref(ids.conductor), fallbacks: [] };
     const role = referenceRoleFor(task);
+    if (role === "lisan") {
+      // Lisan sells in lovelace only and P locks lovelace, so the slot's floor is the lock in lovelace.
+      if (spec.price.asset !== "lovelace") throw new UnpayableSlotError(task.id, `Lisan sells through Masumi in lovelace only; a tree funded in ${spec.price.asset} cannot pay its lock`);
+      return { primary: ref(ids.lisan), fallbacks: [], output_schema: schemas.lisan, list_price: masumiFloor };
+    }
     const price = task.category === "data-lookup" && task.rail !== "address" ? LOOKUP_PER_CALL_LOVELACE : "0";
     // TEST SCENARIO A2: Flaky Lisan (test agent) is hired first and never delivers, so the slot is
     // refunded and re-hires its fallback; the slot takes the schema of the agent that will deliver.
@@ -154,6 +194,8 @@ export interface ConductorDeps {
   checkerKeys: { a: string; b: string; c: string };
   /** Payment key hash of the Masumi purchase wallet P (wallet role masumi-purchaser, ADR 0001 section 8.1). */
   masumiPurchaserHash?: string;
+  /** Lisan's Masumi price in lovelace from the directory (what the lock will read); the registered price when absent. */
+  masumiPriceLovelace?: string;
   /** Exact structural reserve for plans (`sdkStructuralSizer`); a flat estimate without it. */
   structural?: StructuralSizer;
   now?: () => number;
@@ -194,6 +236,7 @@ export const referenceVerifierKeys =
 export function createConductorAgent(deps: ConductorDeps): CascadeAgent {
   const now = deps.now ?? Date.now;
   const verifierKeyOf = referenceVerifierKeys(deps.checkerKeys);
+  const agents = referenceAgentSource(deps.agents, REFERENCE_OUTPUT_SCHEMAS, deps.masumiPriceLovelace === undefined ? {} : { masumiPriceLovelace: deps.masumiPriceLovelace });
   // Preprod keeps its safety windows; on the one-second-slot devnet they shrink to minutes.
   const policy = planPolicyFor(deps.runtime.network === "cardano:preprod" ? "preprod" : "local");
   return cascadeAgent({
@@ -228,7 +271,7 @@ export function createConductorAgent(deps: ConductorDeps): CascadeAgent {
               "/",
               orchestratorApi({
                 llm: deps.llm,
-                agents: referenceAgentSource(deps.agents),
+                agents,
                 verifierKeyOf,
                 policy,
                 ...(deps.masumiPurchaserHash === undefined ? {} : { masumiPurchaserHash: deps.masumiPurchaserHash }),
@@ -258,7 +301,7 @@ export function createConductorAgent(deps: ConductorDeps): CascadeAgent {
           reputation_floor: 0.6,
           risk: risk ?? "balanced",
         },
-        { llm: deps.llm, agents: referenceAgentSource(deps.agents), verifierKeyOf, policy, ...(deps.masumiPurchaserHash === undefined ? {} : { masumiPurchaserHash: deps.masumiPurchaserHash }), ...(deps.structural === undefined ? {} : { structural: deps.structural }) },
+        { llm: deps.llm, agents, verifierKeyOf, policy, ...(deps.masumiPurchaserHash === undefined ? {} : { masumiPurchaserHash: deps.masumiPurchaserHash }), ...(deps.structural === undefined ? {} : { structural: deps.structural }) },
       );
       ctx.log({
         tool: "llm.planner",

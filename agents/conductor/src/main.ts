@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { paymentKeyHash } from "@cascade/shared";
 import { REPO_ROOT } from "@cascade/orchestrator";
-import { jobStoreFromEnv, agentIdFor, cascadeNetworkFromEnv, env, llmFromEnv, PAYMENTS_STATUS, runtimeFor, serveAgent, signerForRole } from "@cascade/agent-kit";
+import { jobStoreFromEnv, agentIdFor, cascadeNetworkFromEnv, env, llmFromEnv, PAYMENTS_STATUS, referenceDirectory, runtimeFor, serveAgent, signerForRole } from "@cascade/agent-kit";
 import { createConductorAgent, EXECUTION_STATUS, referenceAgentNames, type ReferenceAgentIds } from "./agent.js";
 import { chainRuntimeFromEnv } from "./chain-runtime.js";
 
@@ -21,6 +21,8 @@ const checkerKeys = { a: keyOfRole("checker-a"), b: keyOfRole("checker-b"), c: k
 /** The public buyer console and its local dev servers; CASCADE_WEB_ORIGINS adds more. */
 const CONSOLE_ORIGINS = ["https://cascade-alpha-amber.vercel.app", "http://localhost:3000", "http://localhost:3100"];
 const allowedOrigins = [...new Set([...CONSOLE_ORIGINS, ...(env("CASCADE_WEB_ORIGINS") ?? "").split(",").map((o) => o.trim()).filter((o) => o !== "")])];
+// Lisan's Masumi price from the directory the Masumi lock reads, so a plan never prices its slot under the lock.
+const masumiPriceLovelace = (await referenceDirectory(network).resolve(agents.lisan)).masumi_price_lovelace;
 const llm = llmFromEnv();
 const logError = (where: string, e: unknown): void => {
   process.stderr.write(`${where}: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}\n`);
@@ -36,6 +38,7 @@ const agent = createConductorAgent({
   agents,
   checkerKeys,
   masumiPurchaserHash: keyOfRole("masumi-purchaser"),
+  ...(masumiPriceLovelace === undefined ? {} : { masumiPriceLovelace }),
   ...(chain === null ? {} : { structural: chain.structural }),
   // Labelled test scenarios (A5, A8, A9) for acceptance tests; set CASCADE_DISABLE_TEST_SCENARIOS=1 to refuse them.
   ...(env("CASCADE_DISABLE_TEST_SCENARIOS") === "1" ? {} : { scenarioKeys: { lookupApi: keyOfRole("lookup-api") } }),

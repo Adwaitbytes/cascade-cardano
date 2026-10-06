@@ -4,6 +4,7 @@
  * planner LLM invented the research leaf's fields, Scout returned its own valid shape, and L0
  * challenged it. These tests plan with the Conductor's real agent source.
  */
+import { generateKeyPairSync } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { CHECKER_OUTPUT_SCHEMA } from "@cascade/agent-kit";
 import { TRANSLATION_OUTPUT_SCHEMA } from "@cascade/agent-flaky-lisan";
@@ -13,7 +14,9 @@ import { SCOUT_OUTPUT_SCHEMA } from "@cascade/agent-scout";
 import { SCRIBE_OUTPUT_SCHEMA } from "@cascade/agent-scribe";
 import { buildPlan, DEFAULT_POLICY, demoDraft, LlmClient, MASUMI_RESULT_SCHEMA, parseSubAgentOutput, planJob, scenarioDraft, TEST_SCENARIOS, type JobIntake, type PlanDraft } from "@cascade/orchestrator";
 import { jcsSha256Hex, planLeafFor, planNodesPreOrder, planProof, specHash, verifyMerkleProof, type JsonValue, type Plan } from "@cascade/shared/browser";
-import { REFERENCE_LIST_PRICES, referenceAgentSource, referenceRoleFor, referenceVerifierKeys, type ReferenceAgentIds } from "../src/agent.js";
+import { blake2b_224, encodeMasumiDatum, encodeMasumiIdentifier, plutusAddressToBech32, sha256, signCose1, utf8 } from "@cascade/shared";
+import { masumiLockPlan } from "@cascade/sdk";
+import { LISAN_MASUMI_PRICE_LOVELACE, masumiLockFloorLovelace, PREPROD_COINS_PER_UTXO_BYTE, REFERENCE_LIST_PRICES, referenceAgentSource, referenceRoleFor, referenceVerifierKeys, type ReferenceAgentIds } from "../src/agent.js";
 
 const id = (n: number) => `${"67".repeat(28)}${n.toString(16).padStart(2, "0")}`;
 const IDS: ReferenceAgentIds = { conductor: id(1), scout: id(2), pricer: id(3), "lookup-api": id(4), "flaky-lisan": id(5), lisan: id(6), "checker-a": id(7), "checker-b": id(8), "checker-c": id(10), scribe: id(9) };
@@ -205,5 +208,83 @@ describe("plan output schemas are the hired agents' advertised schemas", () => {
     const v = (id: string) => ({ ...INVENTED.tasks[0]!, id, category: "verification" as const });
     expect(["fact-check-1", "fact-check-2", "fact-check-3", "check-a", "check-b", "check-c"].map((i) => referenceRoleFor(v(i)))).toEqual(["checker-a", "checker-b", "checker-c", "checker-a", "checker-b", "checker-c"]);
     expect(["brief-verification-1", "brief-verification-2"].map((i) => verifierKeyOf(v(i)))).toEqual(["61".repeat(28), "62".repeat(28)]);
+  });
+});
+
+/** Seller terms as Lisan's payment service signs them: a 120-hex agent identifier and a COSE signature. */
+function lisanTerms(price: bigint) {
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+  const raw = (k: { export(o: { format: "jwk" }): { x?: string; d?: string } }, f: "x" | "d") => new Uint8Array(Buffer.from(k.export({ format: "jwk" })[f] ?? "", "base64url"));
+  const vkh = Buffer.from(blake2b_224(raw(publicKey, "x"))).toString("hex");
+  const address = plutusAddressToBech32({ payment_credential: { type: "VerificationKey", hash: vkh }, stake_credential: { type: "Inline", credential: { type: "VerificationKey", hash: "77".repeat(28) } } }, 0);
+  const sig = signCose1({ payload: sha256(utf8("terms")), secretKey: raw(privateKey, "d"), address });
+  const agentIdentifier = `${"67".repeat(28)}${"ab".repeat(32)}`;
+  const buyerNonce = "aabbccddeeff00112233aabbccddeeff";
+  const escrow = "addr_test1wzs4e6wc95hkwezlccjw9mdvq0r0rsgx6zk34avptga3ftgn37w4g";
+  const now = 1_790_000_000_000n;
+  return {
+    escrow,
+    terms: {
+      job_id: "j",
+      blockchainIdentifier: encodeMasumiIdentifier({ sellerNonce: "11".repeat(32), agentIdentifier, buyerNonce, referenceSignature: sig.signature, referenceKey: sig.key, contractAddress: escrow }),
+      payByTime: now,
+      submitResultTime: now + 3_600_000n,
+      unlockTime: now + 7_200_000n,
+      externalDisputeUnlockTime: now + 10_800_000n,
+      agentIdentifier,
+      sellerVKey: vkh,
+      input_hash: "cd".repeat(32),
+      identifierFromPurchaser: buyerNonce,
+      amounts: [{ unit: "lovelace", amount: price }],
+    },
+  };
+}
+
+// Preprod showcase tree e42afead hired only 2 children: the Lisan slot was planned at 6736842 and
+// the Draw to P failed with "the Masumi lock needs 10000000, above the plan's 6736842".
+describe("a Masumi slot is priced at least at the lock P makes for Lisan", () => {
+  const masumiSlot = (plan: Plan) => planNodesPreOrder(plan.root).map(({ node }) => node).find((n) => n.spec.masumi_followup !== undefined);
+
+  it("the demo tree at 80 ADA gives Lisan's slot the 10 ADA lock, not 6736842", () => {
+    const res = buildPlan(demoDraft(), intake({ budget: "80000000" }), referenceAgentSource(IDS), DEFAULT_POLICY, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
+    if (!res.ok) throw new Error(res.errors.join("; "));
+    const slot = masumiSlot(res.built.plan);
+    expect(slot?.agents.primary.agent_id).toBe(IDS.lisan);
+    expect(BigInt(slot?.spec.price.max_budget ?? "0")).toBeGreaterThanOrEqual(10_000_000n);
+  });
+
+  it("the full demo tree needs 60 ADA at real list prices, inside the Coworker's 100 ADA default", () => {
+    const res = buildPlan(demoDraft(), intake({ budget: "10000000" }), referenceAgentSource(IDS), DEFAULT_POLICY, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
+    const minimum = BigInt(/raise the budget to at least (\d+)$/.exec(res.ok ? "" : res.errors.join("; "))?.[1] ?? "0");
+    expect(minimum).toBe(59_999_998n);
+    expect(buildPlan(demoDraft(), intake({ budget: "100000000" }), referenceAgentSource(IDS), DEFAULT_POLICY, verifierKeyOf, { masumiPurchaserHash: PURCHASER }).ok).toBe(true);
+  });
+
+  it("the floor follows the directory's price, and a budget that cannot cover it fails naming the minimum", () => {
+    const source = referenceAgentSource(IDS, undefined, { masumiPriceLovelace: "30000000" });
+    const ok = buildPlan(demoDraft(), intake({ budget: "150000000" }), source, DEFAULT_POLICY, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
+    if (!ok.ok) throw new Error(ok.errors.join("; "));
+    expect(BigInt(masumiSlot(ok.built.plan)?.spec.price.max_budget ?? "0")).toBeGreaterThanOrEqual(30_000_000n);
+    const low = buildPlan(demoDraft(), intake({ budget: "60000000" }), source, DEFAULT_POLICY, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
+    expect(low.ok ? "" : low.errors.join("; ")).toMatch(/^budget 60000000 is too low .*translate-ar-masumi 30000000.*; raise the budget to at least \d+$/);
+  });
+
+  it("refuses a Masumi slot in a tree funded in another asset (Lisan sells in lovelace only)", () => {
+    const res = buildPlan(demoDraft(), intake({ asset: "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d" }), referenceAgentSource(IDS), DEFAULT_POLICY, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
+    expect(res.ok ? "" : res.errors.join("; ")).toMatch(/^translate-ar-masumi: Lisan sells through Masumi in lovelace only/);
+  });
+
+  it.each([500_000n, 2_000_000n, BigInt(LISAN_MASUMI_PRICE_LOVELACE)])("covers the lock masumiLockPlan builds at a %s lovelace price, collateral included", (price) => {
+    const { terms, escrow } = lisanTerms(price);
+    const lock = masumiLockPlan({
+      terms,
+      price: { unit: "lovelace", amount: price },
+      purchaserAddress: plutusAddressToBech32({ payment_credential: { type: "VerificationKey", hash: "52".repeat(28) }, stake_credential: { type: "Inline", credential: { type: "VerificationKey", hash: "53".repeat(28) } } }, 0),
+      buyerRefund: { payment_credential: { type: "VerificationKey", hash: "11".repeat(28) }, stake_credential: { type: "Inline", credential: { type: "VerificationKey", hash: "12".repeat(28) } } },
+      escrowAddress: escrow,
+      coinsPerUtxoByte: PREPROD_COINS_PER_UTXO_BYTE,
+    });
+    expect(encodeMasumiDatum(lock.datum).length / 2).toBeLessThan(1_200);
+    expect(masumiLockFloorLovelace(price)).toBeGreaterThanOrEqual(lock.lockedLovelace);
   });
 });

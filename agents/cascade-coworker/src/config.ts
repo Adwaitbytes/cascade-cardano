@@ -74,7 +74,10 @@ export function configFromEnv(): CoworkerConfig {
     temporalAddress: env("CASCADE_TEMPORAL_ADDRESS") ?? "127.0.0.1:27233",
     temporalNamespace: env("CASCADE_TEMPORAL_NAMESPACE") ?? "cascade",
     dataDir: env("COWORKER_DATA_DIR") ?? resolve(REPO_ROOT, "infra/.data/coworker"),
-    treeBudgetLovelace: env("COWORKER_TREE_BUDGET_LOVELACE") ?? "80000000",
+    // The demo-shaped tree (Scout, Pricer with a metered Lookup API channel, Lisan via Masumi at
+    // 10 ADA, three checkers, Scribe) needs 60 ADA at real list prices; 100 ADA leaves room for an
+    // LLM draft with an extra slot. Tree e42afead at 80 ADA hired 2 children: Lisan was unpriced.
+    treeBudgetLovelace: env("COWORKER_TREE_BUDGET_LOVELACE") ?? "100000000",
     // The Conductor's preprod plans need up to fund_by + 135 minutes (Masumi leaves set 35-minute windows).
     treeWindowMs: Number(env("COWORKER_TREE_WINDOW_MIN") ?? "190") * 60_000,
     pollMs: Number(env("COWORKER_POLL_MS") ?? "30000"),
