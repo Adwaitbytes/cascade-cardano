@@ -3,7 +3,7 @@
  * parameters, evaluation and submission; a Blockfrost-compatible API (Yaci Store locally,
  * Blockfrost on preprod) for inclusion depth, which Ogmios cannot report for a past transaction.
  */
-import { OgmiosClient, ogmiosValue, parseOutRef, type EvaluationResult, type ProtocolParameters } from "@cascade/service-kit";
+import { OgmiosClient, ogmiosEvaluator, ogmiosValue, parseOutRef, type EvaluationResult, type ProtocolParameters, type TxEvaluator } from "@cascade/service-kit";
 import type { ResolvedUtxo } from "./phase1.js";
 
 export type Evidence = { status: "unknown" | "mempool" | "confirmed"; confirmations: number };
@@ -130,6 +130,8 @@ export class BlockfrostChain implements ChainAccess {
   constructor(
     private readonly bf: { url: string; projectId: string | null },
     private readonly ogmiosProxy: OgmiosClient,
+    /** Script evaluation (main.ts passes Blockfrost then Koios with failover); defaults to the proxy alone. */
+    private readonly evaluator: TxEvaluator = ogmiosEvaluator("koios", ogmiosProxy),
   ) {
     this.evidenceChain = new OgmiosChain(ogmiosProxy, bf);
   }
@@ -222,7 +224,7 @@ export class BlockfrostChain implements ChainAccess {
   }
 
   evaluate(cborHex: string): Promise<EvaluationResult[]> {
-    return this.ogmiosProxy.evaluate(cborHex);
+    return this.evaluator.evaluate(cborHex);
   }
 
   submit(cborHex: string): Promise<string> {

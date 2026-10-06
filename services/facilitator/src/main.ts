@@ -1,13 +1,17 @@
 /**
  * Facilitator entry point. Env: CASCADE_NETWORK (local | preprod), FACILITATOR_PORT (default 4200),
- * FACILITATOR_CONFIRMATION_WAIT_MS (default 5000).
+ * FACILITATOR_CONFIRMATION_WAIT_MS (default 5000), CASCADE_EVALUATOR_BURST and CASCADE_EVALUATOR_PER_SECOND
+ * (token bucket for script evaluation calls, default 5 and 2).
  */
 import { serve } from "@hono/node-server";
 import { x402Facilitator } from "@x402/core/facilitator";
 import type { Network } from "@x402/core/types";
 import { paymentKeyHash } from "@cascade/shared";
 import {
+  BlockfrostEvaluator,
   OgmiosClient,
+  ResilientEvaluator,
+  TokenBucket,
   assertRuntimeCurrent,
   createLogger,
   createPool,
@@ -16,6 +20,7 @@ import {
   intEnv,
   loadNetworkConfig,
   migrate,
+  ogmiosEvaluator,
   optionalEnv,
   resolveSlotConfig,
   safeUrl,
@@ -34,9 +39,20 @@ async function main(): Promise<void> {
   await migrate(pool, log);
   const network: Network = cfg.network === "local" ? LOCAL_NETWORK : PREPROD_NETWORK;
   const bf = cfg.blockfrostUrl === null ? null : { url: cfg.blockfrostUrl, projectId: cfg.network === "local" ? null : cfg.blockfrostProjectId };
-  // Own node: Ogmios for everything. Otherwise Blockfrost queries plus Koios /ogmios (evaluate, submit).
+  // Own node: Ogmios for everything. Otherwise Blockfrost queries plus Koios /ogmios (submit), and
+  // script evaluation on Blockfrost with failover to Koios, so a rate-limited provider is not a refusal.
+  const proxy = new OgmiosClient(cfg.ogmiosHttp);
   const chain =
-    cfg.chainMode === "ogmios" || bf === null ? new OgmiosChain(new OgmiosClient(cfg.ogmiosHttp), bf) : new BlockfrostChain(bf, new OgmiosClient(cfg.ogmiosHttp));
+    cfg.chainMode === "ogmios" || bf === null
+      ? new OgmiosChain(proxy, bf)
+      : new BlockfrostChain(
+          bf,
+          proxy,
+          new ResilientEvaluator([new BlockfrostEvaluator(bf.url, bf.projectId), ogmiosEvaluator("koios", proxy)], {
+            bucket: new TokenBucket(intEnv("CASCADE_EVALUATOR_BURST", 5), intEnv("CASCADE_EVALUATOR_PER_SECOND", 2)),
+            onFailure: (provider, message) => log.warn({ provider, err: message }, "evaluation provider failed"),
+          }),
+        );
   log.info({ chain_mode: cfg.chainMode }, "chain access");
   const scheme = new CascadeCardanoFacilitator({
     profile: { network, slotConfig: await resolveSlotConfig(cfg), masumi: cfg.network === "preprod" },
