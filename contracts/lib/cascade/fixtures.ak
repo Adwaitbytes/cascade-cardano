@@ -32,6 +32,9 @@ use cascade/value
 
 // ## Keys, hashes and addresses
 
+/// Stand-in for the build-time deployment tag of the leaf validators.
+pub const deployment_tag: ByteArray = #""
+
 pub const own: ByteArray =
   #"a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
 

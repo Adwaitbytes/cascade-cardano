@@ -1,4 +1,4 @@
-//// Metered leaf voucher channel (ADR 9, 1.3, 1.4). Unparameterised: the datum
+//// Metered leaf voucher channel (ADR 9, 1.3, 1.4). No hash parameters: the datum
 //// names the `cascade_node` hash as authority. The channel carries its thread
 //// token `#"6b" ++ receipt_node_id`; Redeem keeps it because the continuing
 //// value must equal the input value minus exactly the claim.
@@ -24,7 +24,9 @@ use cascade/ids
 use cascade/time
 use cascade/value
 
-validator cascade_channel {
+// Unused on purpose: applied at build time by scripts/build.sh so each deployment
+// gets its own script hash (ADR 0001, Hackathon redeploy).
+validator cascade_channel(_deployment_tag: ByteArray) {
   spend(
     datum: Option<ChannelDatum>,
     redeemer: ChannelRedeemer,
@@ -131,7 +133,13 @@ fn redeem_tx(amount: Int) -> Transaction {
 }
 
 fn spend(tx: Transaction, r: ChannelRedeemer) -> Bool {
-  cascade_channel.spend(Some(channel_datum()), r, fixtures.out_ref(5), tx)
+  cascade_channel.spend(
+    fixtures.deployment_tag,
+    Some(channel_datum()),
+    r,
+    fixtures.out_ref(5),
+    tx,
+  )
 }
 
 test voucher_tag_vector() {
@@ -170,6 +178,7 @@ test channel_rejects_signature_by_other_key() fail {
 test channel_rejects_above_deposit() fail {
   let tx = redeem_tx(5_000_000)
   cascade_channel.spend(
+    fixtures.deployment_tag,
     Some(ChannelDatum { ..channel_datum(), deposit: 4_000_000 }),
     Redeem { amount: 5_000_000, signature: sig_5m, out: 0 },
     fixtures.out_ref(5),
@@ -180,6 +189,7 @@ test channel_rejects_above_deposit() fail {
 test channel_rejects_non_increasing_amount() fail {
   let tx = redeem_tx(3_000_000)
   cascade_channel.spend(
+    fixtures.deployment_tag,
     Some(ChannelDatum { ..channel_datum(), redeemed: 3_000_000 }),
     Redeem { amount: 3_000_000, signature: sig_3m, out: 0 },
     fixtures.out_ref(5),
@@ -321,6 +331,7 @@ test channel_close_rejects_by_provider_alone() fail {
 
 test channel_rejects_missing_datum() fail {
   cascade_channel.spend(
+    fixtures.deployment_tag,
     None,
     Close,
     fixtures.out_ref(5),

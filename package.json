@@ -12,7 +12,7 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "aiken:check": "cd contracts && aiken check",
-    "aiken:build": "cd contracts && aiken build",
+    "aiken:build": "contracts/scripts/build.sh",
     "verify:all": "tsx scripts/verify-all.ts",
     "report:final": "tsx scripts/final-report.ts",
     "local:up": "bash infra/local-up.sh",

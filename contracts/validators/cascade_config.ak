@@ -8,7 +8,9 @@ use cardano/assets
 use cardano/transaction.{Input, OutputReference, Transaction}
 use cascade/fixtures
 
-validator cascade_config {
+// Unused on purpose: applied at build time by scripts/build.sh so each deployment
+// gets its own script hash (ADR 0001, Hackathon redeploy).
+validator cascade_config(_deployment_tag: ByteArray) {
   spend(
     _datum: Option<Data>,
     _redeemer: Data,
@@ -37,6 +39,7 @@ validator cascade_config {
 
 fn spend_config(mint: assets.Assets, output: transaction.Output) -> Bool {
   cascade_config.spend(
+    fixtures.deployment_tag,
     None,
     Void,
     fixtures.out_ref(9),
@@ -79,7 +82,13 @@ test config_rejects_lovelace_only_utxo() fail {
 }
 
 test config_rejects_missing_input() fail {
-  cascade_config.spend(None, Void, fixtures.out_ref(9), transaction.placeholder)
+  cascade_config.spend(
+    fixtures.deployment_tag,
+    None,
+    Void,
+    fixtures.out_ref(9),
+    transaction.placeholder,
+  )
 }
 
 fn not_a_single_burn() -> Fuzzer<Int> {

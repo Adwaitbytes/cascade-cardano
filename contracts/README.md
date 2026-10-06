@@ -15,14 +15,17 @@ Aiken validators for Cascade escrow trees. The interface is frozen in
 export PATH="$HOME/.aiken/bin:$PATH"
 aiken check                          # all unit, property and vector tests
 aiken check -m "cascade/tests/draw"  # one module
-aiken build --trace-level silent     # plutus.json, no traces
+scripts/build.sh                     # plutus.json, no traces, deployment tag applied
 python3 scripts/budget.py            # build, size gate (15,500 bytes), BUDGET.md
 python3 scripts/budget.py --check    # size gate only; exits 1 if a script is too big
 python3 scripts/gen_vectors.py       # regenerate tests/vectors.ak from packages/shared
                                      # (warns and leaves out sections whose shape predates ADR 1.6)
 ```
 
-`plutus.json` is committed and built with traces silent. `BUDGET.md` holds
+`plutus.json` is committed and built by `scripts/build.sh`: traces silent, and
+the tag in `deployment-tag` applied to the three leaf validators so each
+deployment has its own hashes (ADR 0001, Hackathon redeploy). Plain
+`aiken build` leaves the leaves parameterised and the deploy script rejects it. `BUDGET.md` holds
 script sizes and execution units per action; regenerate it, never edit it.
 
 ## Scripts
@@ -33,9 +36,9 @@ script sizes and execution units per action; regenerate it, never edit it.
 | `cascade_logic_core` | config, bond, channel hashes | `withdraw`, `publish` | FundRoot, TopUp, Submit, Accept, Challenge, Escalate, Refund, SettleChild, CloseRoot, Cancel, Freeze, Unfreeze |
 | `cascade_logic_draw` | config, bond, channel hashes | `withdraw`, `publish` | Draw of every child kind: native, AddressPayment, Masumi and Metered receipts |
 | `cascade_logic_ext` | config, bond, channel hashes | `withdraw`, `publish` | Resolve, CloseReceipt (ADR 1.4) |
-| `cascade_config` | none | `spend` | Tree Config UTxO; spendable only when the tx burns its tokens |
-| `cascade_bond` | none | `spend` | Bonds; moved when the authority's policy mints or burns, or reclaimed by the owner after `release_after` |
-| `cascade_channel` | none | `spend` | Metered voucher channel: provider `Redeem` with the payer's Ed25519 voucher before `timeout`; `Close` only when the authority's policy mints or burns |
+| `cascade_config` | deployment tag, applied at build | `spend` | Tree Config UTxO; spendable only when the tx burns its tokens |
+| `cascade_bond` | deployment tag, applied at build | `spend` | Bonds; moved when the authority's policy mints or burns, or reclaimed by the owner after `release_after` |
+| `cascade_channel` | deployment tag, applied at build | `spend` | Metered voucher channel: provider `Redeem` with the payer's Ed25519 voucher before `timeout`; `Close` only when the authority's policy mints or burns |
 
 Every other handler fails (`else(_) { fail }`). `cascade_node`'s config,
 bond and channel parameters are unused in its code (blueprint titles

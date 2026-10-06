@@ -346,3 +346,15 @@ Subbit cannot be used as published (docs/research/subbit.md): its Aiken project 
 ## 10. Failure evidence for negative acceptance tests (A10, A11, A12, A13, A19)
 
 "Fails on chain" is proven by building the transaction with the real validators and submitting it to the preprod node through the submit API with evaluation. The node rejects it with a script failure. Evidence records the tx body hash, the node's error, and the same scenario's positive control that succeeds.
+
+## Hackathon redeploy (2026-10-06)
+
+Problem: every on-chain artefact of the TOKEN2049 Origins submission must be created inside the hackathon window. `cascade_config`, `cascade_bond` and `cascade_channel` took no parameters, so rebuilding the same sources gives the same hashes as the Oct 1 deployment; the logic scripts and `cascade_node` take only those hashes, so all seven addresses, the node policy and the logic stake credentials would equal the old ones, and trees from Oct 1 to 5 would sit at the new deployment's addresses.
+
+Decision: each leaf validator takes one unused parameter, `_deployment_tag: ByteArray`. `contracts/scripts/build.sh` runs `aiken build --trace-level silent` and then `aiken blueprint apply` with the bytes in `contracts/deployment-tag` (`cascade/token2049/2026-10-06`) on the three leaves. The committed `plutus.json` therefore lists them with no parameters, so the deploy script, the SDK and every other loader apply parameters exactly as before. The new leaf hashes feed the hash parameters of the logic scripts and `cascade_node`, so all seven hashes change.
+
+Not changed: validator logic, the logic scripts' and `cascade_node`'s compiled code before parameter application (byte-identical to the Oct 1 blueprint), datums, redeemers and execution units in `contracts/BUDGET.md`. Each leaf grows by 39 bytes (the applied tag). `aiken check`: 6,972 checks, 0 errors, 0 warnings.
+
+Alternatives rejected: a seed-UTxO or config-token parameter needs new validator logic (a one-shot check) and changes the off-chain parameter order everywhere; a code edit that only perturbs bytes (a constant in an `else` handler) is optimised away or alters behaviour; wrapping UPLC off chain would make `plutus.json` disagree with the sources. A tag is the smallest reproducible change: anyone can rebuild `plutus.json` from the tagged sources and get the deployed hashes.
+
+Next redeploy: change `contracts/deployment-tag`, run `pnpm aiken:build`, then `pnpm -C scripts exec tsx deploy-scripts.ts --network preprod --supersede-reason "<why>"`.

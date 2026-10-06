@@ -1,4 +1,4 @@
-//// Challenger, verifier and specialist bonds (ADR 1, 4.4). Unparameterised:
+//// Challenger, verifier and specialist bonds (ADR 1, 4.4). No hash parameters:
 //// the datum names the `cascade_node` hash as authority.
 ////
 //// Path (a) requires the transaction to mint or burn under the authority
@@ -18,7 +18,9 @@ use cascade/fixtures
 use cascade/time
 use cascade/types.{BondDatum}
 
-validator cascade_bond {
+// Unused on purpose: applied at build time by scripts/build.sh so each deployment
+// gets its own script hash (ADR 0001, Hackathon redeploy).
+validator cascade_bond(_deployment_tag: ByteArray) {
   spend(
     datum: Option<BondDatum>,
     _redeemer: Data,
@@ -49,7 +51,13 @@ fn bond() -> BondDatum {
 }
 
 fn spend(tx: Transaction) -> Bool {
-  cascade_bond.spend(Some(bond()), Void, fixtures.out_ref(3), tx)
+  cascade_bond.spend(
+    fixtures.deployment_tag,
+    Some(bond()),
+    Void,
+    fixtures.out_ref(3),
+    tx,
+  )
 }
 
 test budget_bond_spend() {
@@ -113,7 +121,13 @@ test bond_rejects_stranger_after_release() fail {
 }
 
 test bond_rejects_missing_datum() fail {
-  cascade_bond.spend(None, Void, fixtures.out_ref(3), transaction.placeholder)
+  cascade_bond.spend(
+    fixtures.deployment_tag,
+    None,
+    Void,
+    fixtures.out_ref(3),
+    transaction.placeholder,
+  )
 }
 
 test prop_bond_owner_reclaims_after_release(
