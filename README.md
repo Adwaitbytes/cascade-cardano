@@ -96,19 +96,19 @@ The redeemer showcase tree below is public: [Tree Explorer](https://cascade-alph
 
 ## Deployed scripts
 
-Aiken `v1.1.24+bacbeb3`, Plutus V3. Blueprint `contracts/plutus.json`, SHA-256 `3439017459348ca71ef160ee0d4c2963e691e4ed8987eef487ab94371d895129`. Deployed 2026-10-01 01:11 UTC. Every script is a reference script at an address no key can spend. Source: [deployments/preprod.json](deployments/preprod.json).
+Aiken `v1.1.24+bacbeb3`, Plutus V3. Blueprint `contracts/plutus.json`, SHA-256 `0452fa1f0fbbbfd61f74d3c394a025429fe735187db19b30c2ae33fb167dbb51`. Deployed 2026-10-06 11:52 UTC. Every script is a reference script at an address no key can spend. Source: [deployments/preprod.json](deployments/preprod.json).
 
 | Script | Hash | Size | Reference UTxO |
 | --- | --- | --- | --- |
-| `cascade_node` | `5f58ba03d373f7510827aa4cb5c39615d0e65ea3630169afaa48abee` | 1,013 B | [70ced1a3...#0](https://preprod.cardanoscan.io/transaction/70ced1a398b4189f2151af01ced025d7735942be35d6cada4d5060048b2bdf39) |
-| `cascade_logic_core` | `951661b03c0c6b23b83f20fb01e089d60379240d92e4a102e3cd1c4b` | 14,980 B | [aae3e2d4...#0](https://preprod.cardanoscan.io/transaction/aae3e2d4e0971aff352f86b55a2b96f1baa0c206f98e19c119c285ac4b83fb3f) |
-| `cascade_logic_draw` | `a221e855ee4064bbb7c953e02e1233d920bb3a970e2877d0e0c87fcf` | 12,503 B | [0ddd0b54...#0](https://preprod.cardanoscan.io/transaction/0ddd0b544745d2b60fb4b4d35cf66311d309fbfb2088f973fa4a9f11fc50fec1) |
-| `cascade_logic_ext` | `6977b056b4fc9e83f3b5da852b944f424c42394c6ef32749ec9952d8` | 11,221 B | [d672494e...#0](https://preprod.cardanoscan.io/transaction/d672494e69c821f8f8271950f7e98324de36dfcdd70433c56c7d98d3558ed585) |
-| `cascade_config` | `a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c` | 632 B | [8cd48112...#0](https://preprod.cardanoscan.io/transaction/8cd481125ce8740290408d3fb8850d4e011ad1bae74accd86e43361cf363aa6b) |
-| `cascade_bond` | `e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f` | 722 B | [905d503d...#0](https://preprod.cardanoscan.io/transaction/905d503dfb1b8199ebd1b728a2480c3ba05fa1c8091514bd65f277b72a2d2e6d) |
-| `cascade_channel` | `8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21` | 1,844 B | [06c8edcb...#0](https://preprod.cardanoscan.io/transaction/06c8edcb9e299c9609c101c5f2e3c77cdde6874711d8aa3655cd1ff677839103) |
+| `cascade_node` | `1eea6bd1b08cf9a466eed7ca7a8d9ab53aa8ed1526ed3281b785ba07` | 1,013 B | [febaa2fe...#0](https://preprod.cardanoscan.io/transaction/febaa2fec5500e154998978058203725e9c49c8d3ccec0e3aeb535cb5f0d9aba) |
+| `cascade_logic_core` | `98ac3c2a0ace0f95750bcc9a9a912ed23e0407a483397a6d056ac9f8` | 14,980 B | [57d93b79...#0](https://preprod.cardanoscan.io/transaction/57d93b791abe8e8906abeaf7f649008aa0f717210da8a0e645b2d65f3aa8b954) |
+| `cascade_logic_draw` | `66dcfce908741d5bdfea7aad54ad8779785983be4c0838544aeb09e1` | 12,503 B | [0e1383bd...#0](https://preprod.cardanoscan.io/transaction/0e1383bd049e7038440d3ca3c475f261fb5af253606116fc0e0a70524f9ca66a) |
+| `cascade_logic_ext` | `aaf22cdcc8c27a42328ec16c09a77bdebf8dcf27c7f49eb4d22b27d9` | 11,221 B | [d329ed62...#0](https://preprod.cardanoscan.io/transaction/d329ed6230743de4a2bae2a466ed09e22302926a72acabfdb93f4bece71b0aaa) |
+| `cascade_config` | `71c7b6bab9332b7684b8995fb66d7021d508626d364fb2824abbc445` | 671 B | [efa55635...#0](https://preprod.cardanoscan.io/transaction/efa556352641877b4f3762acb3393635c0914c3d71569748d99c17f870643666) |
+| `cascade_bond` | `c658bb48805bf32d2c6bb1dca7b13fbb3567a67a150d9fba6664245f` | 761 B | [2c03dd86...#0](https://preprod.cardanoscan.io/transaction/2c03dd8639715251576dad6b854abf7e27f3beb24765a172ca613c7b845afc62) |
+| `cascade_channel` | `b6e93a267107e300194fbc6d836914aa10239eee2f32a9ea427cd071` | 1,883 B | [d479322a...#0](https://preprod.cardanoscan.io/transaction/d479322a5f7756b0eb8036f2b1c84353905344d62bb0626460dfef7f0c701555) |
 
-The three logic scripts are withdraw-zero stake validators. Their stake credentials are registered: core [686f74c3...](https://preprod.cardanoscan.io/transaction/686f74c302674d6c80b5063f1e64b3ff424ecaf9056fb4c872df0e70b6e61ba3), draw [10c93770...](https://preprod.cardanoscan.io/transaction/10c93770e81816414b67b43d1f41838a39736ede5aafd5ff3e170143d1d71fa4), ext [490cfa1a...](https://preprod.cardanoscan.io/transaction/490cfa1a220877aec8a05d461abd465ba008408c7da87f4c64ef9ac9d07371f2). Why seven scripts and not four: one script with all the logic compiled to 23,286 bytes, above the 16,384-byte transaction limit (ADR 0001 sections 1.3 and 1.4).
+The three logic scripts are withdraw-zero stake validators. Their stake credentials are registered: core [eb10fdec...](https://preprod.cardanoscan.io/transaction/eb10fdec1b8766b1106a2c9542941d97f43b03dacb7f0795c77ec24f5c6f4072), draw [30c77138...](https://preprod.cardanoscan.io/transaction/30c77138f3c795dbd4218ab030ed57d462f14c38152fd70aec2c279054814fd1), ext [5513ef99...](https://preprod.cardanoscan.io/transaction/5513ef9920d9dd7d2dd4cc2f5753e5d9154f1b8a7843aeb4f890429149e64b6a). Why seven scripts and not four: one script with all the logic compiled to 23,286 bytes, above the 16,384-byte transaction limit (ADR 0001 sections 1.3 and 1.4).
 
 ## Every redeemer on preprod
 
