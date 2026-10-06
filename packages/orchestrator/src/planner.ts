@@ -16,7 +16,7 @@ You are the orchestrator. Do not create a task for yourself. Tasks with parent "
 Rules:
 - 2 to 8 tasks. Ids are short lowercase words with dashes, such as "scout" or "price-check". Never use the id "root".
 - A task may have children only if may_sub_hire is true and its rail is "native". Children name their parent's id in "parent".
-- rail: "native" for Cascade agents, "masumi" for plain Masumi agents (leaf only), "metered" for many small paid API calls (leaf only).
+- rail: "native" for Cascade agents, "masumi" for plain Masumi agents (leaf only), "metered" for many small paid API calls (leaf only, and only under a "pricing" task, whose agent opens the payment channel).
 - Categories: ${CATEGORIES.join(", ")}.
 - Fact checks: give the checked task acceptance "VerifierQuorum" and add exactly two tasks of category "verification" with the SAME parent as the checked task, each with "verifies" set to the checked task's id and acceptance "ParentAccept". Every other task uses "verifies": "".
 - "contingency_for" is "" unless the task is a backup that replaces another task with the same parent if it fails.

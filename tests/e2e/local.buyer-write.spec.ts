@@ -5,6 +5,7 @@
  * and submits on Yaci; nothing on the chain path is mocked.
  */
 import { expect, test } from "@playwright/test";
+import { z } from "zod";
 import { localWebUrl } from "../lib/local-web.js";
 import { allowlistLocalAgents } from "./local-directory.js";
 import { freshLocalSeed, installLocalWallet, LOCAL_WALLET_NAME, localRoleLucid } from "./local-wallet.js";
@@ -12,6 +13,38 @@ import { freshLocalSeed, installLocalWallet, LOCAL_WALLET_NAME, localRoleLucid }
 const BUYER_ROLE = "qa-buyer";
 /** The local indexer (scripts/local-stack.ts services block). */
 const LOCAL_INDEXER = process.env.E2E_LOCAL_INDEXER_URL ?? "http://127.0.0.1:36100";
+/** The local Conductor: its preprod port in agents/kit/src/roles.ts plus 10000. */
+const LOCAL_CONDUCTOR = process.env.E2E_LOCAL_CONDUCTOR_URL ?? "http://127.0.0.1:34001";
+
+const PlanNodeShape: z.ZodType<{ spec: { rail: string }; children: unknown[] }> = z.looseObject({ spec: z.looseObject({ rail: z.string() }), children: z.array(z.unknown()) });
+const PlanEnvelopeShape = z.looseObject({ plan: z.looseObject({ root: PlanNodeShape }) });
+const TreeEventsShape = z.object({ events: z.array(z.looseObject({ type: z.string(), node_id: z.string(), payload: z.unknown() })), next: z.string().nullable() });
+const DrawnPayload = z.looseObject({ spec_hash: z.string() });
+
+/** Planned descendants that become node UTxOs through a Draw: every child except AddressPayment (x402) leaves. */
+function plannedDraws(node: { spec: { rail: string }; children: unknown[] }): number {
+  return node.children.reduce<number>((n, raw) => {
+    const child = PlanNodeShape.parse(raw);
+    return n + (child.spec.rail === "address" ? 0 : 1) + plannedDraws(child);
+  }, 0);
+}
+
+async function getJson(url: string): Promise<unknown> {
+  const res = await fetch(url, { headers: { accept: "application/json" } });
+  if (!res.ok) throw new Error(`GET ${url} returned ${res.status}`);
+  return res.json();
+}
+
+async function treeEvents(treeId: string): Promise<z.infer<typeof TreeEventsShape>["events"]> {
+  const out: z.infer<typeof TreeEventsShape>["events"] = [];
+  let since: string | null = null;
+  for (;;) {
+    const page = TreeEventsShape.parse(await getJson(`${LOCAL_INDEXER}/v1/trees/${treeId}/events?limit=1000${since === null ? "" : `&since=${encodeURIComponent(since)}`}`));
+    out.push(...page.events);
+    if (page.next === null) return out;
+    since = page.next;
+  }
+}
 const GOAL = "Market-entry brief for cold-pressed juice in Dubai, with a competitor price table, an Arabic summary and a fact check.";
 
 /**
@@ -25,12 +58,14 @@ function consoleOrigin(): string {
 /**
  * On Yaci the local Conductor plans a 5-minute fund window and a root submit_by at most about 15
  * minutes after fund_by (LOCAL_POLICY), so the root result arrives within 18 minutes. The watchtower
- * closes the root at its challenge_until, half a minute after that planned submit_by, however early
- * the buyer accepted, so the close wait covers the whole root window. These waits keep the test
- * inside verify's 60-minute e2e stage, which also runs the public specs.
+ * closes the root at its on-chain challenge_until, half a minute after that planned submit_by, however
+ * early the buyer accepted, so the close wait runs to that instant plus CLOSE_GRACE_MS (a fixed wait
+ * from the accept click ended 80 s before challenge_until when the tree finished early). These waits
+ * keep the test inside verify's 60-minute e2e stage, which also runs the public specs.
  */
 const ROOT_RESULT_WAIT_MS = 18 * 60_000;
-const CLOSE_WAIT_MS = 15 * 60_000;
+const CLOSE_GRACE_MS = 5 * 60_000;
+const TreeShape = z.looseObject({ nodes: z.array(z.looseObject({ node_id: z.string(), challenge_until: z.number() })) });
 
 test("buyer plans, funds with a test CIP-30 wallet and reaches the receipt", async ({ browser }) => {
   test.setTimeout(45 * 60_000);
@@ -48,9 +83,11 @@ test("buyer plans, funds with a test CIP-30 wallet and reaches the receipt", asy
   await expect(page.getByTestId("network-badge").first(), "the local site names the local network").toHaveText("local");
   await page.getByLabel("Goal").fill(GOAL);
   await page.getByLabel("Budget").fill("150");
-  // A recreated devnet has no reputation history, so every seller starts at the neutral 0.5; the
-  // console's default floor of 60 would make the signer refuse every hire (gate 3).
-  await page.locator("#job-minReputation").fill("50");
+  // The slider is a whole percent and reaches the signer as a fraction (50 -> 0.5). Local sellers
+  // start at the neutral 0.5 and drift with every local tree (Scout stood at 0.471 on 2026-10-06), so
+  // any floor above 0 can refuse a planned hire at gate 3 and leave the tree empty. Gate 3 itself is
+  // covered by packages/policy/test/gates.test.ts.
+  await page.locator("#job-minReputation").fill("0");
   await page.locator("#job-asset").selectOption("lovelace");
   await page.getByText("I review the result").click();
   await page.getByRole("button", { name: "Get a plan" }).click();
@@ -59,6 +96,10 @@ test("buyer plans, funds with a test CIP-30 wallet and reaches the receipt", asy
   await page.waitForURL(/\/console\/plan\//, { timeout: 300_000 });
   await expect(page.getByTestId("plan-rows")).toBeVisible({ timeout: 120_000 });
   await expect(page.getByTestId("plan-totals")).toBeVisible();
+  const planId = /\/console\/plan\/([^/?#]+)/.exec(page.url())?.[1];
+  if (planId === undefined) throw new Error(`no plan id in ${page.url()}`);
+  const planned = plannedDraws(PlanEnvelopeShape.parse(await getJson(`${LOCAL_CONDUCTOR}/v1/plans/${planId}`)).plan.root);
+  expect(planned, "the plan hires at least one agent").toBeGreaterThan(0);
 
   // Fund with the test wallet.
   await page.getByRole("button", { name: "Fund this plan" }).click();
@@ -92,7 +133,17 @@ test("buyer plans, funds with a test CIP-30 wallet and reaches the receipt", asy
   await page.keyboard.press("Escape");
 
   // CloseRoot follows; the receipt reconciles every payout and refund.
-  await expect(page.getByText("This job is closed. The receipt has every payout and refund.")).toBeVisible({ timeout: CLOSE_WAIT_MS });
+  const root = TreeShape.parse(await getJson(`${LOCAL_INDEXER}/v1/trees/${treeId}`)).nodes.find((n) => n.node_id === treeId);
+  if (root === undefined) throw new Error(`root ${treeId} missing from the indexer`);
+  const closeWaitMs = Math.max(0, root.challenge_until - Date.now()) + CLOSE_GRACE_MS;
+  await expect(page.getByText("This job is closed. The receipt has every payout and refund.")).toBeVisible({ timeout: closeWaitMs });
+  // The tree actually hired its planned agents: one Draw per planned child spec (a re-hire reuses
+  // the spec, so distinct spec hashes count planned slots) and at least one child settled.
+  const events = await treeEvents(treeId);
+  const drawnSpecs = new Set(events.filter((e) => e.type === "node.drawn").map((e) => DrawnPayload.parse(e.payload).spec_hash));
+  expect(drawnSpecs.size, "every planned child was drawn on chain").toBe(planned);
+  expect(events.filter((e) => e.type === "node.settled").length, "at least one hired child settled").toBeGreaterThan(0);
+
   await page.goto(`/receipt/${treeId}`);
   await expect(page.getByTestId("receipt-nodes")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId("reconciliation")).toBeVisible();

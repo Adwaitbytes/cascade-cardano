@@ -63,6 +63,13 @@ export interface PlanDraft {
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,39}$/;
 
 /**
+ * Categories whose hired agent draws a MeteredReceipt and runs its voucher channel itself (Pricer,
+ * agents/kit/src/metered.ts). Any other parent's subtree can only Draw native children, so a
+ * metered leaf under it is never hired.
+ */
+const METERED_PAYER_CATEGORIES: ReadonlySet<string> = new Set<Category>(["pricing"]);
+
+/**
  * Deterministic repairs of common LLM slips, applied before checking. Each repair is reported so
  * the plan record shows what code changed:
  * - a task that names verifiers gets `VerifierQuorum` acceptance;
@@ -98,6 +105,10 @@ export function draftErrors(draft: PlanDraft, maxDepth: number): string[] {
     if (t.parent !== "root" && byId.get(t.parent)?.may_sub_hire === false) errors.push(`${at}: parent ${t.parent} may not sub-hire`);
     if (t.rail !== "native" && t.may_sub_hire) errors.push(`${at}: only native tasks may sub-hire`);
     if (t.rail === "metered" && t.parent === "root") errors.push(`${at}: a metered task needs a native parent that opens the channel, not the root`);
+    const meteredParent = t.rail === "metered" && t.parent !== "root" ? byId.get(t.parent) : undefined;
+    if (meteredParent !== undefined && !METERED_PAYER_CATEGORIES.has(meteredParent.category)) {
+      errors.push(`${at}: a metered task needs a pricing parent, whose agent opens the voucher channel; ${meteredParent.id} is ${meteredParent.category}`);
+    }
     if ((t.rail === "address") !== (t.payee_hash !== undefined)) errors.push(`${at}: payee_hash is set exactly for the address rail`);
     if (t.payee_hash !== undefined && !/^[0-9a-f]{56}$/.test(t.payee_hash)) errors.push(`${at}: payee_hash must be a 28-byte key hash`);
     if (t.title.length === 0 || t.title.length > 200) errors.push(`${at}: title must be 1 to 200 characters`);

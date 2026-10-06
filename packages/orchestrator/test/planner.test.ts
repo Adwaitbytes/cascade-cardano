@@ -112,6 +112,19 @@ describe("demo fallback draft (PRD 21.2)", () => {
     expect(draftErrors(flat, 3)).toContain("task lookup: a metered task needs a native parent that opens the channel, not the root");
   });
 
+  it("rejects a metered task under a parent whose agent does not open voucher channels", () => {
+    // Local e2e tree 96ff1be7 (2026-10-06): the LLM put a metered competitor-pricing leaf under the
+    // research task (Scout). Scout's subtree can only Draw native children, every hire failed with
+    // "leaf kind MeteredReceipt does not match a native child", Scout missed submit_by, and four of
+    // the six planned children were never drawn.
+    const d = demoDraft();
+    const scout = d.tasks.find((t) => t.category === "research" && t.may_sub_hire);
+    if (scout === undefined) throw new Error("demo draft has no sub-hiring research task");
+    const misplaced: PlanDraft = { ...d, tasks: d.tasks.map((t) => (t.id === "lookup" ? { ...t, parent: scout.id } : t)) };
+    expect(draftErrors(misplaced, 3)).toContain(`task lookup: a metered task needs a pricing parent, whose agent opens the voucher channel; ${scout.id} is research`);
+    expect(draftErrors(d, 3)).toEqual([]);
+  });
+
   it("normalizeDraft repairs acceptance slips and says what it changed", () => {
     const d = demoDraft();
     const slipped: PlanDraft = { ...d, tasks: d.tasks.map((t) => (t.id === "scout" ? { ...t, acceptance: "ParentAccept" as const } : t.id === "scribe" ? { ...t, acceptance: "VerifierQuorum" as const } : t)) };
