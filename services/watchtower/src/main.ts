@@ -16,6 +16,7 @@ import { resolve } from "node:path";
 import { CascadeClient, SCRIPT_NAMES, loadCascadeScripts, loadReferenceScripts, purchaserServiceSigner, type Purchaser, type ReferenceScriptRefs } from "@cascade/sdk";
 import {
   OgmiosClient,
+  chainTipSlot,
   REPO_ROOT,
   createLogger,
   createPool,
@@ -110,7 +111,7 @@ async function main(): Promise<void> {
     }
   };
   void initExecutor();
-  const ogmios = new OgmiosClient(cfg.ogmiosHttp);
+  const tipSlot = chainTipSlot(cfg, new OgmiosClient(cfg.ogmiosHttp), (provider, err) => log.warn({ provider, err }, "tip provider failed"));
   const slotConfig = await resolveSlotConfig(cfg);
   const interval = intEnv("WATCHTOWER_INTERVAL_MS", 10_000);
   // P's key hash is public (wallets file); its cranks are selected even before the executor is ready.
@@ -132,7 +133,7 @@ async function main(): Promise<void> {
   const loop = async () => {
     while (running) {
       try {
-        const { selected, ran, alerts } = await tick({ pool, executor, log, disputeAlertMs, purchaser, chainTime: async () => BigInt(slotToPosixMs(slotConfig, (await ogmios.tip()).slot)) });
+        const { selected, ran, alerts } = await tick({ pool, executor, log, disputeAlertMs, purchaser, chainTime: async () => BigInt(slotToPosixMs(slotConfig, await tipSlot())) });
         Object.assign(health, { last_tick_at: Date.now(), backlog: selected.length, alerts: alerts.length, last_error: null });
         if (selected.length > 0) log.info({ backlog: selected.length, ran: ran.length }, "watchtower tick");
       } catch (e) {

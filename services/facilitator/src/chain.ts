@@ -3,7 +3,17 @@
  * parameters, evaluation and submission; a Blockfrost-compatible API (Yaci Store locally,
  * Blockfrost on preprod) for inclusion depth, which Ogmios cannot report for a past transaction.
  */
-import { OgmiosClient, ogmiosEvaluator, ogmiosValue, parseOutRef, type EvaluationResult, type ProtocolParameters, type TxEvaluator } from "@cascade/service-kit";
+import {
+  OgmiosClient,
+  ogmiosEvaluator,
+  ogmiosSubmitter,
+  ogmiosValue,
+  parseOutRef,
+  type EvaluationResult,
+  type ProtocolParameters,
+  type TxEvaluator,
+  type TxSubmitter,
+} from "@cascade/service-kit";
 import type { ResolvedUtxo } from "./phase1.js";
 
 export type Evidence = { status: "unknown" | "mempool" | "confirmed"; confirmations: number };
@@ -96,8 +106,8 @@ export class OgmiosChain implements ChainAccess {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Preprod without our own node: Blockfrost for chain queries, Koios `/ogmios` (evaluate and submit
-// only) for phase 2 and broadcast.
+// Preprod without our own node: Blockfrost for chain queries, evaluation and broadcast, with Koios
+// `/ogmios` (evaluate and submit only) as the fallback provider.
 
 interface BfAmount {
   unit: string;
@@ -132,6 +142,8 @@ export class BlockfrostChain implements ChainAccess {
     private readonly ogmiosProxy: OgmiosClient,
     /** Script evaluation (main.ts passes Blockfrost then Koios with failover); defaults to the proxy alone. */
     private readonly evaluator: TxEvaluator = ogmiosEvaluator("koios", ogmiosProxy),
+    /** Broadcast (main.ts passes Blockfrost then Koios with failover); defaults to the proxy alone. */
+    private readonly submitter: TxSubmitter = ogmiosSubmitter("koios", ogmiosProxy),
   ) {
     this.evidenceChain = new OgmiosChain(ogmiosProxy, bf);
   }
@@ -228,7 +240,7 @@ export class BlockfrostChain implements ChainAccess {
   }
 
   submit(cborHex: string): Promise<string> {
-    return this.ogmiosProxy.submit(cborHex);
+    return this.submitter.submit(cborHex);
   }
 
   evidence(txId: string): Promise<Evidence> {

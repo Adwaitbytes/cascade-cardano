@@ -19,6 +19,8 @@ import type { Server } from "node:http";
 import {
   BlockfrostClient,
   OgmiosClient,
+  chainTipSlot,
+  maxTxExUnits,
   chainTxFromBlockfrost,
   REPO_ROOT,
   assertRuntimeCurrent,
@@ -95,6 +97,9 @@ async function main(): Promise<void> {
   }
 
   const ogmios = new OgmiosClient(cfg.ogmiosHttp);
+  const onProviderFailure = (provider: string, err: string) => log.warn({ provider, err }, "chain provider failed");
+  const tipSlot = chainTipSlot(cfg, ogmios, onProviderFailure);
+  const exUnits = maxTxExUnits(cfg, ogmios, onProviderFailure);
   const slotConfig = await resolveSlotConfig(cfg);
   let follower: { tipHeight: number; lagSlots: number; stop(): Promise<void> } | null = null;
   const corsOrigins = corsOriginsFromEnv(optionalEnv("CASCADE_CORS_ORIGINS"));
@@ -152,7 +157,7 @@ async function main(): Promise<void> {
     oracle,
     log,
     tipHeight: async () => follower?.tipHeight ?? tipHeightFromDb(pool),
-    tipSlot: async () => (await ogmios.tip().catch(() => null))?.slot ?? null,
+    tipSlot: () => tipSlot().catch(() => null),
     horizonSlots: Math.floor((cfg.validityHorizonSeconds * 1000) / slotConfig.slotLength),
     adminToken: optionalEnv("CASCADE_DIRECTORY_ADMIN_TOKEN") ?? null,
     decimalsOf: decimals,
@@ -161,10 +166,7 @@ async function main(): Promise<void> {
     views: {
       slotConfig,
       indexedSlot: async () => Number((await pool.query<{ s: string | null }>("SELECT max(slot) AS s FROM chain_points")).rows[0]?.s ?? 0),
-      maxExUnits: async () => {
-        const p = await ogmios.protocolParameters();
-        return { memory: p.maxExecutionUnitsPerTransaction.memory, steps: p.maxExecutionUnitsPerTransaction.cpu };
-      },
+      maxExUnits: exUnits,
     },
   });
 

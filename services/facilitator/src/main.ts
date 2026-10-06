@@ -9,8 +9,10 @@ import type { Network } from "@x402/core/types";
 import { paymentKeyHash } from "@cascade/shared";
 import {
   BlockfrostEvaluator,
+  BlockfrostSubmitter,
   OgmiosClient,
   ResilientEvaluator,
+  ResilientSubmitter,
   TokenBucket,
   assertRuntimeCurrent,
   createLogger,
@@ -21,6 +23,7 @@ import {
   loadNetworkConfig,
   migrate,
   ogmiosEvaluator,
+  ogmiosSubmitter,
   optionalEnv,
   resolveSlotConfig,
   safeUrl,
@@ -39,8 +42,8 @@ async function main(): Promise<void> {
   await migrate(pool, log);
   const network: Network = cfg.network === "local" ? LOCAL_NETWORK : PREPROD_NETWORK;
   const bf = cfg.blockfrostUrl === null ? null : { url: cfg.blockfrostUrl, projectId: cfg.network === "local" ? null : cfg.blockfrostProjectId };
-  // Own node: Ogmios for everything. Otherwise Blockfrost queries plus Koios /ogmios (submit), and
-  // script evaluation on Blockfrost with failover to Koios, so a rate-limited provider is not a refusal.
+  // Own node: Ogmios for everything. Otherwise Blockfrost for queries, evaluation and submission, each
+  // failing over to Koios /ogmios, so a rate-limited or out-of-quota provider is never a refusal.
   const proxy = new OgmiosClient(cfg.ogmiosHttp);
   const chain =
     cfg.chainMode === "ogmios" || bf === null
@@ -51,6 +54,9 @@ async function main(): Promise<void> {
           new ResilientEvaluator([new BlockfrostEvaluator(bf.url, bf.projectId), ogmiosEvaluator("koios", proxy)], {
             bucket: new TokenBucket(intEnv("CASCADE_EVALUATOR_BURST", 5), intEnv("CASCADE_EVALUATOR_PER_SECOND", 2)),
             onFailure: (provider, message) => log.warn({ provider, err: message }, "evaluation provider failed"),
+          }),
+          new ResilientSubmitter([new BlockfrostSubmitter(bf.url, bf.projectId), ogmiosSubmitter("koios", proxy)], {
+            onFailure: (provider, message) => log.warn({ provider, err: message }, "submission provider failed"),
           }),
         );
   log.info({ chain_mode: cfg.chainMode }, "chain access");

@@ -60,6 +60,14 @@ export class PgClaimStore {
     return rows[0] ?? null;
   }
 
+  /**
+   * Drops a claim whose transaction provably reached no node (every provider turned the request
+   * away), terms binding included, so the client's retry claims and submits it afresh.
+   */
+  async unclaim(txId: string, ownerToken: string): Promise<void> {
+    await this.pool.query("DELETE FROM x402_claims WHERE tx_id = $1 AND owner_token = $2", [txId, ownerToken]);
+  }
+
   /** Releases a claim when no submission happened. Masumi digests stay bound (spec section 5). */
   async release(txId: string, ownerToken: string, keepBinding: boolean): Promise<void> {
     if (keepBinding) await this.setStatus(txId, ownerToken, "rejected");

@@ -19,6 +19,13 @@ export class OgmiosError extends Error {
 
 export class OgmiosTransportError extends Error {
   override readonly name = "OgmiosTransportError";
+  constructor(
+    message: string,
+    /** HTTP status when the provider answered at all; undefined for network errors and timeouts. */
+    readonly status?: number,
+  ) {
+    super(message);
+  }
 }
 
 type Reviver = (key: string, value: unknown, context?: { source?: string }) => unknown;
@@ -132,11 +139,11 @@ export class OgmiosClient {
     try {
       body = parseJsonLossless(text);
     } catch {
-      throw new OgmiosTransportError(`${method}: HTTP ${res.status} with a non-JSON body`);
+      throw new OgmiosTransportError(`${method}: HTTP ${res.status} with a non-JSON body`, res.status);
     }
     const msg = body as { result?: T; error?: { code: number; message: string; data?: unknown } };
     if (msg.error !== undefined) throw new OgmiosError(method, msg.error.code, msg.error.message, msg.error.data);
-    if (!("result" in msg)) throw new OgmiosTransportError(`${method}: HTTP ${res.status} without result`);
+    if (!("result" in msg)) throw new OgmiosTransportError(`${method}: HTTP ${res.status} without result`, res.status);
     return msg.result as T;
   }
 

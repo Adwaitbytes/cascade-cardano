@@ -11,6 +11,8 @@ export * from "./logger.js";
 export * from "./migrations.js";
 export * from "./ogmios.js";
 export * from "./evaluator.js";
+export * from "./submitter.js";
+export * from "./tip.js";
 export * from "./tracing.js";
 export * from "./lucid.js";
 export * from "./channel.js";

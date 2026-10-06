@@ -53,8 +53,10 @@ import {
 import { decodeNodeDatum } from "@cascade/shared";
 import {
   OgmiosError,
+  SubmitRejectedError,
+  SubmitUnavailableError,
   chainTxFromCbor,
-  isDefinitiveRejection,
+  isDefinitiveSubmitRejection,
   paymentCredentialOf,
   posixMsToSlot,
   withSpan,
@@ -368,11 +370,27 @@ export class CascadeCardanoFacilitator implements SchemeNetworkFacilitator {
       try {
         await this.o.chain.submit(v.cborHex);
       } catch (e) {
-        if (isDefinitiveRejection(e)) {
+        if (isDefinitiveSubmitRejection(e)) {
           await this.o.claims.release(txId, owner, termsDigest !== null);
           const code = e instanceof OgmiosError ? e.code : 0;
-          this.o.log.warn({ tx_id: txId, code }, "ledger rejected the transaction");
-          return { success: false, errorReason: ERR_SETTLEMENT_DEFINITIVELY_REJECTED, errorMessage: `node rejected the transaction (${code})`, transaction: txId, network, payer: v.payer };
+          const detail = e instanceof SubmitRejectedError ? e.message.slice(0, 300) : `node rejected the transaction (${code})`;
+          this.o.log.warn({ tx_id: txId, code, err: detail }, "ledger rejected the transaction");
+          return { success: false, errorReason: ERR_SETTLEMENT_DEFINITIVELY_REJECTED, errorMessage: detail, transaction: txId, network, payer: v.payer };
+        }
+        if (e instanceof SubmitUnavailableError && e.relayed === "no") {
+          // Every provider turned the request away (quota, rate limit): nothing reached a node, so the
+          // claim is dropped and the client's settlement_pending retry submits again.
+          await this.o.claims.unclaim(txId, owner);
+          this.o.log.warn({ tx_id: txId, err: e.message }, "no submission provider available; transaction not relayed");
+          return {
+            success: false,
+            errorReason: ERR_SETTLEMENT_PENDING,
+            errorMessage: "no submission provider is available; retry",
+            transaction: txId,
+            network,
+            ...(v.payer ? { payer: v.payer } : {}),
+            extra: { status: "pending", transactionId: txId, confirmations: 0, submitted: "none" },
+          };
         }
         // Unknown outcome: keep the claim as submitted, observe, never resubmit.
         await this.o.claims.setStatus(txId, owner, "submitted", v.payer);
