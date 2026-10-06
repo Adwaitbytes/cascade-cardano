@@ -11,5 +11,6 @@ export * from "./ids.js";
 export * from "./jcs.js";
 export * from "./masumi-identifier.js";
 export * from "./plan.js";
+export * from "./reputation.js";
 export * from "./schemas.js";
 export * from "./types.js";

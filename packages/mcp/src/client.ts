@@ -5,7 +5,7 @@
  *   signer   policy-gated signing for a configured agent key (never a raw key here)
  * Responses are parsed with zod so a drifting service fails loudly instead of feeding bad data on.
  */
-import { AgentIdSchema, AmountSchema, AssetIdSchema, Hex28Schema } from "@cascade/shared/browser";
+import { AgentIdSchema, AmountSchema, AssetIdSchema, Hex28Schema, ReputationPercentSchema } from "@cascade/shared/browser";
 import { z } from "zod";
 
 export const CASCADE_NETWORKS = ["local", "preprod"] as const;
@@ -98,7 +98,8 @@ export const CreateJobRequestSchema = z.object({
   budget: AmountSchema,
   deadline: z.number().int().nonnegative(),
   max_depth: z.number().int().min(1).max(6),
-  min_reputation: z.number().int().min(0).max(100),
+  /** Whole percent (0 to 100); the Conductor converts it to the canonical fraction. */
+  min_reputation: ReputationPercentSchema,
   risk: z.enum(RISK_LEVELS),
   acceptance: z.enum(ACCEPTANCE_PREFERENCES),
   allow_agents: z.array(z.string().min(1)).max(50),
@@ -345,6 +346,7 @@ export class CascadeApi {
     return this.indexer(`/v1/trees/${enc(treeId)}/receipt`, z.record(z.string(), z.unknown()));
   }
 
+  /** `min_rep` is the canonical fraction (0 to 1), as the Directory takes it. */
   findAgents(query: { category?: string; min_rep?: number; rail?: "native" | "masumi" | "metered" }): Promise<DirectoryAgent[]> {
     const params = new URLSearchParams();
     if (query.category !== undefined) params.set("category", query.category);

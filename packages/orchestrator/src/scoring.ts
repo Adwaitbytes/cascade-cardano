@@ -68,6 +68,7 @@ export interface RankOptions {
   /** Time the task has before its `submit_by`; quotes slower than it are dropped. */
   timeMaxMs: number;
   now: number;
+  /** Canonical fraction (0 to 1), the same unit as `AgentStats.reputation`. */
   reputationFloor?: number;
   allowlist?: readonly string[];
   blocklist?: readonly string[];

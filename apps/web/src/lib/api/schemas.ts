@@ -11,6 +11,7 @@ import {
   Hex32Schema,
   NodeSpecSchema,
   PlanSchema,
+  ReputationPercentSchema,
 } from "@cascade/shared/browser";
 import { z } from "zod";
 
@@ -243,7 +244,8 @@ export const CreateJobRequestSchema = z.object({
   budget: AmountSchema,
   deadline: MsSchema,
   max_depth: z.number().int().min(1).max(6),
-  min_reputation: z.number().int().min(0).max(100),
+  /** Whole percent (0 to 100); the Conductor converts it to the canonical fraction (0 to 1). */
+  min_reputation: ReputationPercentSchema,
   risk: z.enum(RISK_LEVELS),
   acceptance: z.enum(ACCEPTANCE_PREFERENCES),
   allow_agents: z.array(z.string().min(1)).max(50),

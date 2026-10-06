@@ -324,7 +324,7 @@ export function computeFacts(input: GateContextInput): Facts {
     minScore = Math.min(minScore, rep.score);
     minConf = Math.min(minConf, rep.confidence);
     if (rep.score < policy.reputation_floor.score || rep.confidence < policy.reputation_floor.confidence) {
-      d(3, `seller ${h.seller} has score ${rep.score.toFixed(3)} and confidence ${rep.confidence.toFixed(3)}, below the floor`);
+      d(3, `seller ${h.seller} has score ${rep.score.toFixed(3)} and confidence ${rep.confidence.toFixed(3)}, below the floor of score ${policy.reputation_floor.score.toFixed(3)} and confidence ${policy.reputation_floor.confidence.toFixed(3)}`);
     }
   }
 

@@ -9,6 +9,7 @@ export interface JobFormValues {
   /** `datetime-local` value, interpreted in the browser's time zone. */
   deadline: string;
   maxDepth: number;
+  /** Reputation floor as a whole percent (0 to 100), sent as-is in `min_reputation`; the Conductor converts it to the canonical fraction. */
   minReputation: number;
   risk: (typeof RISK_LEVELS)[number];
   acceptance: (typeof ACCEPTANCE_PREFERENCES)[number];

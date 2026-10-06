@@ -21,6 +21,8 @@ describe("buyer policy from intake", () => {
     expect(policy.reputation_floor).toEqual({ score: 0, confidence: 0 });
     expect(0.29 >= policy.reputation_floor.score).toBe(true);
     expect(buyerPolicyFor(DEFAULT_BUYER_POLICY, { min_reputation: 60, block_agents: [] }).reputation_floor.score).toBe(0.6);
+    // The console slider sends 50 (percent); the signer compares the fraction 0.5 against scores like 0.471.
+    expect(buyerPolicyFor(DEFAULT_BUYER_POLICY, { min_reputation: 50, block_agents: [] }).reputation_floor.score).toBe(0.5);
   });
 
   it("keeps every other default and adds blockable agent ids to the blocklist", () => {
@@ -38,6 +40,7 @@ describe("buyer policy from intake", () => {
 
   it("rejects a floor outside 0 to 100", () => {
     expect(() => buyerPolicyFor(DEFAULT_BUYER_POLICY, { min_reputation: 101, block_agents: [] })).toThrow(RangeError);
+    expect(() => buyerPolicyFor(DEFAULT_BUYER_POLICY, { min_reputation: 0.5, block_agents: [] })).toThrow(RangeError);
   });
 
   it("fund-tx hands the stored request's floor and blocklist to the transaction builder", async () => {

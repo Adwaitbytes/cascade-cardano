@@ -226,8 +226,13 @@ describe("cascade MCP server", () => {
   it("finds agents, fetches receipts and lists a serving agent", async () => {
     const calls: Call[] = [];
     const client = await connect({ ...baseEndpoints, indexerAdminToken: "adm" }, calls);
-    expect(textOf(await client.callTool({ name: "cascade_find_agents", arguments: { category: "research", min_reputation: 0.5 } }))).toContain("Scout");
+    expect(textOf(await client.callTool({ name: "cascade_find_agents", arguments: { category: "research", min_reputation: 50 } }))).toContain("Scout");
     expect(calls.at(-1)?.url).toBe("http://indexer.test/v1/agents?category=research&min_rep=0.5");
+    // Both tools take the floor as a whole percent; a fraction is refused, never read as 0.5%.
+    const before = calls.length;
+    const fraction = await client.callTool({ name: "cascade_find_agents", arguments: { min_reputation: 0.5 } }).catch((e: unknown) => ({ isError: true, thrown: e }));
+    expect(fraction.isError).toBe(true);
+    expect(calls).toHaveLength(before);
     expect(textOf(await client.callTool({ name: "cascade_get_receipt", arguments: { tree_id: TREE } }))).toContain('"reconciled": true');
     const served = await client.callTool({
       name: "cascade_serve_as_agent",

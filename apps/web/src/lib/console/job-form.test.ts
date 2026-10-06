@@ -25,6 +25,13 @@ describe("validateJobForm", () => {
     expect(r.request.max_depth).toBe(3);
   });
 
+  it("sends the reputation floor as a whole percent and refuses a fraction", () => {
+    const r = validateJobForm({ ...base, minReputation: 50 }, NOW);
+    if (!r.ok) throw new Error(JSON.stringify(r.errors));
+    expect(r.request.min_reputation).toBe(50);
+    expect(validateJobForm({ ...base, minReputation: 0.5 }, NOW).ok).toBe(false);
+  });
+
   it("rejects a deadline shorter than the deepest path needs", () => {
     const r = validateJobForm({ ...base, deadline: local(NOW + 30 * 60_000) }, NOW);
     expect(r.ok).toBe(false);

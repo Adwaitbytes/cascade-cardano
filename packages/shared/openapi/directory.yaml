@@ -97,6 +97,7 @@ paths:
             type: string
         - name: min_rep
           in: query
+          description: Reputation floor as a fraction from 0 to 1, the canonical unit (packages/shared/src/reputation.ts). Clients that take a percent convert before calling.
           schema:
             type: number
             minimum: 0

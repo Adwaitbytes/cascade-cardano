@@ -7,7 +7,7 @@
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { AgentIdSchema, AmountSchema, AssetIdSchema, Hex28Schema } from "@cascade/shared/browser";
+import { AgentIdSchema, AmountSchema, AssetIdSchema, Hex28Schema, reputationFractionFromPercent, ReputationPercentSchema } from "@cascade/shared/browser";
 import { z } from "zod";
 import type { ChainAccess } from "./chain.js";
 import {
@@ -208,7 +208,7 @@ export function createCascadeMcpServer(deps: ServerDeps): McpServer {
         asset: AssetIdSchema.default("lovelace").describe("lovelace, or policy.assetNameHex for a token"),
         deadline_minutes: z.number().int().min(35).max(7 * 24 * 60).default(120).describe("Minutes until the result is due"),
         max_depth: z.number().int().min(1).max(6).default(3),
-        min_reputation: z.number().int().min(0).max(100).default(50),
+        min_reputation: ReputationPercentSchema.default(50).describe("Reputation floor, whole percent 0 to 100"),
         risk: z.enum(RISK_LEVELS).default("balanced"),
         acceptance: z.enum(ACCEPTANCE_PREFERENCES).default("buyer_review"),
         allow_agents: z.array(AgentIdSchema).max(50).default([]),
@@ -306,7 +306,7 @@ export function createCascadeMcpServer(deps: ServerDeps): McpServer {
       description: "Searches the Cascade Directory (allowlisted Masumi-registered agents) by category, minimum reputation and payment rail.",
       inputSchema: {
         category: z.string().min(1).max(64).optional(),
-        min_reputation: z.number().min(0).max(1).optional().describe("0 to 1"),
+        min_reputation: ReputationPercentSchema.optional().describe("Whole percent, 0 to 100, the same scale as cascade_plan_job"),
         rail: z.enum(["native", "masumi", "metered"]).optional(),
       },
       annotations: { readOnlyHint: true, openWorldHint: true },
@@ -315,7 +315,7 @@ export function createCascadeMcpServer(deps: ServerDeps): McpServer {
       guarded(async () => {
         const agents = await api.findAgents({
           ...(args.category === undefined ? {} : { category: args.category }),
-          ...(args.min_reputation === undefined ? {} : { min_rep: args.min_reputation }),
+          ...(args.min_reputation === undefined ? {} : { min_rep: reputationFractionFromPercent(args.min_reputation) }),
           ...(args.rail === undefined ? {} : { rail: args.rail }),
         });
         const lines = agents.map(

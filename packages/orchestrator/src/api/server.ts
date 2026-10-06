@@ -30,7 +30,7 @@ import {
 } from "./schemas.js";
 import type { BuyerTerms } from "./buyer-policy.js";
 import { InMemoryPlanStore, type PlanStore, type StoredPlan } from "./store.js";
-import type { Plan } from "@cascade/shared/browser";
+import { reputationFractionFromPercent, type Plan } from "@cascade/shared/browser";
 import type { StructuralSizer } from "../chain/structural.js";
 
 /** Unsigned transaction builders for wallet-signed actions (W2 `@cascade/sdk`). */
@@ -126,7 +126,7 @@ export function orchestratorApi(deps: OrchestratorApiDeps): Hono {
       fund_by: at + fundWindow,
       submit_by: req.deadline,
       max_depth: req.max_depth,
-      reputation_floor: req.min_reputation / 100,
+      reputation_floor: reputationFractionFromPercent(req.min_reputation),
       risk: req.risk,
       allowlist: req.allow_agents,
       blocklist: req.block_agents,

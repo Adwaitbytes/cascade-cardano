@@ -31,7 +31,7 @@ export interface JobIntake {
   /** POSIX ms by which the root must submit its result. */
   submit_by: number;
   max_depth: number;
-  /** Minimum specialist reputation in [0, 1]. */
+  /** Minimum specialist reputation as the canonical fraction (0 to 1), never a percent; see @cascade/shared reputation.ts. */
   reputation_floor: number;
   risk: RiskPreset;
   allowlist?: string[];

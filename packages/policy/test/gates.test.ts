@@ -1,6 +1,6 @@
-import { computePlanRoot, planLeafFor, specHash, type NodeDatum, type NodeSpec, type Plan, type PlutusAddress, type TreeConfig } from "@cascade/shared";
+import { computePlanRoot, planLeafFor, reputationFractionFromPercent, specHash, type NodeDatum, type NodeSpec, type Plan, type PlutusAddress, type TreeConfig } from "@cascade/shared";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_BUYER_POLICY, evaluateGates, loadPolicy, type BuyerPolicy, type GateContextInput, type SpentNode, type TxView } from "../src/index.js";
+import { BuyerPolicySchema, DEFAULT_BUYER_POLICY, evaluateGates, loadPolicy, type BuyerPolicy, type GateContextInput, type SpentNode, type TxView } from "../src/index.js";
 
 const h = (b: string, n: number) => b.repeat(n);
 const keyAddr = (k: string): PlutusAddress => ({ payment_credential: { type: "VerificationKey", hash: k }, stake_credential: null });
@@ -218,6 +218,22 @@ describe("eight signer gates (PRD 13.2)", () => {
     const r = evaluateGates(input({ reputationOf: () => ({ score: 0.2, confidence: 0.9 }) }), "conductor");
     expect(failed(r)).toEqual([3]);
     expect(failed(evaluateGates(input({ reputationOf: () => null }, { reputation_floor: { score: 0.3, confidence: 0.1 } }), "conductor"))).toEqual([3]);
+  });
+
+  // Local e2e, 2026-10-06: a console floor of 50 / 100 reached gate 3 as 0.5 and refused Scout at
+  // 0.471. The floor and the score share one unit (a fraction), and the detail names both.
+  it("gate 3 compares the floor and the score as fractions and names both in the detail", () => {
+    const floor = { score: reputationFractionFromPercent(50), confidence: 0 };
+    const below = evaluateGates(input({ reputationOf: () => ({ score: 0.471, confidence: 0.167 }) }, { reputation_floor: floor }), "conductor");
+    expect(failed(below)).toEqual([3]);
+    expect(below.gates.find((g) => g.gate === 3)?.detail.join(" ")).toContain("score 0.471 and confidence 0.167, below the floor of score 0.500 and confidence 0.000");
+    expect(evaluateGates(input({ reputationOf: () => ({ score: 0.5, confidence: 0 }) }, { reputation_floor: floor }), "conductor").decision).toBe("allow");
+    const zero = { score: reputationFractionFromPercent(0), confidence: 0 };
+    expect(evaluateGates(input({ reputationOf: () => ({ score: 0.471, confidence: 0.167 }) }, { reputation_floor: zero }), "conductor").decision).toBe("allow");
+  });
+
+  it("a policy cannot hold a floor in percent", () => {
+    expect(BuyerPolicySchema.safeParse({ ...DEFAULT_BUYER_POLICY, reputation_floor: { score: 50, confidence: 0 } }).success).toBe(false);
   });
 
   it("gate 4: a child whose dispute window overruns the parent's submit deadline", () => {

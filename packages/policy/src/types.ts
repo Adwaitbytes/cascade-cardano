@@ -2,7 +2,7 @@
  * Inputs of the signer fence. The policy package is pure: the signer service decodes the
  * transaction and looks up chain and directory state, and passes the results in these shapes.
  */
-import { AgentIdSchema, RailSchema, type Action, type NodeDatum, type Plan, type Rail, type TreeConfig } from "@cascade/shared";
+import { AgentIdSchema, RailSchema, ReputationFractionSchema, type Action, type NodeDatum, type Plan, type Rail, type TreeConfig } from "@cascade/shared";
 import { z } from "zod";
 
 /** One output of the transaction under review. */
@@ -54,7 +54,12 @@ export const BuyerPolicySchema = z
     version: z.literal("1"),
     /** Allowed price excess over the approved quote, in basis points. */
     slippage_bps: z.number().int().min(0).max(10_000),
-    reputation_floor: z.object({ score: z.number().min(0).max(1), confidence: z.number().min(0).max(1) }).strict(),
+    /**
+     * Gate 3 floor in the canonical unit, a fraction from 0 to 1, compared directly with the
+     * indexer's reputation score and confidence. A percent from people (console, CLI, MCP) is
+     * converted with `reputationFractionFromPercent` before it reaches a policy.
+     */
+    reputation_floor: z.object({ score: ReputationFractionSchema, confidence: ReputationFractionSchema }).strict(),
     allowed_rails: z.array(RailSchema).min(1),
     /** Payment key hashes (56 hex) or registry asset ids the buyer refuses. */
     blocklist: z.array(z.string().regex(/^[0-9a-f]{56,120}$/)).max(1000),

@@ -3,7 +3,7 @@
  * apps/web/src/lib/api/schemas.ts (W5). test/api.test.ts parses every response with the web app's
  * own schemas, so any drift fails the build.
  */
-import { AmountSchema, AssetIdSchema, Hex28Schema, PlanSchema } from "@cascade/shared/browser";
+import { AmountSchema, AssetIdSchema, Hex28Schema, PlanSchema, ReputationPercentSchema } from "@cascade/shared/browser";
 import { z } from "zod";
 import { TEST_SCENARIOS } from "../test-scenarios.js";
 
@@ -19,7 +19,8 @@ export const CreateJobRequestSchema = z.object({
   budget: AmountSchema,
   deadline: MsSchema,
   max_depth: z.number().int().min(1).max(6),
-  min_reputation: z.number().int().min(0).max(100),
+  /** Reputation floor as a whole percent (0 to 100); converted to the canonical fraction on intake. */
+  min_reputation: ReputationPercentSchema,
   risk: z.enum(RISK_LEVELS),
   acceptance: z.enum(ACCEPTANCE_PREFERENCES),
   allow_agents: z.array(z.string().min(1)).max(50),
