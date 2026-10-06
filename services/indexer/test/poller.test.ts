@@ -2,29 +2,23 @@
  * The Blockfrost poller (preprod mode) against Yaci Store's Blockfrost-compatible API must produce
  * the same trees, nodes and events as the Ogmios chain-sync follower over the same real chain
  * history. The test seeds its own history first (a tree funded and topped up on the devnet's
- * recorded deployment) and fails with a prerequisite message when the deployment is missing.
+ * recorded deployment, redeployed first when contracts/plutus.json changed) and fails with a
+ * prerequisite message when the deployment is missing.
  * Both paths start at the block before the seed: replaying the devnet from origin grows by a block
  * a second and, under parallel suites, ran past Yaci Store's request timeouts.
  */
-import { BlockfrostClient, loadNetworkConfig } from "@cascade/service-kit";
+import { BlockfrostClient, loadNetworkConfig, type CascadeScripts } from "@cascade/service-kit";
 import { assertYaciStoreFresh, createTestDatabase, healYaciStore, type TestDatabase } from "@cascade/service-kit/testing";
 import { pino } from "pino";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Follower } from "../src/follower.js";
 import { BlockfrostPoller } from "../src/poller.js";
-import { seedTree } from "./seed.js";
+import { ensureLocalDeployment, seedTree } from "./seed.js";
 
 const cfg = loadNetworkConfig("local");
 const log = pino({ level: "silent" });
-const SCRIPTS = {
-  node: cfg.scripts.node ?? "",
-  config: cfg.scripts.config,
-  logicCore: cfg.scripts.logicCore,
-  logicDraw: cfg.scripts.logicDraw,
-  logicExt: cfg.scripts.logicExt,
-  bond: cfg.scripts.bond,
-  channel: cfg.scripts.channel,
-};
+/** Read after ensureLocalDeployment: a redeploy changes every hash. */
+let SCRIPTS: CascadeScripts;
 const bf = new BlockfrostClient(cfg.blockfrostUrl ?? "", null);
 let a: TestDatabase;
 let b: TestDatabase;
@@ -34,6 +28,10 @@ let seeded: { treeId: string; txIds: string[] };
 beforeAll(async () => {
   await healYaciStore(cfg.ogmiosHttp, cfg.blockfrostUrl);
   await assertYaciStoreFresh(cfg.ogmiosHttp, cfg.blockfrostUrl);
+  await ensureLocalDeployment();
+  const deployed = loadNetworkConfig("local").scripts;
+  if (deployed.node === null) throw new Error("prerequisite: the local deployment names no cascade_node hash");
+  SCRIPTS = { ...deployed, node: deployed.node };
   [a, b] = await Promise.all([createTestDatabase(), createTestDatabase()]);
   seeded = await seedTree();
 }, 900_000);
@@ -101,9 +99,21 @@ describe("Blockfrost poller", () => {
   it("undoes a stored block that the chain no longer has", async () => {
     const { rows } = await b.pool.query<{ slot: string }>("SELECT slot FROM node_events WHERE NOT rolled_back ORDER BY slot DESC LIMIT 1");
     const lastEventSlot = Number(rows[0]?.slot ?? 0);
+    const point = await b.pool.query<{ h: string }>("SELECT block_height AS h FROM chain_points WHERE slot = $1", [lastEventSlot]);
+    const lastEventHeight = Number(point.rows[0]?.h);
+    expect(Number.isInteger(lastEventHeight), "the newest event's block is a stored chain point").toBe(true);
+    // The poller only applies blocks DEPTH below the tip. The first test can finish within a few
+    // blocks of the seed, so wait until the newest event's block is that deep before re-applying it.
+    const DEPTH = 3;
+    let deep = false;
+    for (let i = 0; i < 120 && !deep; i++) {
+      deep = (await bf.latestBlock()).height >= lastEventHeight + DEPTH;
+      if (!deep) await new Promise((r) => setTimeout(r, 500));
+    }
+    expect(deep, `the devnet tip passed block ${lastEventHeight} by ${DEPTH}`).toBe(true);
     // Pretend the block of the newest event, and everything after it, was replaced by a fork.
     await b.pool.query("UPDATE chain_points SET block_hash = md5(block_hash) || md5(block_hash || 'fork') WHERE slot >= $1", [lastEventSlot]);
-    const poller = new BlockfrostPoller({ pool: b.pool, bf, scripts: SCRIPTS, log, publish: () => undefined, depth: 3 });
+    const poller = new BlockfrostPoller({ pool: b.pool, bf, scripts: SCRIPTS, log, publish: () => undefined, depth: DEPTH });
     await poller.pollOnce();
     const rb = await b.pool.query("SELECT 1 FROM node_events WHERE type = 'chain.rollback'");
     expect(rb.rows.length).toBeGreaterThan(0);
