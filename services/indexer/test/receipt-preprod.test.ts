@@ -1,8 +1,12 @@
 /**
- * Invariant 1 on a real tree: replays preprod tree be6854... (fund, draw, child refund, submit,
- * accept, close) from Blockfrost into a throwaway database and checks the served receipt the way the
- * explorer does: for an ADA tree, deposits (budget plus structural ADA in) must equal payouts plus
- * refunds plus protocol fees plus structural ADA returned, to the lovelace.
+ * Invariant 1 on a real tree: replays preprod tree ade682..., the main tree of the 2026-10-06 redeemer
+ * showcase on the tagged deployment in deployments/preprod.json (demo/out/redeemers.json), from
+ * Blockfrost into a throwaway database and checks the served receipt the way the explorer does. The
+ * tree exercises fund, top-up, freeze, native and receipt draws, settle, challenge, escalate,
+ * resolve, refund, both receipt closes and the root close. For an ADA tree, deposits (budget plus
+ * structural ADA in) must equal payouts plus refunds plus protocol fees plus structural ADA returned,
+ * to the lovelace. The tree must be one made with the script hashes in deployments/preprod.json:
+ * after a redeploy, point TREE and TXS at a closed tree of the new deployment.
  */
 import { BlockfrostClient, chainTxFromBlockfrost, deriveRoleKey, loadEnv, loadNetworkConfig, withTransaction, type CascadeScripts } from "@cascade/service-kit";
 import { createTestDatabase, type TestDatabase } from "@cascade/service-kit/testing";
@@ -12,14 +16,29 @@ import { createApi } from "../src/api.js";
 import { applyBlockTxs } from "../src/follower.js";
 import { recordPoint } from "../src/store.js";
 
-const TREE = "be685438765292c4d7c58e40635599e64a0f17dfad46024889101b62";
+const TREE = "ade682cb5f8e007cb68584a35f8696b78f36d4c32b29fdda7cfad206";
+/** Every transaction of the tree, in chain order (block heights 5260531 to 5260565). */
 const TXS = [
-  "765179237c07ad5e346262e4750e85be7ab9f743e6fdb0b5353aa6fd2fa8136f",
-  "794030135ce80d352e3fd3cc53e44662e787a7f521903519efbca34476abf7ae",
-  "c24c683d0f1ba61f2ca3da9d0e550f89e2b56d6a5c79203d8acc3bb20d23a01f",
-  "f8b1a8ac3b7c43c122f24657218eac0eaa09d24af0d6575a623fb86defb0fb56",
-  "e5c03a113678c234e9d632f54eda3b697eda6dcc3e0bb99dba77c837e2b35c42",
-  "98ca6753611c627b85051cddcc3ab922d9142e0684161f7249692e1079c5f89e",
+  "a4d28ac98a371dd43eadf8cef3ca2c6f417dd07bc05e90a2ce48d5c402708cdf", // FundRoot
+  "ee128e5a67ea46d4f64e13a256b7d112bba069723eb4d1978b69d9d750f8c54a", // TopUp
+  "a5cb0366affa6e4bd45d41b1f6eec9f5a6b925d07da98af065b8786d47b5370a", // Freeze
+  "d96f602ad290cdb85cc3435d555adbc35419f6d150af397533a04a2a582e0e40", // Unfreeze
+  "21514966fb1f80d33ee8037c6f74b33e9a3add9ff9ccf5d9744ebba9ed28eec9", // Draw (three native children)
+  "fb9bab1e94b957010bf332c4ade622d16add47911e5e7ac4be96e0f2a70918ae", // Draw (Metered and Masumi receipts)
+  "ae62495eb1dde7be1ef1ff444efe1e25cd69638f2831984e5bf86496d36decfd", // Submit (Scout)
+  "e3d8013ea393b1487aaebd72aa2204ddf26ff56bd39ffcb94014e03ce6a8eb47", // Accept (Scout)
+  "da37ee899e391eb1d515bc187f04b7a6ae2c177d094c13ca4a51fe3ea95aae4f", // SettleChild (Scout)
+  "760fdb8d2a4b6676753434c0e662db8cd5018a68c101e16e04866a0f6d3b4c3c", // Submit (Pricer)
+  "d784c83542101a7ce7947fd82ff5389f65822dce11abdf918e8b03dda53bc480", // Challenge (Pricer)
+  "3a45f8f2af4c0ca6a4e1adfec716a487a403f24ae1374bda8023807dbd1746bb", // Escalate (Pricer)
+  "baf314d8b9d6f363ca021bef105fab3d2008cf0febb4837fc001c02adbc742f2", // Resolve (Pricer)
+  "1db9f31149273c8096ef33708e50deadd3a5757bde58fe3916ad5685deebec48", // CloseReceipt (Metered)
+  "fb8280c71a523c5d423af87edc355f191feea126ba1e1722d514e66a279d6472", // Refund (Flaky Lisan)
+  "a789a7acd6338b3d8e95b10a3858c23baa63b19d6541b8430c8cee55be61da90", // Masumi vested_pay refund
+  "2f419757cafdfaa2e6da23968d2bc55dcc0c9428db2fe16c9098df744e270182", // CloseReceipt (Masumi)
+  "7edb32759e285e2375e71cf8723339f5e632f7620e5027c3e75ea6392de79bbd", // Submit (root)
+  "931fe08706418ace7330b1c9218b55a1f1897b2d3debdb9ce40e0b012be75636", // Accept (root)
+  "69720f3162300f9b04febd20723a5f3d51135504c3b5d62f404fcc1b9dbc9df0", // CloseRoot
 ];
 
 loadEnv();
@@ -48,7 +67,7 @@ afterAll(async () => {
   await db?.drop();
 });
 
-describe("receipt reconciliation on preprod tree be6854", () => {
+describe("receipt reconciliation on preprod tree ade682", () => {
   it("balances deposits against payouts, refunds, fees and structural ADA returned, to the lovelace", async () => {
     const app = createApi({
       pool: db.pool,
@@ -72,8 +91,9 @@ describe("receipt reconciliation on preprod tree be6854", () => {
       balanced: boolean;
     };
     expect(r.deposits.asset).toBe("lovelace");
-    // 30 ADA budget plus 9.49972 ADA structural (root reserve plus config min-ADA) went in.
-    expect(r.deposits.amount).toBe("39499720");
+    // 21 ADA budget (20 at fund, 1 top-up) plus 27.33163 ADA structural (24 ADA root reserve plus
+    // the config output's 3.33163 ADA min-ADA, both read from the FundRoot outputs) went in.
+    expect(r.deposits.amount).toBe("48331630");
     const accounted = BigInt(r.payouts.amount) + BigInt(r.refunds.amount) + BigInt(r.fees.amount) + BigInt(r.structural_returned_lovelace);
     expect(BigInt(r.deposits.amount) - accounted).toBe(0n);
     expect(r.balanced).toBe(true);
