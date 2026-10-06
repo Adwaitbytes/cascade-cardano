@@ -94,18 +94,69 @@ const OgmiosResponse = z.object({
   error: z.object({ code: z.number().int(), message: z.string(), data: z.unknown().optional() }).optional(),
 });
 
+/** A provider that rate limited, failed or answered without a JSON-RPC body: try the next one. */
+class EvaluatorTransportError extends Error {}
+
+async function ogmiosEvaluate(name: string, url: string, init: RequestInit): Promise<EvalRedeemer[]> {
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, signal: AbortSignal.timeout(60_000) });
+  } catch (err) {
+    throw new EvaluatorTransportError(`${name}: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  const text = await res.text();
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new EvaluatorTransportError(`${name}: HTTP ${res.status} with a non-JSON body`);
+  }
+  const parsed = OgmiosResponse.safeParse(json);
+  if (!parsed.success) throw new EvaluatorTransportError(`${name}: HTTP ${res.status} without an evaluation result`);
+  const body = parsed.data;
+  // JSON-RPC internal and server errors come from the provider, not the ledger.
+  if (body.error !== undefined && (body.error.code === -32603 || (body.error.code <= -32000 && body.error.code >= -32099))) {
+    throw new EvaluatorTransportError(`${name}: provider error ${body.error.code}`);
+  }
+  if (body.error !== undefined) throw new Error(`Ogmios error ${body.error.code}: ${body.error.message}: ${JSON.stringify(body.error.data ?? null)}`);
+  if (body.result === undefined) throw new EvaluatorTransportError(`${name}: HTTP ${res.status} without an evaluation result`);
+  return body.result.map((b) => ({ redeemer_tag: b.validator.purpose, redeemer_index: b.validator.index, ex_units: { mem: b.budget.memory, steps: b.budget.cpu } }));
+}
+
+/**
+ * Evaluates on Blockfrost (`utils/txs/evaluate`, Ogmios v6 form) and fails over to Koios's Ogmios
+ * proxy, with backoff, so a rate-limited provider never fails a step. An evaluation answer about
+ * the scripts is final.
+ */
 class BlockfrostWithOgmiosEvaluation extends Blockfrost {
   override async evaluateTx(tx: string): Promise<EvalRedeemer[]> {
-    const res = await fetch(KOIOS_OGMIOS_PREPROD, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", method: "evaluateTransaction", params: { transaction: { cbor: tx } }, id: null }),
-      signal: AbortSignal.timeout(60_000),
-    });
-    const body = OgmiosResponse.parse(await res.json());
-    if (body.error !== undefined) throw new Error(`Ogmios error ${body.error.code}: ${body.error.message}: ${JSON.stringify(body.error.data ?? null)}`);
-    if (body.result === undefined) throw new Error("Ogmios returned neither result nor error");
-    return body.result.map((b) => ({ redeemer_tag: b.validator.purpose, redeemer_index: b.validator.index, ex_units: { mem: b.budget.memory, steps: b.budget.cpu } }));
+    const providers: Array<() => Promise<EvalRedeemer[]>> = [
+      () =>
+        ogmiosEvaluate("blockfrost", `${BLOCKFROST_PREPROD}/utils/txs/evaluate?version=6`, {
+          method: "POST",
+          headers: { "content-type": "application/cbor", project_id: requireEnv("BLOCKFROST_PROJECT_ID_PREPROD") },
+          body: tx,
+        }),
+      () =>
+        ogmiosEvaluate("koios", KOIOS_OGMIOS_PREPROD, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", method: "evaluateTransaction", params: { transaction: { cbor: tx } }, id: null }),
+        }),
+    ];
+    const problems: string[] = [];
+    for (let round = 0; round < 4; round++) {
+      for (const evaluate of providers) {
+        try {
+          return await evaluate();
+        } catch (err) {
+          if (!(err instanceof EvaluatorTransportError)) throw err;
+          problems.push(err.message);
+        }
+      }
+      await sleep(5_000 * 2 ** round);
+    }
+    throw new Error(`no evaluator answered: ${problems.slice(-2).join("; ")}`);
   }
 }
 

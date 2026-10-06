@@ -46,8 +46,11 @@ const log = (msg: string): void => console.log(`[${new Date().toISOString().slic
 // ---------------------------------------------------------------------------------------------
 // Roles (deployments/wallets.preprod.json)
 
+// Every fee and deposit is paid by the treasury wallet, which no running service spends from, so the
+// showcase never races the live Conductor, agents or acceptance runs for wallet UTxOs. The other
+// roles only sign or receive.
 const R = {
-  buyer: role("buyer"),
+  buyer: role("treasury"),
   conductor: role("conductor"),
   scout: role("scout"),
   pricer: role("pricer"),
@@ -338,7 +341,6 @@ async function run(): Promise<void> {
   const state = loadState();
   saveState(state);
   const buyer = await clientFor(R.buyer);
-  const conductorClient = await clientFor(R.conductor);
   const plan = planFor(state.tag);
   const step = (id: string, label: string): StepContext => ({ state, id, label });
 
@@ -477,8 +479,8 @@ async function run(): Promise<void> {
   // Pricer: Submit, Challenge by the parent operator (posts a 4 ADA bond), Escalate by the
   // worker, Resolve by 2 of 2 arbiters with a split and a bond slash.
   await runStep(step("submitB", "Submit (Pricer)"), buyer, R.buyer, async () => fromBuilt(await buyer.submit(b, h32(`${state.tag}/result/pricer`))));
-  await runStep(step("challengeB", "Challenge"), conductorClient, R.conductor, async () =>
-    fromBuilt(await conductorClient.challenge({ nodeId: b, reasonHash: h32(`${state.tag}/reason/pricer`), challenger: R.conductor.vkh, challengerAddress: R.conductor.address })),
+  await runStep(step("challengeB", "Challenge"), buyer, R.buyer, async () =>
+    fromBuilt(await buyer.challenge({ nodeId: b, reasonHash: h32(`${state.tag}/reason/pricer`), challenger: R.conductor.vkh, challengerAddress: R.conductor.address })),
   );
   await runStep(step("escalateB", "Escalate"), buyer, R.buyer, async () => fromBuilt(await buyer.escalate(b)));
   await runStep(step("resolveB", "Resolve"), buyer, R.buyer, async () => {
@@ -496,22 +498,8 @@ async function run(): Promise<void> {
     );
   });
 
-  // Metered: the provider redeems one cumulative voucher, then the receipt closes and the
-  // unspent deposit returns into the root.
-  // Supporting step: a failed provider redeem does not block the receipt close (the whole deposit
-  // then returns), so it is recorded as a known issue instead of stopping the run.
-  if (state.steps.redeemChannel === undefined && state.skipped?.redeemChannel === undefined) {
-    try {
-      await runStep(step("redeemChannel", "Redeem (cascade_channel)"), buyer, R.buyer, async () =>
-        fromBuilt(await buyer.redeemChannels([{ receiptId: metered, amount: 1n * ADA, signature: signVoucher(payer, treeId, metered, 1n * ADA) }])),
-      );
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      log(`Redeem skipped: ${msg.slice(0, 300)}`);
-      state.skipped = { ...(state.skipped ?? {}), redeemChannel: msg.slice(0, 600) };
-      saveState(state);
-    }
-  }
+  // Metered: the receipt closes and its whole deposit returns into the root. A provider redeem
+  // runs on its own tree in the channel phase (--channel).
   await runStep(step("closeMetered", "CloseReceipt (Metered)"), buyer, R.buyer, async () => fromBuilt(await buyer.closeReceipt(metered, "both")));
 
   // Flaky Lisan never submits: after refund_after its whole value returns into the root.
@@ -671,11 +659,11 @@ const ROWS: Row[] = [
   { redeemer: "Submit", step: "submitA", primary: true, expectAction: "Submit", proved: "Scout commits its result hash before submit_by with no open children." },
   { redeemer: "Accept", step: "acceptA", primary: true, expectAction: "Accept", proved: "The parent operator's signature satisfies Scout's ParentAccept rule." },
   { redeemer: "SettleChild", step: "settleA", primary: true, expectAction: "SettleChild", proved: "Scout's 1 ADA fee goes to its payee, the unused 2 ADA folds back into the root, the child token burns (withdraw-zero settlement)." },
-  { redeemer: "Challenge", step: "challengeB", primary: true, expectAction: "Challenge", proved: "The parent operator challenges Pricer's submitted result before challenge_until and posts a 4 ADA bond at cascade_bond." },
+  { redeemer: "Challenge", step: "challengeB", primary: true, expectAction: "Challenge", proved: "The parent operator challenges Pricer's submitted result before challenge_until and posts a 4 ADA bond at cascade_bond (the treasury pays it; the operator key signs)." },
   { redeemer: "Escalate", step: "escalateB", primary: true, expectAction: "Escalate", proved: "Pricer, the challenged worker, escalates to the arbiters before dispute_until." },
   { redeemer: "Resolve", step: "resolveB", primary: true, expectAction: "Resolve", proved: "Arbiters 1 and 2 (threshold 2) split Pricer's 3 ADA: 1.5 ADA to the worker, 1.5 ADA back into the root. The challenger's bond is slashed 70/30: 2.8 ADA to the worker, 1.2 ADA to the arbiter fee address." },
   { redeemer: "Refund", step: "refundC", primary: true, expectAction: "Refund", proved: "Flaky Lisan, a test agent that fails on purpose, missed submit_by. After refund_after anyone may crank Refund; its whole value returns into the root in one transaction." },
-  { redeemer: "CloseReceipt (Metered)", step: "closeMetered", primary: true, expectAction: "CloseReceipt", proved: "Operator and provider close the metered receipt: the part of the 3 ADA deposit the provider did not redeem returns from the channel into the root; channel and receipt tokens burn." },
+  { redeemer: "CloseReceipt (Metered)", step: "closeMetered", primary: true, expectAction: "CloseReceipt", proved: "Operator and provider close the metered receipt before any redeem: the whole 3 ADA deposit returns from the channel into the root; channel and receipt tokens burn." },
   { redeemer: "CloseReceipt (Masumi)", step: "closeMasumi", primary: true, expectAction: "CloseReceipt", proved: "After the Masumi lock refunded to buyer_refund, the operator closes the Masumi receipt; parent counters drop and the receipt token burns." },
   { redeemer: "CloseRoot", step: "closeRoot", primary: true, expectAction: "CloseRoot", proved: "Buyer accepted the root; the Conductor gets its 1 ADA fee, everything else (unused budget and all structural ADA) returns to buyer_refund, root and config tokens burn." },
   { redeemer: "Cancel", step: "cancel", primary: true, expectAction: "Cancel", proved: "Buyer cancels a funded tree with nothing drawn: full refund, both tokens burn." },
