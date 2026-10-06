@@ -356,7 +356,7 @@ async function run(): Promise<void> {
           payee: R.conductor.plutus,
           budget: 20n * ADA,
           fee: 1n * ADA,
-          structural: 18n * ADA,
+          structural: 24n * ADA,
           spec_hash: plan.leaves[LEAF.root]!.spec_hash,
           input_hash: h32(`${state.tag}/root-input`),
           submit_by: submitBy,
@@ -371,7 +371,7 @@ async function run(): Promise<void> {
     saveState(state);
   }
   const treeId = need(state.main.treeId, "main tree id");
-  await track(state, buyer, treeId);
+  await trackIfLive(state, buyer, treeId);
 
   await runStep(step("topUp", "TopUp"), buyer, R.buyer, async () => fromBuilt(await buyer.topUp(treeId, 1n * ADA)));
   await runStep(step("freeze", "Freeze"), buyer, R.buyer, async () => fromBuilt(await buyer.freeze(treeId)));
@@ -563,6 +563,7 @@ async function run(): Promise<void> {
   const spare = need(state.spare.treeId, "spare tree id");
   await runStep(step("cancel", "Cancel"), buyer, R.buyer, async () => fromBuilt(await buyer.cancel(spare)));
 
+  await runChannel(state, buyer);
   await report(state, buyer);
 }
 
@@ -585,7 +586,7 @@ async function runChannel(state: State, buyer: CascadeClient): Promise<void> {
           payee: R.conductor.plutus,
           budget: 5n * ADA,
           fee: 1n * ADA,
-          structural: 12n * ADA,
+          structural: 14n * ADA,
           spec_hash: plan.leaves[LEAF.root]!.spec_hash,
           input_hash: h32(`${state.tag}/channel-input`),
           submit_by: submitBy,
@@ -650,7 +651,7 @@ interface Row {
 }
 
 const ROWS: Row[] = [
-  { redeemer: "FundRoot", step: "fundRoot", primary: true, expectAction: "FundRoot", proved: "Buyer locks 20 ADA plus 18 ADA structural reserve; root and config thread tokens minted from a one-shot seed; plan root set." },
+  { redeemer: "FundRoot", step: "fundRoot", primary: true, expectAction: "FundRoot", proved: "Buyer locks 20 ADA plus 24 ADA structural reserve; root and config thread tokens minted from a one-shot seed; plan root set." },
   { redeemer: "TopUp", step: "topUp", primary: true, expectAction: "TopUp", proved: "Buyer raises the root budget by 1 ADA; nothing else in the datum changes." },
   { redeemer: "Freeze", step: "freeze", primary: true, expectAction: "Freeze", proved: "Buyer sets frozen on the root; no value moves. Acceptance test A13 checks that a Draw fails while frozen." },
   { redeemer: "Unfreeze", step: "unfreeze", primary: true, expectAction: "Unfreeze", proved: "Buyer clears frozen; Draws are allowed again." },
