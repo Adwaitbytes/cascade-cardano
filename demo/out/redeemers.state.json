@@ -1,334 +1,338 @@
 {
   "version": 1,
-  "tag": "w8-showcase-1790847487228",
+  "tag": "w8-showcase-1791288649384",
   "main": {
-    "treeId": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
-    "a": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
-    "b": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
-    "c": "c1f49ab2b6d7c6fc380214547dc68031369a2fa6321e9b37c01345b1",
-    "metered": "696c07e851aa04bc91ba58f6e307964eab08d86a0f10ce8d173fa404",
-    "masumi": "9efe3a1069e591cdab998e3a8e252afb20e6419d6bedb3c2ad313c12",
+    "treeId": "ade682cb5f8e007cb68584a35f8696b78f36d4c32b29fdda7cfad206",
+    "a": "01283d30ae59785a78fd8c743ed1a0b8924b13331113b82bc08dc22b",
+    "b": "a80515f98bf3e514a86e0b3f5a744dc5c3a26cc059fb8e2561395c3b",
+    "c": "d38f5a3b90a2634665aa7aeef342ff93c08a0c3dada640c0ba02fe90",
+    "metered": "7d90099b98b561e35e8f02cab60eaa4226f999d2086758dfe7dd1d56",
+    "masumi": "54f94b98cd7768fe52614d6cbc8ffe94c3ead219e34f6b316b820fc4",
     "masumiLock": 4
   },
   "spare": {
-    "treeId": "f073ac10fc9d3b0a60b0b31c00991f7879f3188a30f9cb1a14871018"
+    "treeId": "c157c001c156fc4c8134d89881434068dc521513e6053149c19959c4"
   },
   "nodeRefs": {
-    "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856": {
-      "txHash": "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
-      "outputIndex": 1
-    },
-    "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe": {
-      "txHash": "0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
+    "ade682cb5f8e007cb68584a35f8696b78f36d4c32b29fdda7cfad206": {
+      "txHash": "a4d28ac98a371dd43eadf8cef3ca2c6f417dd07bc05e90a2ce48d5c402708cdf",
       "outputIndex": 0
     },
-    "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a": {
-      "txHash": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+    "01283d30ae59785a78fd8c743ed1a0b8924b13331113b82bc08dc22b": {
+      "txHash": "e3d8013ea393b1487aaebd72aa2204ddf26ff56bd39ffcb94014e03ce6a8eb47",
+      "outputIndex": 0
+    },
+    "a80515f98bf3e514a86e0b3f5a744dc5c3a26cc059fb8e2561395c3b": {
+      "txHash": "21514966fb1f80d33ee8037c6f74b33e9a3add9ff9ccf5d9744ebba9ed28eec9",
       "outputIndex": 2
     },
-    "c1f49ab2b6d7c6fc380214547dc68031369a2fa6321e9b37c01345b1": {
-      "txHash": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+    "d38f5a3b90a2634665aa7aeef342ff93c08a0c3dada640c0ba02fe90": {
+      "txHash": "21514966fb1f80d33ee8037c6f74b33e9a3add9ff9ccf5d9744ebba9ed28eec9",
       "outputIndex": 3
     },
-    "696c07e851aa04bc91ba58f6e307964eab08d86a0f10ce8d173fa404": {
-      "txHash": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+    "7d90099b98b561e35e8f02cab60eaa4226f999d2086758dfe7dd1d56": {
+      "txHash": "fb9bab1e94b957010bf332c4ade622d16add47911e5e7ac4be96e0f2a70918ae",
       "outputIndex": 1
     },
-    "9efe3a1069e591cdab998e3a8e252afb20e6419d6bedb3c2ad313c12": {
-      "txHash": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+    "54f94b98cd7768fe52614d6cbc8ffe94c3ead219e34f6b316b820fc4": {
+      "txHash": "fb9bab1e94b957010bf332c4ade622d16add47911e5e7ac4be96e0f2a70918ae",
       "outputIndex": 3
     }
   },
   "pending": {
     "fundRoot": {
-      "txHash": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341",
-      "by": "buyer",
+      "txHash": "a4d28ac98a371dd43eadf8cef3ca2c6f417dd07bc05e90a2ce48d5c402708cdf",
+      "by": "treasury",
       "extra": {
-        "treeId": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856"
+        "treeId": "ade682cb5f8e007cb68584a35f8696b78f36d4c32b29fdda7cfad206"
       }
     },
     "topUp": {
-      "txHash": "d525ce88bd775070ad1c5ef0d19ce9ac9d65ae42b60dfbce0c2e7c55b364919e",
-      "by": "buyer",
+      "txHash": "ee128e5a67ea46d4f64e13a256b7d112bba069723eb4d1978b69d9d750f8c54a",
+      "by": "treasury",
       "extra": {}
     },
     "freeze": {
-      "txHash": "3478b1545fbf8e4bf391ca2849843ad0ddc808687581a0b1160623f43740110f",
-      "by": "buyer",
+      "txHash": "a5cb0366affa6e4bd45d41b1f6eec9f5a6b925d07da98af065b8786d47b5370a",
+      "by": "treasury",
       "extra": {}
     },
     "unfreeze": {
-      "txHash": "c6c13dc163d58f7872bed6efb0813959ee9e21323a6787909d5bb2d14747b75c",
-      "by": "buyer",
+      "txHash": "d96f602ad290cdb85cc3435d555adbc35419f6d150af397533a04a2a582e0e40",
+      "by": "treasury",
       "extra": {}
     },
     "drawNative": {
-      "txHash": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
-      "by": "buyer",
+      "txHash": "21514966fb1f80d33ee8037c6f74b33e9a3add9ff9ccf5d9744ebba9ed28eec9",
+      "by": "treasury",
       "extra": {
-        "a": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
-        "b": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
-        "c": "c1f49ab2b6d7c6fc380214547dc68031369a2fa6321e9b37c01345b1"
+        "a": "01283d30ae59785a78fd8c743ed1a0b8924b13331113b82bc08dc22b",
+        "b": "a80515f98bf3e514a86e0b3f5a744dc5c3a26cc059fb8e2561395c3b",
+        "c": "d38f5a3b90a2634665aa7aeef342ff93c08a0c3dada640c0ba02fe90"
       }
     },
     "drawReceipts": {
-      "txHash": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
-      "by": "buyer",
+      "txHash": "fb9bab1e94b957010bf332c4ade622d16add47911e5e7ac4be96e0f2a70918ae",
+      "by": "treasury",
       "extra": {
-        "metered": "696c07e851aa04bc91ba58f6e307964eab08d86a0f10ce8d173fa404",
-        "masumi": "9efe3a1069e591cdab998e3a8e252afb20e6419d6bedb3c2ad313c12",
+        "metered": "7d90099b98b561e35e8f02cab60eaa4226f999d2086758dfe7dd1d56",
+        "masumi": "54f94b98cd7768fe52614d6cbc8ffe94c3ead219e34f6b316b820fc4",
         "masumiLock": 4
       }
     },
     "submitA": {
-      "txHash": "3f3515dfbdfca2fcc3b95564f44b754e999d3c769e6fcf8c73f5502cea4a627a",
-      "by": "buyer",
+      "txHash": "ae62495eb1dde7be1ef1ff444efe1e25cd69638f2831984e5bf86496d36decfd",
+      "by": "treasury",
       "extra": {}
     },
     "acceptA": {
-      "txHash": "0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
-      "by": "buyer",
+      "txHash": "e3d8013ea393b1487aaebd72aa2204ddf26ff56bd39ffcb94014e03ce6a8eb47",
+      "by": "treasury",
       "extra": {}
     },
     "settleA": {
-      "txHash": "f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc",
-      "by": "buyer",
+      "txHash": "da37ee899e391eb1d515bc187f04b7a6ae2c177d094c13ca4a51fe3ea95aae4f",
+      "by": "treasury",
       "extra": {}
     },
     "submitB": {
-      "txHash": "7f8b365f656097b1a67a7f9e7ff98a4ecab3b75ac5d4f520aa87150566767817",
-      "by": "buyer",
+      "txHash": "760fdb8d2a4b6676753434c0e662db8cd5018a68c101e16e04866a0f6d3b4c3c",
+      "by": "treasury",
       "extra": {}
     },
     "challengeB": {
-      "txHash": "0accdf81c601e9c8608436f2c960dd4f16cf2c5ce0a4b95a5b1cf25c4a4f2232",
-      "by": "conductor",
+      "txHash": "d784c83542101a7ce7947fd82ff5389f65822dce11abdf918e8b03dda53bc480",
+      "by": "treasury",
       "extra": {}
     },
     "escalateB": {
-      "txHash": "2cb65930d439c835813f6674c92de59ab5990d2b46efb8d8c2cefe2eea8b6d8d",
-      "by": "buyer",
+      "txHash": "3a45f8f2af4c0ca6a4e1adfec716a487a403f24ae1374bda8023807dbd1746bb",
+      "by": "treasury",
       "extra": {}
     },
     "resolveB": {
-      "txHash": "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
-      "by": "buyer",
+      "txHash": "baf314d8b9d6f363ca021bef105fab3d2008cf0febb4837fc001c02adbc742f2",
+      "by": "treasury",
       "extra": {}
     },
     "closeMetered": {
-      "txHash": "5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489",
-      "by": "buyer",
+      "txHash": "1db9f31149273c8096ef33708e50deadd3a5757bde58fe3916ad5685deebec48",
+      "by": "treasury",
+      "extra": {}
+    },
+    "refundC": {
+      "txHash": "fb8280c71a523c5d423af87edc355f191feea126ba1e1722d514e66a279d6472",
+      "by": "treasury",
       "extra": {}
     },
     "masumiRefund": {
-      "txHash": "cdd3cf934223c590c6abb0b9e9e88b964fd84f978949d700f9c0ef24225d216c",
-      "by": "buyer",
+      "txHash": "a789a7acd6338b3d8e95b10a3858c23baa63b19d6541b8430c8cee55be61da90",
+      "by": "treasury",
       "extra": {}
     },
     "closeMasumi": {
-      "txHash": "41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b",
-      "by": "buyer",
+      "txHash": "2f419757cafdfaa2e6da23968d2bc55dcc0c9428db2fe16c9098df744e270182",
+      "by": "treasury",
       "extra": {}
     },
     "submitRoot": {
-      "txHash": "5b4e08ca132cb7efc228baf41292ed88d28f16b8a6759673c70c808474edff65",
-      "by": "buyer",
+      "txHash": "7edb32759e285e2375e71cf8723339f5e632f7620e5027c3e75ea6392de79bbd",
+      "by": "treasury",
       "extra": {}
     },
     "acceptRoot": {
-      "txHash": "56ef4316ee1fa16914b1db0ee956cb5c29fd8fb8c864498422a6f9a82e251699",
-      "by": "buyer",
+      "txHash": "931fe08706418ace7330b1c9218b55a1f1897b2d3debdb9ce40e0b012be75636",
+      "by": "treasury",
       "extra": {}
     },
     "closeRoot": {
-      "txHash": "d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217",
-      "by": "buyer",
+      "txHash": "69720f3162300f9b04febd20723a5f3d51135504c3b5d62f404fcc1b9dbc9df0",
+      "by": "treasury",
       "extra": {}
     },
     "fundSpare": {
-      "txHash": "6a753c242111b47fd0aa4b024f6e30c0cb9c688aaa3a3edb3886e36cbde9ca50",
-      "by": "buyer",
+      "txHash": "dc30ff1417d4f72f69041aebdcdb051c3c028bed40687077e420820fc9d569db",
+      "by": "treasury",
       "extra": {
-        "treeId": "f073ac10fc9d3b0a60b0b31c00991f7879f3188a30f9cb1a14871018"
+        "treeId": "c157c001c156fc4c8134d89881434068dc521513e6053149c19959c4"
       }
     },
     "cancel": {
-      "txHash": "46c6dc88268cced653430f61ce1d5008953f9b016aedbbca28603292b22aa21b",
-      "by": "buyer",
+      "txHash": "232d2d8f8cf11e57d67f084bc5aa45d5403172c3d999f25bc57140272986d414",
+      "by": "treasury",
       "extra": {}
     },
     "channelFund": {
-      "txHash": "e47311fb792ad8adab218fc4ac0b9fd731eef7e2260e58915d7527eb43972b14",
-      "by": "buyer",
+      "txHash": "b27d2a13d1a94c75feeed27756e894e1430178f306bece7fe12af86eae0b8bf1",
+      "by": "treasury",
       "extra": {
-        "treeId": "fa6d28b31ab6d0a0c6c68eee143056dbc65572452568b06a31b0fd85"
+        "treeId": "5c3853de51dc8e173b922fea46e46192d1e7f6df6f06a8a70f146165"
       }
     },
     "channelDraw": {
-      "txHash": "ac32148124966d231b90e26668835759104aab367b88a442d0e52d7f7fb7d582",
-      "by": "buyer",
+      "txHash": "d5ef9768036ed2b9f70c2d28f75ba44256161a447d319fa12aa428f36f251907",
+      "by": "treasury",
       "extra": {
-        "receipt": "692ef90e79db78f46bcf0be6d1cd62011eec52e670dc931fe809cad0"
+        "receipt": "60b73e68049c4f57f317f5db77cfb590f51fc84b476d9bf25020847d"
       }
     },
     "redeemChannel": {
-      "txHash": "8924aab51904951588a261c3b81b1c8d3a1be1734c0eb7454d4aaa83a4f6259a",
-      "by": "buyer",
+      "txHash": "2961fe2fbabcf4ab94ecb69d6991255ebfc2780780d09823f559eb269cce516c",
+      "by": "treasury",
       "extra": {}
     },
     "channelClose": {
-      "txHash": "62f5c2630a0279ac2f6eae4b89efbef1ee7b0a0e3965ec4a039c8eef439c9691",
-      "by": "buyer",
+      "txHash": "66149bc18aca6f53b3f63ed0adae093853ebff8f623962dd86b661e627bacb11",
+      "by": "treasury",
       "extra": {}
     },
     "channelCancel": {
-      "txHash": "2c030e66751b7214f2c43cbdd5c2eb2a7c3f513d9ccb8f7c9b8c2b6612cb3556",
-      "by": "buyer",
+      "txHash": "63d4cabbc7ba7fad412204e739dc499a22aed90ff0d23eda68bc634217ad3011",
+      "by": "treasury",
       "extra": {}
     }
   },
   "steps": {
     "fundRoot": {
-      "txHash": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341",
-      "by": "buyer",
-      "at": "2026-10-01T09:39:18.227Z"
+      "txHash": "a4d28ac98a371dd43eadf8cef3ca2c6f417dd07bc05e90a2ce48d5c402708cdf",
+      "by": "treasury",
+      "at": "2026-10-06T12:11:30.464Z"
     },
     "topUp": {
-      "txHash": "d525ce88bd775070ad1c5ef0d19ce9ac9d65ae42b60dfbce0c2e7c55b364919e",
-      "by": "buyer",
-      "at": "2026-10-01T09:41:39.392Z"
+      "txHash": "ee128e5a67ea46d4f64e13a256b7d112bba069723eb4d1978b69d9d750f8c54a",
+      "by": "treasury",
+      "at": "2026-10-06T12:12:41.020Z"
     },
     "freeze": {
-      "txHash": "3478b1545fbf8e4bf391ca2849843ad0ddc808687581a0b1160623f43740110f",
-      "by": "buyer",
-      "at": "2026-10-01T09:42:25.233Z"
+      "txHash": "a5cb0366affa6e4bd45d41b1f6eec9f5a6b925d07da98af065b8786d47b5370a",
+      "by": "treasury",
+      "at": "2026-10-06T12:13:40.780Z"
     },
     "unfreeze": {
-      "txHash": "c6c13dc163d58f7872bed6efb0813959ee9e21323a6787909d5bb2d14747b75c",
-      "by": "buyer",
-      "at": "2026-10-01T09:43:18.964Z"
+      "txHash": "d96f602ad290cdb85cc3435d555adbc35419f6d150af397533a04a2a582e0e40",
+      "by": "treasury",
+      "at": "2026-10-06T12:14:31.242Z"
     },
     "drawNative": {
-      "txHash": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
-      "by": "buyer",
-      "at": "2026-10-01T09:44:02.205Z"
+      "txHash": "21514966fb1f80d33ee8037c6f74b33e9a3add9ff9ccf5d9744ebba9ed28eec9",
+      "by": "treasury",
+      "at": "2026-10-06T12:15:09.489Z"
     },
     "drawReceipts": {
-      "txHash": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
-      "by": "buyer",
-      "at": "2026-10-01T09:44:32.076Z"
+      "txHash": "fb9bab1e94b957010bf332c4ade622d16add47911e5e7ac4be96e0f2a70918ae",
+      "by": "treasury",
+      "at": "2026-10-06T12:15:38.031Z"
     },
     "submitA": {
-      "txHash": "3f3515dfbdfca2fcc3b95564f44b754e999d3c769e6fcf8c73f5502cea4a627a",
-      "by": "buyer",
-      "at": "2026-10-01T09:44:58.870Z"
+      "txHash": "ae62495eb1dde7be1ef1ff444efe1e25cd69638f2831984e5bf86496d36decfd",
+      "by": "treasury",
+      "at": "2026-10-06T12:16:18.857Z"
     },
     "acceptA": {
-      "txHash": "0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
-      "by": "buyer",
-      "at": "2026-10-01T09:46:11.470Z"
+      "txHash": "e3d8013ea393b1487aaebd72aa2204ddf26ff56bd39ffcb94014e03ce6a8eb47",
+      "by": "treasury",
+      "at": "2026-10-06T12:16:42.860Z"
     },
     "settleA": {
-      "txHash": "f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc",
-      "by": "buyer",
+      "txHash": "da37ee899e391eb1d515bc187f04b7a6ae2c177d094c13ca4a51fe3ea95aae4f",
+      "by": "treasury",
       "note": "Scout's fee paid to its payee; unused budget folded back into the root.",
-      "at": "2026-10-01T09:46:45.869Z"
+      "at": "2026-10-06T12:17:21.636Z"
     },
     "submitB": {
-      "txHash": "7f8b365f656097b1a67a7f9e7ff98a4ecab3b75ac5d4f520aa87150566767817",
-      "by": "buyer",
-      "at": "2026-10-01T09:47:18.651Z"
+      "txHash": "760fdb8d2a4b6676753434c0e662db8cd5018a68c101e16e04866a0f6d3b4c3c",
+      "by": "treasury",
+      "at": "2026-10-06T12:17:56.538Z"
     },
     "challengeB": {
-      "txHash": "0accdf81c601e9c8608436f2c960dd4f16cf2c5ce0a4b95a5b1cf25c4a4f2232",
-      "by": "conductor",
-      "at": "2026-10-01T09:47:46.467Z"
+      "txHash": "d784c83542101a7ce7947fd82ff5389f65822dce11abdf918e8b03dda53bc480",
+      "by": "treasury",
+      "at": "2026-10-06T12:18:23.669Z"
     },
     "escalateB": {
-      "txHash": "2cb65930d439c835813f6674c92de59ab5990d2b46efb8d8c2cefe2eea8b6d8d",
-      "by": "buyer",
-      "at": "2026-10-01T09:48:34.905Z"
+      "txHash": "3a45f8f2af4c0ca6a4e1adfec716a487a403f24ae1374bda8023807dbd1746bb",
+      "by": "treasury",
+      "at": "2026-10-06T12:20:04.513Z"
     },
     "resolveB": {
-      "txHash": "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
-      "by": "buyer",
-      "at": "2026-10-01T09:50:28.799Z"
+      "txHash": "baf314d8b9d6f363ca021bef105fab3d2008cf0febb4837fc001c02adbc742f2",
+      "by": "treasury",
+      "at": "2026-10-06T12:22:00.061Z"
     },
     "closeMetered": {
-      "txHash": "5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489",
-      "by": "buyer",
-      "at": "2026-10-01T09:54:24.409Z"
+      "txHash": "1db9f31149273c8096ef33708e50deadd3a5757bde58fe3916ad5685deebec48",
+      "by": "treasury",
+      "at": "2026-10-06T12:22:40.995Z"
     },
     "refundC": {
-      "txHash": "426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285",
-      "by": "preprod watchtower service (cranked before this script)",
+      "txHash": "fb8280c71a523c5d423af87edc355f191feea126ba1e1722d514e66a279d6472",
+      "by": "treasury",
       "note": "Flaky Lisan (test agent that fails on purpose) missed submit_by; its 2 ADA budget and structural ADA returned into the root in one transaction.",
-      "at": "2026-10-01T09:54:25.054Z"
+      "at": "2026-10-06T12:23:43.539Z"
     },
     "masumiRefund": {
-      "txHash": "cdd3cf934223c590c6abb0b9e9e88b964fd84f978949d700f9c0ef24225d216c",
-      "by": "buyer",
-      "at": "2026-10-01T09:55:07.135Z"
+      "txHash": "a789a7acd6338b3d8e95b10a3858c23baa63b19d6541b8430c8cee55be61da90",
+      "by": "treasury",
+      "at": "2026-10-06T12:24:12.610Z"
     },
     "closeMasumi": {
-      "txHash": "41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b",
-      "by": "buyer",
-      "at": "2026-10-01T09:55:42.668Z"
+      "txHash": "2f419757cafdfaa2e6da23968d2bc55dcc0c9428db2fe16c9098df744e270182",
+      "by": "treasury",
+      "at": "2026-10-06T12:24:36.398Z"
     },
     "submitRoot": {
-      "txHash": "5b4e08ca132cb7efc228baf41292ed88d28f16b8a6759673c70c808474edff65",
-      "by": "buyer",
-      "at": "2026-10-01T09:56:21.921Z"
+      "txHash": "7edb32759e285e2375e71cf8723339f5e632f7620e5027c3e75ea6392de79bbd",
+      "by": "treasury",
+      "at": "2026-10-06T12:25:16.890Z"
     },
     "acceptRoot": {
-      "txHash": "56ef4316ee1fa16914b1db0ee956cb5c29fd8fb8c864498422a6f9a82e251699",
-      "by": "buyer",
-      "at": "2026-10-01T09:56:50.758Z"
+      "txHash": "931fe08706418ace7330b1c9218b55a1f1897b2d3debdb9ce40e0b012be75636",
+      "by": "treasury",
+      "at": "2026-10-06T12:25:50.099Z"
     },
     "closeRoot": {
-      "txHash": "d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217",
-      "by": "buyer",
-      "at": "2026-10-01T09:57:11.960Z"
+      "txHash": "69720f3162300f9b04febd20723a5f3d51135504c3b5d62f404fcc1b9dbc9df0",
+      "by": "treasury",
+      "at": "2026-10-06T12:26:29.567Z"
     },
     "fundSpare": {
-      "txHash": "6a753c242111b47fd0aa4b024f6e30c0cb9c688aaa3a3edb3886e36cbde9ca50",
-      "by": "buyer",
-      "at": "2026-10-01T09:57:55.895Z"
+      "txHash": "dc30ff1417d4f72f69041aebdcdb051c3c028bed40687077e420820fc9d569db",
+      "by": "treasury",
+      "at": "2026-10-06T12:27:00.699Z"
     },
     "cancel": {
-      "txHash": "46c6dc88268cced653430f61ce1d5008953f9b016aedbbca28603292b22aa21b",
-      "by": "buyer",
-      "at": "2026-10-01T09:58:27.588Z"
+      "txHash": "232d2d8f8cf11e57d67f084bc5aa45d5403172c3d999f25bc57140272986d414",
+      "by": "treasury",
+      "at": "2026-10-06T12:27:30.117Z"
     },
     "channelFund": {
-      "txHash": "e47311fb792ad8adab218fc4ac0b9fd731eef7e2260e58915d7527eb43972b14",
-      "by": "buyer",
-      "at": "2026-10-01T10:52:04.674Z"
+      "txHash": "b27d2a13d1a94c75feeed27756e894e1430178f306bece7fe12af86eae0b8bf1",
+      "by": "treasury",
+      "at": "2026-10-06T12:29:02.260Z"
     },
     "channelDraw": {
-      "txHash": "ac32148124966d231b90e26668835759104aab367b88a442d0e52d7f7fb7d582",
-      "by": "buyer",
-      "at": "2026-10-01T10:52:42.540Z"
+      "txHash": "d5ef9768036ed2b9f70c2d28f75ba44256161a447d319fa12aa428f36f251907",
+      "by": "treasury",
+      "at": "2026-10-06T12:29:53.866Z"
     },
     "redeemChannel": {
-      "txHash": "8924aab51904951588a261c3b81b1c8d3a1be1734c0eb7454d4aaa83a4f6259a",
-      "by": "buyer",
-      "at": "2026-10-01T10:53:19.754Z"
+      "txHash": "2961fe2fbabcf4ab94ecb69d6991255ebfc2780780d09823f559eb269cce516c",
+      "by": "treasury",
+      "at": "2026-10-06T12:30:54.582Z"
     },
     "channelClose": {
-      "txHash": "62f5c2630a0279ac2f6eae4b89efbef1ee7b0a0e3965ec4a039c8eef439c9691",
-      "by": "buyer",
-      "at": "2026-10-01T10:54:05.702Z"
+      "txHash": "66149bc18aca6f53b3f63ed0adae093853ebff8f623962dd86b661e627bacb11",
+      "by": "treasury",
+      "at": "2026-10-06T12:31:35.470Z"
     },
     "channelCancel": {
-      "txHash": "2c030e66751b7214f2c43cbdd5c2eb2a7c3f513d9ccb8f7c9b8c2b6612cb3556",
-      "by": "buyer",
-      "at": "2026-10-01T10:54:50.318Z"
+      "txHash": "63d4cabbc7ba7fad412204e739dc499a22aed90ff0d23eda68bc634217ad3011",
+      "by": "treasury",
+      "at": "2026-10-06T12:33:03.331Z"
     }
   },
-  "skipped": {},
   "channel": {
-    "treeId": "fa6d28b31ab6d0a0c6c68eee143056dbc65572452568b06a31b0fd85",
-    "receipt": "692ef90e79db78f46bcf0be6d1cd62011eec52e670dc931fe809cad0"
+    "treeId": "5c3853de51dc8e173b922fea46e46192d1e7f6df6f06a8a70f146165",
+    "receipt": "60b73e68049c4f57f317f5db77cfb590f51fc84b476d9bf25020847d"
   }
 }
