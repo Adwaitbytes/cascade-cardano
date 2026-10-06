@@ -9,6 +9,7 @@ import type { CoworkerConfig, Registration } from "./config.js";
 import type { Journal } from "./journal.js";
 import type { MpsSeller } from "./mps.js";
 import { confirmedState, confirmedTxHash, masumiPaymentPayload, newPurchaserNonce, paymentWindows, SELLER_PAID_STATES, sha256Hex, termsRequest, type PaymentWindows, type SignedTerms } from "./payment.js";
+import { interpretTask, type IntakeResult } from "./intake.js";
 import { renderReport } from "./report.js";
 import { SokosumiError, type SokosumiClient } from "./sokosumi.js";
 
@@ -41,6 +42,8 @@ export interface TaskState {
   paid: boolean;
   stage: Stage;
   input: string;
+  /** The Task's name, read with the description to infer the deliverable. */
+  name?: string;
   updatedAt: number;
   log: { at: number; stage: Stage; note?: string }[];
   nonce?: string;
@@ -102,7 +105,7 @@ export class CoworkerWorker {
       for (const task of await this.d.sokosumi.listTasks(this.d.config.coworkerId, "READY")) {
         if (this.d.journal.load(task.id) !== null) continue;
         const input = (task.description ?? "").trim() === "" ? task.name : (task.description as string);
-        this.save({ taskId: task.id, paid: !this.d.unpaidTaskIds.has(task.id), stage: "starting", input, updatedAt: this.now(), log: [] }, "picked up");
+        this.save({ taskId: task.id, paid: !this.d.unpaidTaskIds.has(task.id), stage: "starting", input, name: task.name, updatedAt: this.now(), log: [] }, "picked up");
       }
     } catch (e) {
       this.log(`listing READY Tasks failed: ${message(e)}`);
@@ -122,6 +125,11 @@ export class CoworkerWorker {
     this.d.journal.save(next);
     this.log(`task ${state.taskId} ${state.stage}${note === undefined ? "" : `: ${note}`}`);
     return next;
+  }
+
+  private intake(s: TaskState): IntakeResult {
+    const description = s.name === undefined || s.input !== s.name ? s.input : null;
+    return interpretTask(s.name ?? "", description, { budgetCapLovelace: this.d.config.treeBudgetLovelace, treeWindowMs: this.d.config.treeWindowMs });
   }
 
   private fundingBusy(except: string): boolean {
@@ -148,8 +156,16 @@ export class CoworkerWorker {
         }
         return this.save({ ...s, stage: "started", error: undefined }, "RUNNING");
       }
-      case "started":
-        return s.paid ? this.save({ ...s, stage: "terms-pending" }) : this.save({ ...s, stage: "escrow-locked" }, "unpaid rehearsal: no Masumi payment");
+      case "started": {
+        // Refuse before any payment is requested: nothing is charged for a Task the team cannot do.
+        const intake = this.intake(s);
+        if (!intake.ok) {
+          await sokosumi.postEvent(s.taskId, { status: "FAILED", comment: `${intake.message} Nothing was charged.` });
+          return this.save({ ...s, stage: "failed", error: `intake refused: ${intake.reason}` }, `intake refused (${intake.reason})`);
+        }
+        const read = `understood as ${intake.notes.join("; ")}`;
+        return s.paid ? this.save({ ...s, stage: "terms-pending" }, read) : this.save({ ...s, stage: "escrow-locked" }, `${read}; unpaid rehearsal: no Masumi payment`);
+      }
       case "terms-pending": {
         // No purchase was posted yet, so fresh terms are always safe to request again.
         const nonce = newPurchaserNonce();
@@ -191,9 +207,16 @@ export class CoworkerWorker {
       case "escrow-locked": {
         const pending = this.save({ ...s, stage: "plan-pending" });
         const deadline = s.windows === undefined ? now + config.treeWindowMs : Math.min(now + config.treeWindowMs, s.windows.submitResult - 10 * MINUTE);
+        const intake = this.intake(s);
+        if (!intake.ok) {
+          await sokosumi.postEvent(s.taskId, { status: "FAILED", comment: `${intake.message} ${s.paid ? "The escrowed payment returns to the buyer through Masumi after the result deadline." : ""}`.trim() });
+          return this.save({ ...pending, stage: "failed", error: `intake refused: ${intake.reason}` }, `intake refused (${intake.reason})`);
+        }
+        // A light job starts on a smaller budget; after a failed draft it gets the configured cap.
+        const budgetLovelace = (s.planAttempts ?? 0) > 0 ? config.treeBudgetLovelace : intake.budgetLovelace;
         let planId: string;
         try {
-          planId = await cascade.draftPlan(s.input, config.treeBudgetLovelace, deadline);
+          planId = await cascade.draftPlan({ goal: intake.goal, budgetLovelace, deadline, maxDepth: intake.maxDepth, nativeOnly: intake.nativeOnly });
         } catch (e) {
           const attempts = (s.planAttempts ?? 0) + 1;
           // The signed result deadline cannot move: when no plan fits it, say so and let Masumi refund the buyer.
@@ -257,8 +280,10 @@ export class CoworkerWorker {
         const root = tree.nodes.find((n) => n.node_id === treeId);
         const acceptIndexed = s.acceptTx === null || s.acceptTx === undefined || root?.tx_ids.includes(s.acceptTx) === true;
         if (!acceptIndexed && attempts < 10) return this.save({ ...s, summarizeAttempts: attempts });
+        const intake = this.intake(s);
         const result = renderReport({
           goal: s.input.trim(),
+          ...(intake.ok ? { title: intake.title } : {}),
           treeId,
           outcome: s.outcome ?? null,
           tree,

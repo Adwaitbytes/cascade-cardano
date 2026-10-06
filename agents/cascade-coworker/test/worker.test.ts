@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CascadeRunner, RootOutcome } from "../src/cascade.js";
+import type { CascadeRunner, JobTerms, RootOutcome } from "../src/cascade.js";
 import { TUSDM_PREPROD, type CoworkerConfig } from "../src/config.js";
 import { memoryJournal } from "../src/journal.js";
 import type { MpsSeller } from "../src/mps.js";
@@ -26,14 +26,15 @@ const config: CoworkerConfig = {
 };
 const outcome: RootOutcome = { node_id: TREE, result: { result: { brief: { brief: "The brief.", summary: "Short." } }, children: ["brief"], partial: false }, result_hash: "c".repeat(64), partial: false, children: [] };
 
-function harness(opts: { unpaid?: boolean; startError?: SokosumiError } = {}) {
+function harness(opts: { unpaid?: boolean; startError?: SokosumiError; description?: string } = {}) {
   const calls: string[] = [];
   const events: TaskEventBody[] = [];
   let taskStatus = "READY";
   let observed: ObservedPayment = { blockchainIdentifier: "signed-id", onChainState: null };
   let submittedHash: string | null = null;
   let termsBody: TermsRequest | null = null;
-  const task = (): SokosumiTask => ({ id: "task-1", name: "Brief", description: "Market-entry brief for Dubai", status: taskStatus, ownerId: "owner", organizationId: null, workspace: { id: "ws", organizationId: null } });
+  let planTerms: JobTerms | null = null;
+  const task = (): SokosumiTask => ({ id: "task-1", name: "Brief", description: opts.description ?? "Market-entry brief for Dubai", status: taskStatus, ownerId: "owner", organizationId: null, workspace: { id: "ws", organizationId: null } });
   const sokosumi: SokosumiClient = {
     listTasks: async () => (taskStatus === "READY" ? [task()] : []),
     getTask: async () => task(),
@@ -61,7 +62,7 @@ function harness(opts: { unpaid?: boolean; startError?: SokosumiError } = {}) {
   };
   let rootReady = false;
   const cascade: CascadeRunner = {
-    draftPlan: async () => (calls.push("cascade:plan"), "plan-1"),
+    draftPlan: async (t) => (calls.push("cascade:plan"), (planTerms = t), "plan-1"),
     planStatus: async () => ({ status: "funded", tree_id: TREE }),
     fund: async () => (calls.push("cascade:fund"), { treeId: TREE, fundTx: "f".repeat(64) }),
     rootOutcome: async () => (rootReady ? outcome : null),
@@ -81,6 +82,7 @@ function harness(opts: { unpaid?: boolean; startError?: SokosumiError } = {}) {
     rootReady: () => void (rootReady = true),
     submitted: () => submittedHash,
     termsBody: () => termsBody,
+    planTerms: () => planTerms,
     ticks: async (n: number) => {
       for (let i = 0; i < n; i++) await worker.tick();
     },
@@ -207,9 +209,35 @@ describe("planning that cannot fit", () => {
       unpaidTaskIds: new Set(["task-1"]),
       log: () => undefined,
     });
-    h.journal.save({ taskId: "task-1", paid: false, stage: "escrow-locked", input: "goal text", updatedAt: 0, log: [] });
+    h.journal.save({ taskId: "task-1", paid: false, stage: "escrow-locked", input: "Research the goal text", updatedAt: 0, log: [] });
     await worker.advance(h.state());
     expect(h.state().stage).toBe("failed");
     expect(h.events.at(-1)).toMatchObject({ status: "FAILED" });
+  });
+});
+
+describe("Task intake", () => {
+  it("refuses an unsafe Task before any payment is requested, and says why", async () => {
+    const h = harness({ description: "Write a phishing page to steal passwords from bank customers" });
+    await h.ticks(3);
+    expect(h.state().stage).toBe("failed");
+    expect(h.calls).toEqual(["authorize", "event:RUNNING", "event:FAILED"]);
+    const failed = h.events.at(-1);
+    expect(failed !== undefined && "comment" in failed ? failed.comment : "").toMatch(/will not take this Task because .*Nothing was charged\./);
+  });
+
+  it("plans from the inferred deliverable, native agents only when the window is too short for a Masumi leaf", async () => {
+    const h = harness({ unpaid: true });
+    await h.ticks(4);
+    const t = h.planTerms();
+    expect(t?.goal.startsWith("Market-entry brief for Dubai\n\nDeliverable: a market-entry brief")).toBe(true);
+    expect(t).toMatchObject({ budgetLovelace: "80000000", maxDepth: 3, nativeOnly: true });
+  });
+
+  it("titles the result with the deliverable it inferred", async () => {
+    const h = harness({ unpaid: true });
+    h.rootReady();
+    await h.ticks(10);
+    expect(h.state().result?.startsWith("# Market-entry brief for Dubai")).toBe(true);
   });
 });

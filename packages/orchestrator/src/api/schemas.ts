@@ -24,6 +24,8 @@ export const CreateJobRequestSchema = z.object({
   acceptance: z.enum(ACCEPTANCE_PREFERENCES),
   allow_agents: z.array(z.string().min(1)).max(50),
   block_agents: z.array(z.string().min(1)).max(50),
+  /** Plan native Cascade agents only: Masumi slots become native and Masumi contingencies are dropped (their 35-minute windows set the pace of a tree). Not part of the web contract. */
+  native_only: z.boolean().optional(),
   /** Labelled acceptance-test scenario (A1, A3, A5, A7, A8, A9); replaces the planner with a fixed draft. Not part of the web contract. */
   test_scenario: z.enum(TEST_SCENARIOS).optional(),
 });

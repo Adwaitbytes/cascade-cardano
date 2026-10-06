@@ -1,6 +1,7 @@
 export * from "./api.js";
 export * from "./cascade.js";
 export * from "./config.js";
+export * from "./intake.js";
 export * from "./journal.js";
 export * from "./mps.js";
 export * from "./payment.js";

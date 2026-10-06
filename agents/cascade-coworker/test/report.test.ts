@@ -61,19 +61,22 @@ describe("renderReport", () => {
   it("leads with the deliverable: brief, summary, competitors and a price table", () => {
     expect(text.startsWith("# Market-entry brief for cold-pressed juice in Dubai")).toBe(true);
     expect(text).toContain("Dubai is a growing market.");
-    expect(text).toContain("**Summary.** Enter through gyms.");
-    expect(text).toContain("- Pressed / Co: premium");
-    expect(text).toContain("| brand | product | size_ml | price_aed |");
+    expect(text).toContain("## Executive summary\n\nEnter through gyms.");
+    expect(text.indexOf("## Executive summary")).toBeLessThan(text.indexOf("## Brief"));
+    expect(text).toContain("### Brief\nDubai is a growing market.");
+    expect(text).toContain("| Pressed / Co | premium |");
+    expect(text).toContain("| Brand | Product | Size (ml) | Price (AED) |");
     expect(text).toContain("| Pressed | Green | 300 | 28 |");
   });
   it("lists each hired agent with what it was paid, root first, and the links", () => {
-    expect(text).toContain("| Cascade Conductor | 0 | 80 ADA | 8 ADA | Accepted |");
-    expect(text).toContain("| Cascade Scribe | 1 | 20 ADA | 5 ADA | Settled |");
+    expect(text).toContain(`| Cascade Conductor | Planned the job, hired and paid the team | 8 ADA |  | [Accepted](https://preprod.cardanoscan.io/transaction/${"e".repeat(64)}) |`);
+    expect(text).toContain("| Cascade Scribe | Wrote the brief and executive summary | 5 ADA |  | [Settled]");
     expect(text.indexOf("Cascade Conductor |")).toBeLessThan(text.indexOf("Cascade Scribe |"));
     expect(text).toContain(`https://cascade-alpha-amber.vercel.app/tree/${tree}`);
     expect(text).toContain(`https://cascade-alpha-amber.vercel.app/receipt/${tree}`);
     expect(text).toContain(`https://preprod.cardanoscan.io/transaction/${"f".repeat(64)}`);
-    expect(text).toContain("80 ADA locked, 13 ADA paid to agents, 0 ADA refunded");
+    expect(text).toContain("80 ADA locked · 13 ADA paid to agents · 0 ADA refunded · ledger balanced");
+    expect(text.indexOf("## How this was made")).toBeGreaterThan(text.indexOf("## Price table"));
     expect(text).toContain(`https://preprod.cardanoscan.io/transaction/${"9".repeat(64)}`);
   });
   it("says plainly when the tree delivered nothing", () => {

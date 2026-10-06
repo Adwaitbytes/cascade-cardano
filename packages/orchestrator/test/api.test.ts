@@ -98,6 +98,23 @@ describe("orchestrator API (web contract)", () => {
     expect(validatePlanFull(envelope.plan)).toEqual([]);
   });
 
+  it("native_only plans no Masumi slot, so a short window is not paced by Masumi's 35-minute minimum", async () => {
+    const masumiSlots = async (over: Record<string, unknown>) => {
+      const { call } = make(builder);
+      const { plan_id } = (await (await call("POST", "/v1/jobs", job(over))).json()) as { plan_id: string };
+      const envelope = web.PlanEnvelopeSchema.parse(await (await call("GET", `/v1/plans/${plan_id}`)).json());
+      const found: string[] = [];
+      const walk = (n: typeof envelope.plan.root): void => {
+        if ((n.spec as { masumi_followup?: unknown }).masumi_followup !== undefined) found.push(n.spec.id);
+        n.children.forEach(walk);
+      };
+      walk(envelope.plan.root);
+      return found;
+    };
+    expect(await masumiSlots({})).not.toEqual([]);
+    expect(await masumiSlots({ native_only: true })).toEqual([]);
+  });
+
   it("a plan drafted without a test scenario carries no scenario label", async () => {
     const { call } = make(builder, () => NOW, { lookupApi: "ab".repeat(28) });
     const { plan_id } = (await (await call("POST", "/v1/jobs", job())).json()) as { plan_id: string };

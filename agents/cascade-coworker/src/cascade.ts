@@ -18,6 +18,7 @@ export const ChildOutcomeSchema = z.object({
   hire: z
     .object({
       agent_id: z.string(),
+      node_id: z.string().optional(),
       job_id: z.string().nullable().optional(),
       draw_tx_id: z.string().optional(),
       masumi: z.object({ lock_tx: z.string(), blockchain_identifier: z.string() }).partial().optional(),
@@ -74,8 +75,18 @@ export interface CascadeRunnerDeps {
   fetchImpl?: typeof fetch;
 }
 
+/** What the Coworker asks the Conductor for, from `interpretTask`. */
+export interface JobTerms {
+  goal: string;
+  budgetLovelace: string;
+  deadline: number;
+  maxDepth: number;
+  /** Plan native Cascade agents only (no Masumi leaf, whose windows need about 165 minutes). */
+  nativeOnly: boolean;
+}
+
 export interface CascadeRunner {
-  draftPlan(goal: string, budgetLovelace: string, deadline: number): Promise<string>;
+  draftPlan(terms: JobTerms): Promise<string>;
   planStatus(planId: string): Promise<z.infer<typeof PlanEnvelopeSchema>>;
   /** Builds, signs and submits the FundRoot; returns the tree id and tx hash. */
   fund(planId: string): Promise<{ treeId: string; fundTx: string }>;
@@ -109,14 +120,15 @@ export function cascadeRunner(deps: CascadeRunnerDeps): CascadeRunner {
   }
 
   return {
-    async draftPlan(goal, budgetLovelace, deadline) {
+    async draftPlan(terms) {
       const res = z.object({ plan_id: z.string().min(1) }).parse(
         await post("/v1/jobs", {
-          goal,
+          goal: terms.goal,
           asset: "lovelace",
-          budget: budgetLovelace,
-          deadline,
-          max_depth: 3,
+          budget: terms.budgetLovelace,
+          deadline: terms.deadline,
+          max_depth: terms.maxDepth,
+          ...(terms.nativeOnly ? { native_only: true } : {}),
           min_reputation: 0,
           risk: "balanced",
           acceptance: "buyer_review",

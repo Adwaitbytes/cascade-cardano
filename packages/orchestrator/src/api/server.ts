@@ -15,7 +15,7 @@ import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import type { z } from "zod";
 import { PlanningError, planJob } from "../planner.js";
-import { buildPlan } from "../build-plan.js";
+import { buildPlan, DEFAULT_POLICY } from "../build-plan.js";
 import { labelledIntake, scenarioDraft, type ScenarioKeys } from "../test-scenarios.js";
 import type { AgentSource, JobIntake, PlanPolicy, VerifierKeyOf } from "../build-plan.js";
 import type { LlmClient } from "../llm.js";
@@ -140,7 +140,8 @@ export function orchestratorApi(deps: OrchestratorApiDeps): Hono {
       return c.json({ plan_id: res.built.plan.plan_id });
     }
     try {
-      const planned = await planJob(intake, { llm: deps.llm, agents: deps.agents, ...(deps.policy === undefined ? {} : { policy: deps.policy }), ...(deps.verifierKeyOf === undefined ? {} : { verifierKeyOf: deps.verifierKeyOf }), ...planKeys });
+      const policy = req.native_only === true ? { ...(deps.policy ?? DEFAULT_POLICY), masumi_rail: false } : deps.policy;
+      const planned = await planJob(intake, { llm: deps.llm, agents: deps.agents, ...(policy === undefined ? {} : { policy }), ...(deps.verifierKeyOf === undefined ? {} : { verifierKeyOf: deps.verifierKeyOf }), ...planKeys });
       await store.put({
         built: planned.built,
         request: req,
