@@ -90,3 +90,13 @@ To try it: `sokosumi --preprod tasks create --personal --coworker-id 01a110cd-4e
 - Sokosumi CLI 1.0.4 has no flags for the profile's price or estimated duration; both are stated in the description.
 - A Cascade tree with Masumi leaves needs about 2 h 45 min of window, so the signed result deadline is
   about 3 h 35 min after the Task starts and the seller collects about 4 h after the start.
+
+### Paid Task 1 (2026-10-06): payment flow proven end to end
+
+- Task: `01a110e2-b1ca-752c-bc65-123cd12ae594` on Sokosumi preprod, Coworker `01a110cd-4ee0-763b-ae63-4008564c9f8e`
+- Masumi escrow lock (Sokosumi pays with the buyer's credits): https://preprod.cardanoscan.io/transaction/caafb951464f87f3f2f2f972875657f6723c870e81a7152bd8ca61116472c589
+- Result hash on chain (SubmitResult): https://preprod.cardanoscan.io/transaction/a9cefb55e6a6b035ef6cbee15332691b09741204d2e86cc1beec7e85aa578d1c
+- Seller collection, state Withdrawn: https://preprod.cardanoscan.io/transaction/0e584a87be1ce0315a42a39a7c1c18b100f7c75074ede6825f8c351bb3dc93c4
+- Cascade tree funding: https://preprod.cardanoscan.io/transaction/ffe6216e97f7fd70027a545ad4e0d0e2af17a351edd9b03e19c22ab4cf7d71ed
+
+Honest notes: this Task ran before the hackathon redeploy, so its Cascade tree used the earlier script hashes, and the delivered result was partial because the child agents went offline mid-run. It proves the Sokosumi to Masumi escrow to seller payout path. Paid Task 2 below runs on today's deployment with a full result.
