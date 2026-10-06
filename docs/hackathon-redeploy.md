@@ -43,6 +43,8 @@ pnpm -C scripts exec tsx deploy-scripts.ts --network preprod \
 
 The script publishes seven reference-script UTxOs at the treasury's always-fail holder, registers the three logic stake credentials and rewrites `deployments/preprod.json`, keeping the Oct 1 block under `superseded`. Record the printed Cardanoscan links. Then set `urls.explorer_demo_tree` and `urls.receipt` to `null` in `preprod.json` (they point at old trees) and commit `deployments/preprod.json`.
 
+Done 2026-10-06 from this copy: first tx `efa55635…` at slot 135603932, block 5260469 (11:45:32 UTC); last stake registration `5513ef99…` at slot 135604358, block 5260489. Treasury before deploy: 6,545 ADA. Use `INDEXER_START_HEIGHT=5260469`.
+
 ## 3. Stop the old stack (old folder, lead's go-ahead only)
 
 ```sh

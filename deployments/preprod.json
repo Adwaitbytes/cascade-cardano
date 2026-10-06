@@ -24,142 +24,142 @@
     "fallback": "koios public tier"
   },
   "aikenVersion": "v1.1.24+bacbeb3",
-  "blueprintSha256": "3439017459348ca71ef160ee0d4c2963e691e4ed8987eef487ab94371d895129",
+  "blueprintSha256": "0452fa1f0fbbbfd61f74d3c394a025429fe735187db19b30c2ae33fb167dbb51",
   "scripts": {
     "cascade_config": {
-      "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c",
-      "sizeBytes": 632,
+      "hash": "71c7b6bab9332b7684b8995fb66d7021d508626d364fb2824abbc445",
+      "sizeBytes": 671,
       "parameters": [],
-      "address": "addr_test1wz34dvr4vnefvfpht6ckztx88ply2n4mphcmac43axxd5nqgm0ljq",
+      "address": "addr_test1wpcu0d46hyejka5yhzv4ldndwqsa2zrzd5mylv5zf2aug3g6zukvs",
       "referenceUtxo": {
-        "txHash": "8cd481125ce8740290408d3fb8850d4e011ad1bae74accd86e43361cf363aa6b",
+        "txHash": "efa556352641877b4f3762acb3393635c0914c3d71569748d99c17f870643666",
         "outputIndex": 0
       }
     },
     "cascade_bond": {
-      "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f",
-      "sizeBytes": 722,
+      "hash": "c658bb48805bf32d2c6bb1dca7b13fbb3567a67a150d9fba6664245f",
+      "sizeBytes": 761,
       "parameters": [],
-      "address": "addr_test1wrjejpj0gqzxc68rvvyqq5clq3qsq02yzpx5df8t5r070rc2ddy4u",
+      "address": "addr_test1wrr93w6gspdlxtfvdwcaefa387an2eax0g2sm8a6vejzghcmuewwv",
       "referenceUtxo": {
-        "txHash": "905d503dfb1b8199ebd1b728a2480c3ba05fa1c8091514bd65f277b72a2d2e6d",
+        "txHash": "2c03dd8639715251576dad6b854abf7e27f3beb24765a172ca613c7b845afc62",
         "outputIndex": 0
       }
     },
     "cascade_channel": {
-      "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21",
-      "sizeBytes": 1844,
+      "hash": "b6e93a267107e300194fbc6d836914aa10239eee2f32a9ea427cd071",
+      "sizeBytes": 1883,
       "parameters": [],
-      "address": "addr_test1wz8h5wvw36dv5mvsxmyxqfsc8e9cyswmca9j6p2vl2kfuggu0zkjp",
+      "address": "addr_test1wzmwjw3xwyr7xqqef77xmqmfzj4pqgu7achn9202gf7dqugd4rksj",
       "referenceUtxo": {
-        "txHash": "06c8edcb9e299c9609c101c5f2e3c77cdde6874711d8aa3655cd1ff677839103",
+        "txHash": "d479322a5f7756b0eb8036f2b1c84353905344d62bb0626460dfef7f0c701555",
         "outputIndex": 0
       }
     },
     "cascade_logic_core": {
-      "hash": "951661b03c0c6b23b83f20fb01e089d60379240d92e4a102e3cd1c4b",
+      "hash": "98ac3c2a0ace0f95750bcc9a9a912ed23e0407a483397a6d056ac9f8",
       "sizeBytes": 14980,
       "parameters": [
         {
           "name": "cascade_config",
-          "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+          "hash": "71c7b6bab9332b7684b8995fb66d7021d508626d364fb2824abbc445"
         },
         {
           "name": "cascade_bond",
-          "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+          "hash": "c658bb48805bf32d2c6bb1dca7b13fbb3567a67a150d9fba6664245f"
         },
         {
           "name": "cascade_channel",
-          "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+          "hash": "b6e93a267107e300194fbc6d836914aa10239eee2f32a9ea427cd071"
         }
       ],
-      "address": "addr_test1wz23vcds8sxxkgac8us0kq0q38tqx7fypkfwfggzu0x3cjclx2nt9",
+      "address": "addr_test1wzv2c0p2pt8ql9t4p0xf4x539mfrupq85jpnj7ndq44vn7qw6rly3",
       "referenceUtxo": {
-        "txHash": "aae3e2d4e0971aff352f86b55a2b96f1baa0c206f98e19c119c285ac4b83fb3f",
+        "txHash": "57d93b791abe8e8906abeaf7f649008aa0f717210da8a0e645b2d65f3aa8b954",
         "outputIndex": 0
       },
-      "rewardAddress": "stake_test17z23vcds8sxxkgac8us0kq0q38tqx7fypkfwfggzu0x3cjclw5tu0"
+      "rewardAddress": "stake_test17zv2c0p2pt8ql9t4p0xf4x539mfrupq85jpnj7ndq44vn7qwja8nm"
     },
     "cascade_logic_draw": {
-      "hash": "a221e855ee4064bbb7c953e02e1233d920bb3a970e2877d0e0c87fcf",
+      "hash": "66dcfce908741d5bdfea7aad54ad8779785983be4c0838544aeb09e1",
       "sizeBytes": 12503,
       "parameters": [
         {
           "name": "cascade_config",
-          "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+          "hash": "71c7b6bab9332b7684b8995fb66d7021d508626d364fb2824abbc445"
         },
         {
           "name": "cascade_bond",
-          "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+          "hash": "c658bb48805bf32d2c6bb1dca7b13fbb3567a67a150d9fba6664245f"
         },
         {
           "name": "cascade_channel",
-          "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+          "hash": "b6e93a267107e300194fbc6d836914aa10239eee2f32a9ea427cd071"
         }
       ],
-      "address": "addr_test1wz3zr6z4aeqxfwahe9f7qtsjx0vjpwe6ju8zsa7sury8lnce7vcl5",
+      "address": "addr_test1wpndel8fpp6p6k7lafa2649dsauhskvrhexqswz5ft4sncg0wxqfw",
       "referenceUtxo": {
-        "txHash": "0ddd0b544745d2b60fb4b4d35cf66311d309fbfb2088f973fa4a9f11fc50fec1",
+        "txHash": "0e1383bd049e7038440d3ca3c475f261fb5af253606116fc0e0a70524f9ca66a",
         "outputIndex": 0
       },
-      "rewardAddress": "stake_test17z3zr6z4aeqxfwahe9f7qtsjx0vjpwe6ju8zsa7sury8lncekjqg7"
+      "rewardAddress": "stake_test17pndel8fpp6p6k7lafa2649dsauhskvrhexqswz5ft4sncg0xcc7y"
     },
     "cascade_logic_ext": {
-      "hash": "6977b056b4fc9e83f3b5da852b944f424c42394c6ef32749ec9952d8",
+      "hash": "aaf22cdcc8c27a42328ec16c09a77bdebf8dcf27c7f49eb4d22b27d9",
       "sizeBytes": 11221,
       "parameters": [
         {
           "name": "cascade_config",
-          "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+          "hash": "71c7b6bab9332b7684b8995fb66d7021d508626d364fb2824abbc445"
         },
         {
           "name": "cascade_bond",
-          "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+          "hash": "c658bb48805bf32d2c6bb1dca7b13fbb3567a67a150d9fba6664245f"
         },
         {
           "name": "cascade_channel",
-          "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+          "hash": "b6e93a267107e300194fbc6d836914aa10239eee2f32a9ea427cd071"
         }
       ],
-      "address": "addr_test1wp5h0vzkkn7faqlnkhdg22u5fapycs3ef3h0xf6fajv49kq65pekc",
+      "address": "addr_test1wz40ytxuerp85s3j3mqkczd8000tlrw0ylrlf8456g4j0kg24jlzg",
       "referenceUtxo": {
-        "txHash": "d672494e69c821f8f8271950f7e98324de36dfcdd70433c56c7d98d3558ed585",
+        "txHash": "d329ed6230743de4a2bae2a466ed09e22302926a72acabfdb93f4bece71b0aaa",
         "outputIndex": 0
       },
-      "rewardAddress": "stake_test17p5h0vzkkn7faqlnkhdg22u5fapycs3ef3h0xf6fajv49kq6ulppj"
+      "rewardAddress": "stake_test17z40ytxuerp85s3j3mqkczd8000tlrw0ylrlf8456g4j0kg2av84z"
     },
     "cascade_node": {
-      "hash": "5f58ba03d373f7510827aa4cb5c39615d0e65ea3630169afaa48abee",
+      "hash": "1eea6bd1b08cf9a466eed7ca7a8d9ab53aa8ed1526ed3281b785ba07",
       "sizeBytes": 1013,
       "parameters": [
         {
           "name": "cascade_config",
-          "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+          "hash": "71c7b6bab9332b7684b8995fb66d7021d508626d364fb2824abbc445"
         },
         {
           "name": "cascade_bond",
-          "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+          "hash": "c658bb48805bf32d2c6bb1dca7b13fbb3567a67a150d9fba6664245f"
         },
         {
           "name": "cascade_channel",
-          "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+          "hash": "b6e93a267107e300194fbc6d836914aa10239eee2f32a9ea427cd071"
         },
         {
           "name": "cascade_logic_core",
-          "hash": "951661b03c0c6b23b83f20fb01e089d60379240d92e4a102e3cd1c4b"
+          "hash": "98ac3c2a0ace0f95750bcc9a9a912ed23e0407a483397a6d056ac9f8"
         },
         {
           "name": "cascade_logic_draw",
-          "hash": "a221e855ee4064bbb7c953e02e1233d920bb3a970e2877d0e0c87fcf"
+          "hash": "66dcfce908741d5bdfea7aad54ad8779785983be4c0838544aeb09e1"
         },
         {
           "name": "cascade_logic_ext",
-          "hash": "6977b056b4fc9e83f3b5da852b944f424c42394c6ef32749ec9952d8"
+          "hash": "aaf22cdcc8c27a42328ec16c09a77bdebf8dcf27c7f49eb4d22b27d9"
         }
       ],
-      "address": "addr_test1wp043wsr6delw5ggy74yedwrjc2apej75d3sz6d04fy2hmsn83k43",
+      "address": "addr_test1wq0w5673kzx0nfrxamtu575dn26n428dz5nw6v5pk7zm5pc8zyv5w",
       "referenceUtxo": {
-        "txHash": "70ced1a398b4189f2151af01ced025d7735942be35d6cada4d5060048b2bdf39",
+        "txHash": "febaa2fec5500e154998978058203725e9c49c8d3ccec0e3aeb535cb5f0d9aba",
         "outputIndex": 0
       }
     }
@@ -169,21 +169,21 @@
     "nativeScript": "8201828200581c300e94b6ed899d51bf4d749e70192dbe991aa58d35ffc42b01621835820280",
     "note": "Native script all [sig treasury, any []]; any [] is false, so reference scripts here can never be spent."
   },
-  "deployedAt": "2026-10-01T01:11:26.056Z",
+  "deployedAt": "2026-10-06T11:52:47.805Z",
   "stakeRegistrations": {
     "cascade_logic_core": {
-      "rewardAddress": "stake_test17z23vcds8sxxkgac8us0kq0q38tqx7fypkfwfggzu0x3cjclw5tu0",
-      "txHash": "686f74c302674d6c80b5063f1e64b3ff424ecaf9056fb4c872df0e70b6e61ba3",
+      "rewardAddress": "stake_test17zv2c0p2pt8ql9t4p0xf4x539mfrupq85jpnj7ndq44vn7qwja8nm",
+      "txHash": "eb10fdec1b8766b1106a2c9542941d97f43b03dacb7f0795c77ec24f5c6f4072",
       "status": "registered"
     },
     "cascade_logic_draw": {
-      "rewardAddress": "stake_test17z3zr6z4aeqxfwahe9f7qtsjx0vjpwe6ju8zsa7sury8lncekjqg7",
-      "txHash": "10c93770e81816414b67b43d1f41838a39736ede5aafd5ff3e170143d1d71fa4",
+      "rewardAddress": "stake_test17pndel8fpp6p6k7lafa2649dsauhskvrhexqswz5ft4sncg0xcc7y",
+      "txHash": "30c77138f3c795dbd4218ab030ed57d462f14c38152fd70aec2c279054814fd1",
       "status": "registered"
     },
     "cascade_logic_ext": {
-      "rewardAddress": "stake_test17p5h0vzkkn7faqlnkhdg22u5fapycs3ef3h0xf6fajv49kq6ulppj",
-      "txHash": "490cfa1a220877aec8a05d461abd465ba008408c7da87f4c64ef9ac9d07371f2",
+      "rewardAddress": "stake_test17z40ytxuerp85s3j3mqkczd8000tlrw0ylrlf8456g4j0kg2av84z",
+      "txHash": "5513ef9920d9dd7d2dd4cc2f5753e5d9154f1b8a7843aeb4f890429149e64b6a",
       "status": "registered"
     }
   },
@@ -536,6 +536,174 @@
         "cascade_logic_ext": {
           "rewardAddress": "stake_test17qhqj724arplc3rg6xefmjydr8xq86z0lvn5j2hqcrze9agyrkqmq",
           "txHash": "810f4d36a850890247e28f7e1768a4977625de8e22408d039e911804bedbb93a",
+          "status": "registered"
+        }
+      }
+    },
+    {
+      "status": "do not use: hackathon redeploy: deployment tag cascade/token2049/2026-10-06",
+      "supersededAt": "2026-10-06T11:52:47.805Z",
+      "aikenVersion": "v1.1.24+bacbeb3",
+      "blueprintSha256": "3439017459348ca71ef160ee0d4c2963e691e4ed8987eef487ab94371d895129",
+      "deployedAt": "2026-10-01T01:11:26.056Z",
+      "referenceScriptHolder": {
+        "address": "addr_test1wq02sn2xfw4hmcnse2ewfu0mflnntpg59nlhq2t9c9ex3qc0d0yqs",
+        "nativeScript": "8201828200581c300e94b6ed899d51bf4d749e70192dbe991aa58d35ffc42b01621835820280",
+        "note": "Native script all [sig treasury, any []]; any [] is false, so reference scripts here can never be spent."
+      },
+      "scripts": {
+        "cascade_config": {
+          "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c",
+          "sizeBytes": 632,
+          "parameters": [],
+          "address": "addr_test1wz34dvr4vnefvfpht6ckztx88ply2n4mphcmac43axxd5nqgm0ljq",
+          "referenceUtxo": {
+            "txHash": "8cd481125ce8740290408d3fb8850d4e011ad1bae74accd86e43361cf363aa6b",
+            "outputIndex": 0
+          }
+        },
+        "cascade_bond": {
+          "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f",
+          "sizeBytes": 722,
+          "parameters": [],
+          "address": "addr_test1wrjejpj0gqzxc68rvvyqq5clq3qsq02yzpx5df8t5r070rc2ddy4u",
+          "referenceUtxo": {
+            "txHash": "905d503dfb1b8199ebd1b728a2480c3ba05fa1c8091514bd65f277b72a2d2e6d",
+            "outputIndex": 0
+          }
+        },
+        "cascade_channel": {
+          "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21",
+          "sizeBytes": 1844,
+          "parameters": [],
+          "address": "addr_test1wz8h5wvw36dv5mvsxmyxqfsc8e9cyswmca9j6p2vl2kfuggu0zkjp",
+          "referenceUtxo": {
+            "txHash": "06c8edcb9e299c9609c101c5f2e3c77cdde6874711d8aa3655cd1ff677839103",
+            "outputIndex": 0
+          }
+        },
+        "cascade_logic_core": {
+          "hash": "951661b03c0c6b23b83f20fb01e089d60379240d92e4a102e3cd1c4b",
+          "sizeBytes": 14980,
+          "parameters": [
+            {
+              "name": "cascade_config",
+              "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+            },
+            {
+              "name": "cascade_bond",
+              "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+            },
+            {
+              "name": "cascade_channel",
+              "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+            }
+          ],
+          "address": "addr_test1wz23vcds8sxxkgac8us0kq0q38tqx7fypkfwfggzu0x3cjclx2nt9",
+          "referenceUtxo": {
+            "txHash": "aae3e2d4e0971aff352f86b55a2b96f1baa0c206f98e19c119c285ac4b83fb3f",
+            "outputIndex": 0
+          },
+          "rewardAddress": "stake_test17z23vcds8sxxkgac8us0kq0q38tqx7fypkfwfggzu0x3cjclw5tu0"
+        },
+        "cascade_logic_draw": {
+          "hash": "a221e855ee4064bbb7c953e02e1233d920bb3a970e2877d0e0c87fcf",
+          "sizeBytes": 12503,
+          "parameters": [
+            {
+              "name": "cascade_config",
+              "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+            },
+            {
+              "name": "cascade_bond",
+              "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+            },
+            {
+              "name": "cascade_channel",
+              "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+            }
+          ],
+          "address": "addr_test1wz3zr6z4aeqxfwahe9f7qtsjx0vjpwe6ju8zsa7sury8lnce7vcl5",
+          "referenceUtxo": {
+            "txHash": "0ddd0b544745d2b60fb4b4d35cf66311d309fbfb2088f973fa4a9f11fc50fec1",
+            "outputIndex": 0
+          },
+          "rewardAddress": "stake_test17z3zr6z4aeqxfwahe9f7qtsjx0vjpwe6ju8zsa7sury8lncekjqg7"
+        },
+        "cascade_logic_ext": {
+          "hash": "6977b056b4fc9e83f3b5da852b944f424c42394c6ef32749ec9952d8",
+          "sizeBytes": 11221,
+          "parameters": [
+            {
+              "name": "cascade_config",
+              "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+            },
+            {
+              "name": "cascade_bond",
+              "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+            },
+            {
+              "name": "cascade_channel",
+              "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+            }
+          ],
+          "address": "addr_test1wp5h0vzkkn7faqlnkhdg22u5fapycs3ef3h0xf6fajv49kq65pekc",
+          "referenceUtxo": {
+            "txHash": "d672494e69c821f8f8271950f7e98324de36dfcdd70433c56c7d98d3558ed585",
+            "outputIndex": 0
+          },
+          "rewardAddress": "stake_test17p5h0vzkkn7faqlnkhdg22u5fapycs3ef3h0xf6fajv49kq6ulppj"
+        },
+        "cascade_node": {
+          "hash": "5f58ba03d373f7510827aa4cb5c39615d0e65ea3630169afaa48abee",
+          "sizeBytes": 1013,
+          "parameters": [
+            {
+              "name": "cascade_config",
+              "hash": "a356b07564f29624375eb1612cc7387e454ebb0df1bee2b1e98cda4c"
+            },
+            {
+              "name": "cascade_bond",
+              "hash": "e599064f40046c68e3630800531f0441003d44104d46a4eba0dfe78f"
+            },
+            {
+              "name": "cascade_channel",
+              "hash": "8f7a398e8e9aca6d9036c86026183e4b8241dbc74b2d054cfaac9e21"
+            },
+            {
+              "name": "cascade_logic_core",
+              "hash": "951661b03c0c6b23b83f20fb01e089d60379240d92e4a102e3cd1c4b"
+            },
+            {
+              "name": "cascade_logic_draw",
+              "hash": "a221e855ee4064bbb7c953e02e1233d920bb3a970e2877d0e0c87fcf"
+            },
+            {
+              "name": "cascade_logic_ext",
+              "hash": "6977b056b4fc9e83f3b5da852b944f424c42394c6ef32749ec9952d8"
+            }
+          ],
+          "address": "addr_test1wp043wsr6delw5ggy74yedwrjc2apej75d3sz6d04fy2hmsn83k43",
+          "referenceUtxo": {
+            "txHash": "70ced1a398b4189f2151af01ced025d7735942be35d6cada4d5060048b2bdf39",
+            "outputIndex": 0
+          }
+        }
+      },
+      "stakeRegistrations": {
+        "cascade_logic_core": {
+          "rewardAddress": "stake_test17z23vcds8sxxkgac8us0kq0q38tqx7fypkfwfggzu0x3cjclw5tu0",
+          "txHash": "686f74c302674d6c80b5063f1e64b3ff424ecaf9056fb4c872df0e70b6e61ba3",
+          "status": "registered"
+        },
+        "cascade_logic_draw": {
+          "rewardAddress": "stake_test17z3zr6z4aeqxfwahe9f7qtsjx0vjpwe6ju8zsa7sury8lncekjqg7",
+          "txHash": "10c93770e81816414b67b43d1f41838a39736ede5aafd5ff3e170143d1d71fa4",
+          "status": "registered"
+        },
+        "cascade_logic_ext": {
+          "rewardAddress": "stake_test17p5h0vzkkn7faqlnkhdg22u5fapycs3ef3h0xf6fajv49kq6ulppj",
+          "txHash": "490cfa1a220877aec8a05d461abd465ba008408c7da87f4c64ef9ac9d07371f2",
           "status": "registered"
         }
       }
