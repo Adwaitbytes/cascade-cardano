@@ -1,0 +1,171 @@
+{
+  "generated_at": "2026-10-01T00:40:14.553Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "cases": 13,
+  "unexpected_successes": 0,
+  "harness_errors": 0,
+  "results": [
+    {
+      "id": "bond.slash_with_fake_node_hash",
+      "action": "Resolve",
+      "mutation": "bond spent with only a logic withdrawal whose node_hash is fake; node, parent and config inputs and the node burn removed",
+      "threats": [
+        "T2",
+        "T9",
+        "T18"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "ba814cca6d2fb9e0beca47c7810687ba2e44edb6a46576609a072b293531455d",
+      "detail": "evaluate: 3010 failing spend:0, withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "close_receipt.metered_early_close_by_operator",
+      "action": "CloseReceipt",
+      "mutation": "provider signature removed from a pre-timeout Metered close (operator signs alone)",
+      "threats": [
+        "T5"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "67ff1721cab63e870f1873342631f707f5b47a32cc6a3a0d0fbd2d3f1496257f",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.address_payment_to_operator",
+      "action": "Draw",
+      "mutation": "AddressPayment leaf and output switched to the plan-bound leaf paying parent.operator",
+      "threats": [
+        "T3",
+        "T16"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "9dc4f5a92e19221fb9b53848f98da88ebfba152a1e0f2b566fa2a9f4416ec876",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.at_frozen_root",
+      "action": "Draw",
+      "mutation": "same Draw after the buyer froze the root (root input and continuing datum carry frozen = True)",
+      "threats": [
+        "T16"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "a133a85098ad25b58c0b43eb299861cf12e0a96860e4d23f85597eae77b1e084",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.below_frozen_root",
+      "action": "Draw",
+      "mutation": "same depth-1 Draw after the buyer froze the root (root_ref now frozen)",
+      "threats": [
+        "T16"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "25e38b02ed3f99da9b00c1e79714b67b77de41cd9aed01c2a3ff14f301745dc9",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.child_output_to_operator_key",
+      "action": "Draw",
+      "mutation": "child output address replaced by the operator key address",
+      "threats": [
+        "T3",
+        "T16"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "0d2bdfbbee511a672b00268aea9e9585d3ada9d5c7f4c6e96444fa445e99a1ee",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.child_output_without_thread_token",
+      "action": "Draw",
+      "mutation": "child token removed from the child output and from the mint",
+      "threats": [
+        "T1"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "6f38d02ed3d8b00acb894ed628cfe6faa7b64bea1073a949bbb82399315e06a3",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.child_token_to_wallet",
+      "action": "Draw",
+      "mutation": "child token removed from the child output (it leaves in change)",
+      "threats": [
+        "T1"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "51363cd907d0e688e7e046416ac09bae4a14f9bd0bbc9d8156f8ad3bff768b65",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.dispute_until_breaks_parent_window",
+      "action": "Draw",
+      "mutation": "child dispute_until set to parent.submit_by (safety margin not kept)",
+      "threats": [
+        "T6"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "f341556267ea2ff5b0e71d815ef8c564279c80e0d98eb00114ffd1ec4ffec608",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.leaf_outside_plan_root",
+      "action": "Draw",
+      "mutation": "child spec, leaf and proof taken from a plan the buyer did not sign",
+      "threats": [
+        "T3",
+        "T4"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "785efc63ac195346da72b9b1bc4a59d2b13a24c1d9b20dd943c60d13abe43dd8",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "draw.two_children_name_one_output",
+      "action": "Draw",
+      "mutation": "second ChildDraw.out set to the first child's output index",
+      "threats": [
+        "T2"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "22199db36bf07782c6677bbc5bcdcd51b2e38cb31e12f5381fec9222779f877f",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "fund_root.no_arbiters_with_native_leaves",
+      "action": "FundRoot",
+      "mutation": "config arbiters [] and arbiter_threshold 0, Native still allowed",
+      "threats": [
+        "T7",
+        "T9"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "fc991b48a6421fa9cba3bd59767f5b70cdbc331ca20c22e27b1315fc020d7161",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    },
+    {
+      "id": "fund_root.threshold_above_arbiters",
+      "action": "FundRoot",
+      "mutation": "config arbiter_threshold 3 with 2 arbiters",
+      "threats": [
+        "T9"
+      ],
+      "network": "yaci",
+      "outcome": "rejected_by_script",
+      "tx_body_hash": "ff76252584e9d9e2f62d61bcfccc9703358da8eaca22959f3112acf8587e2000",
+      "detail": "evaluate: 3010 failing withdraw:0: Some scripts of the transactions terminated with error(s); submit: 3136: ValidationTagMismatch (\"The transaction failed unexpectedly.\")"
+    }
+  ]
+}

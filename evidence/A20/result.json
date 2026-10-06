@@ -1,0 +1,16 @@
+{
+  "id": "A20",
+  "title": "Stage recording",
+  "criterion": "The demo flow in section 21 runs clean on preprod and is recorded without cuts in any money movement.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:17.031Z",
+  "finished_at": "2026-10-01T00:40:17.032Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: [\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"urls\",\n      \"explorer_demo_tree\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+  ]
+}

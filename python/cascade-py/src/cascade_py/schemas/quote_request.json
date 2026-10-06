@@ -1,0 +1,237 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "spec": {
+      "additionalProperties": false,
+      "description": "Closed object; `spec_hash` is SHA-256 of its JCS form. Mirrors `NodeSpecSchema` in packages/shared/src/plan.ts.",
+      "properties": {
+        "acceptance": {
+          "enum": [
+            "ParentAccept",
+            "VerifierQuorum",
+            "AutoAfterWindow",
+            "BuyerAccept"
+          ],
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "deadlines": {
+          "additionalProperties": false,
+          "properties": {
+            "challenge_window_ms": {
+              "description": "POSIX milliseconds or a duration in milliseconds.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "compose_ms": {
+              "description": "POSIX milliseconds or a duration in milliseconds.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "dispute_window_ms": {
+              "description": "POSIX milliseconds or a duration in milliseconds.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "work_ms": {
+              "description": "POSIX milliseconds or a duration in milliseconds.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "work_ms",
+            "compose_ms",
+            "challenge_window_ms",
+            "dispute_window_ms"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+          "type": "string"
+        },
+        "input_schema": {
+          "type": "object"
+        },
+        "max_sub_budget_share_bps": {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "may_sub_hire": {
+          "type": "boolean"
+        },
+        "output_schema": {
+          "type": "object"
+        },
+        "payee_hash": {
+          "description": "Seller payment key hash; present exactly when `rail` is `address` (ADR 0001 section 5.2).",
+          "pattern": "^[0-9a-f]{56}$",
+          "type": "string"
+        },
+        "price": {
+          "additionalProperties": false,
+          "properties": {
+            "asset": {
+              "pattern": "^(lovelace|[0-9a-f]{56}\\.([0-9a-f]{2}){0,32})$",
+              "type": "string"
+            },
+            "max_budget": {
+              "description": "Canonical decimal integer in base units.",
+              "pattern": "^(0|[1-9][0-9]*)$",
+              "type": "string"
+            },
+            "max_fee": {
+              "description": "Canonical decimal integer in base units.",
+              "pattern": "^(0|[1-9][0-9]*)$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset",
+            "max_budget",
+            "max_fee"
+          ],
+          "type": "object"
+        },
+        "rail": {
+          "enum": [
+            "native",
+            "masumi",
+            "metered",
+            "address"
+          ],
+          "type": "string"
+        },
+        "task": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        "verifier": {
+          "additionalProperties": false,
+          "properties": {
+            "arbitration": {
+              "type": "boolean"
+            },
+            "challenge": {
+              "type": "boolean"
+            },
+            "deterministic": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "quorum": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "bond_lovelace": {
+                      "description": "Canonical decimal integer in base units.",
+                      "pattern": "^(0|[1-9][0-9]*)$",
+                      "type": "string"
+                    },
+                    "fee": {
+                      "description": "Canonical decimal integer in base units.",
+                      "pattern": "^(0|[1-9][0-9]*)$",
+                      "type": "string"
+                    },
+                    "k": {
+                      "maximum": 9,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "n": {
+                      "maximum": 9,
+                      "minimum": 1,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "k",
+                    "fee",
+                    "bond_lovelace"
+                  ],
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "required": [
+            "deterministic",
+            "quorum",
+            "challenge",
+            "arbitration"
+          ],
+          "type": "object"
+        },
+        "version": {
+          "const": "1",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "id",
+        "task",
+        "category",
+        "input_schema",
+        "output_schema",
+        "acceptance",
+        "rail",
+        "price",
+        "deadlines",
+        "may_sub_hire",
+        "max_sub_budget_share_bps",
+        "verifier"
+      ],
+      "type": "object"
+    },
+    "spec_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "window": {
+      "additionalProperties": false,
+      "properties": {
+        "start_by": {
+          "description": "POSIX milliseconds or a duration in milliseconds.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "submit_by": {
+          "description": "POSIX milliseconds or a duration in milliseconds.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_by",
+        "submit_by"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "spec",
+    "spec_hash",
+    "window"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,121 @@
+# Cascade local stack. Start with `pnpm local:up`, stop with `pnpm local:down`.
+# Host ports use a 2xxxx block (Postgres 55432) so this stack never collides
+# with other projects on the same machine. Every port is listed in
+# deployments/local.json, which scripts read instead of hardcoding URLs.
+# All ports bind to 127.0.0.1 only.
+name: cascade-local
+
+services:
+  yaci:
+    cpus: 1.5  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    # Yaci DevKit v0.12.0-beta5: cardano-node 11.0.1 (PV11, matches preprod),
+    # bundled Ogmios v6.14, Kupo v2.11 and Yaci Store (Blockfrost-compatible API).
+    image: bloxbean/yaci-cli:0.12.0-beta5
+    init: true
+    entrypoint: ["/bin/bash", "/cascade/start-devnet.sh"]
+    env_file:
+      - ./yaci/env
+      - ./yaci/node.properties
+    volumes:
+      - ./yaci/start-devnet.sh:/cascade/start-devnet.sh:ro
+      - ./yaci/node.properties:/app/config/node.properties:ro
+      - ./yaci/plutus-costmodels-v10.json:/app/config/plutus-costmodels-v10.json:ro
+      - ./yaci/plutus-costmodels-v11.json:/app/config/plutus-costmodels-v11.json:ro
+      - yaci-data:/clusters
+    ports:
+      - "127.0.0.1:21337:1337"   # Ogmios (WebSocket and HTTP JSON-RPC)
+      - "127.0.0.1:21442:1442"   # Kupo
+      - "127.0.0.1:28080:8080"   # Yaci Store, Blockfrost-compatible API at /api/v1
+      - "127.0.0.1:20000:10000"  # Yaci admin API (devnet info, topup)
+      - "127.0.0.1:28090:8090"   # cardano-submit-api
+      - "127.0.0.1:23001:3001"   # node-to-node
+      - "127.0.0.1:23333:3333"   # node-to-client socket over TCP (socat)
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl -sf http://localhost:1337/health >/dev/null &&
+          curl -sf http://localhost:1442/health >/dev/null &&
+          curl -sf http://localhost:8080/api/v1/blocks/latest >/dev/null
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  yaci-viewer:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    image: bloxbean/yaci-viewer:0.12.0-beta5
+    environment:
+      PUBLIC_INDEXER_BASE_URL: http://yaci:8080/api/v1
+      PUBLIC_INDEXER_CLIENT_BASE_URL: http://localhost:28080/api/v1
+      PUBLIC_INDEXER_WS_URL: ws://localhost:28080/ws/liveblocks
+      IS_DOCKER: "true"
+    ports:
+      - "127.0.0.1:25173:5173"
+    depends_on:
+      yaci:
+        condition: service_healthy
+
+  postgres:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cascade
+      POSTGRES_USER: cascade
+      # Local-only default. Override with CASCADE_LOCAL_PG_PASSWORD.
+      POSTGRES_PASSWORD: ${CASCADE_LOCAL_PG_PASSWORD:-cascade}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cascade -d cascade"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  temporal:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    # Temporal CLI dev server: frontend gRPC plus the web UI, SQLite-backed.
+    image: temporalio/temporal:1.4.1
+    command:
+      - server
+      - start-dev
+      - --ip
+      - 0.0.0.0
+      - --db-filename
+      - /home/temporal/temporal.db
+      - --namespace
+      - cascade
+    volumes:
+      - temporal-data:/home/temporal
+    ports:
+      - "127.0.0.1:27233:7233"   # gRPC frontend
+      - "127.0.0.1:28233:8233"   # web UI
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "localhost:7233"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  minio:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    # The minio/minio images are no longer published on Docker Hub or Quay;
+    # Chainguard ships the upstream MinIO server. Pinned by digest.
+    image: cgr.dev/chainguard/minio@sha256:4692462f35d97d7e82c30371d82f057703c5d9489bcae726010594c812f2d285
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      # Local-only defaults. Override with CASCADE_LOCAL_MINIO_USER / _PASSWORD.
+      MINIO_ROOT_USER: ${CASCADE_LOCAL_MINIO_USER:-cascade}
+      MINIO_ROOT_PASSWORD: ${CASCADE_LOCAL_MINIO_PASSWORD:-cascade-local}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "127.0.0.1:29000:9000"   # S3 API
+      - "127.0.0.1:29001:9001"   # console
+
+volumes:
+  yaci-data:
+  pg-data:
+  temporal-data:
+  minio-data:

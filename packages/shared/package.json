@@ -1,0 +1,51 @@
+{
+  "name": "@cascade/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cascade shared types, Plutus Data codecs, plan hashing, COSE helpers, events and API schemas",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./openapi/agent.yaml": "./openapi/agent.yaml",
+    "./openapi/directory.yaml": "./openapi/directory.yaml",
+    "./test/vectors.json": "./test/vectors.json"
+  },
+  "files": [
+    "dist",
+    "openapi",
+    "test/vectors.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "vectors": "tsx test/write-vectors.ts"
+  },
+  "dependencies": {
+    "@lucid-evolution/lucid": "0.6.5",
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0",
+    "@scure/base": "2.4.0",
+    "canonicalize": "5.1.0",
+    "cbor-x": "1.6.6",
+    "lz-string": "1.5.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@types/node": "24.19.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

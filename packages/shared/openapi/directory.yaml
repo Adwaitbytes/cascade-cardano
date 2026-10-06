@@ -1,0 +1,1295 @@
+openapi: 3.1.0
+info:
+  title: Cascade Directory and Indexer API
+  version: 0.1.0
+  summary: Public REST API (PRD 17.2).
+  description: |
+    Versioned, rate-limited public API. Amounts are canonical decimal strings, hashes lowercase hex,
+    times POSIX milliseconds. Every chain-derived record carries the transaction id and slot that
+    produced it. Event objects match `CascadeEventSchema` in packages/shared/src/events.ts.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+servers:
+  - url: https://directory.example.invalid
+paths:
+  /v1/trees/{tree_id}:
+    get:
+      operationId: getTree
+      summary: Tree with all nodes, states and tx links
+      parameters:
+        - $ref: "#/components/parameters/TreeId"
+      responses:
+        "200":
+          description: Tree.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tree"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/trees/{tree_id}/receipt:
+    get:
+      operationId: getTreeReceipt
+      summary: Reconciled receipt, signed by the indexer
+      parameters:
+        - $ref: "#/components/parameters/TreeId"
+      responses:
+        "200":
+          description: Receipt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/trees/{tree_id}/events:
+    get:
+      operationId: getTreeEvents
+      summary: Ordered events for replay
+      parameters:
+        - $ref: "#/components/parameters/TreeId"
+        - name: since
+          in: query
+          required: false
+          description: Return events after this `event_id`.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 200
+      responses:
+        "200":
+          description: Events in chain order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [events, next]
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                  next:
+                    type: [string, "null"]
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/agents:
+    get:
+      operationId: searchAgents
+      summary: Directory search
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: min_rep
+          in: query
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1
+        - name: rail
+          in: query
+          schema:
+            $ref: "#/components/schemas/Rail"
+      responses:
+        "200":
+          description: Matching agents.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [agents]
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AgentSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/agents/{asset_id}:
+    get:
+      operationId: getAgent
+      summary: Profile, capabilities, reputation with signals
+      parameters:
+        - name: asset_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/AgentId"
+      responses:
+        "200":
+          description: Agent profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentProfile"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/reputation/snapshot/latest:
+    get:
+      operationId: getLatestReputationSnapshot
+      summary: Snapshot root, tx link, download URL
+      responses:
+        "200":
+          description: Latest snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [snapshot_root, tx_id, slot, download_url, created_at]
+                properties:
+                  snapshot_root:
+                    $ref: "#/components/schemas/Hex32"
+                  tx_id:
+                    $ref: "#/components/schemas/Hex32"
+                  slot:
+                    type: integer
+                  download_url:
+                    type: string
+                    format: uri
+                  created_at:
+                    $ref: "#/components/schemas/Ms"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/reputation/snapshot/{root}/inputs:
+    get:
+      operationId: getReputationSnapshotInputs
+      summary: What a snapshot was computed from (PRD 12.4)
+      description: >-
+        Recompute: derive each terminal node's outcome from chain history, take specs, agents,
+        verdicts and params from here (each spec must hash to the node's on-chain spec_hash), and
+        `reputationFromInputs` from `@cascade/indexer/read` reproduces the anchored root. Agent
+        identity is the current registry asset for the operator's payment key; re-registered
+        agents keep their key, so their history merges into the current asset. `nodes` are the
+        outcomes the indexer used, for node-by-node comparison.
+      parameters:
+        - name: root
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Hex32"
+      responses:
+        "200":
+          description: Snapshot inputs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [specs, agents, verdicts, params, nodes]
+                properties:
+                  specs:
+                    type: array
+                    items:
+                      type: object
+                      required: [node_id, spec_hash, spec]
+                      properties:
+                        node_id:
+                          $ref: "#/components/schemas/Hex28"
+                        spec_hash:
+                          $ref: "#/components/schemas/Hex32"
+                        spec:
+                          $ref: "./agent.yaml#/components/schemas/NodeSpec"
+                  agents:
+                    type: array
+                    items:
+                      type: object
+                      required: [operator_vkh, agent_asset_id, registry_asset_tx]
+                      properties:
+                        operator_vkh:
+                          $ref: "#/components/schemas/Hex28"
+                        agent_asset_id:
+                          $ref: "#/components/schemas/AgentId"
+                        registry_asset_tx:
+                          oneOf:
+                            - $ref: "#/components/schemas/Hex32"
+                            - type: "null"
+                  verdicts:
+                    type: array
+                    items:
+                      type: object
+                      required: [node_id, verifier_asset_id, verdict, signature, key]
+                      properties:
+                        node_id:
+                          $ref: "#/components/schemas/Hex28"
+                        verifier_asset_id:
+                          type: string
+                        verdict:
+                          type: string
+                          enum: [accept, reject]
+                        signature:
+                          type: string
+                        key:
+                          type: [string, "null"]
+                  params:
+                    type: object
+                    required: [now, half_life_ms, v_ref, diversity_cap, prior_weight]
+                    properties:
+                      now:
+                        $ref: "#/components/schemas/Ms"
+                      half_life_ms:
+                        type: integer
+                      v_ref:
+                        $ref: "#/components/schemas/Amount"
+                      diversity_cap:
+                        type: number
+                      prior_weight:
+                        type: number
+                  nodes:
+                    type: array
+                    items:
+                      type: object
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/quotes/request:
+    post:
+      operationId: requestQuotes
+      summary: Fans out quote requests to candidate agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [request, agents]
+              properties:
+                request:
+                  $ref: "./agent.yaml#/components/schemas/QuoteRequest"
+                agents:
+                  type: array
+                  minItems: 1
+                  maxItems: 16
+                  items:
+                    $ref: "#/components/schemas/AgentId"
+                timeout_ms:
+                  type: integer
+                  minimum: 100
+                  maximum: 30000
+      responses:
+        "200":
+          description: One entry per agent, in request order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [results]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required: [agent_id, status]
+                      properties:
+                        agent_id:
+                          $ref: "#/components/schemas/AgentId"
+                        status:
+                          type: string
+                          enum: [quoted, declined, invalid_signature, timeout, error]
+                        quote:
+                          $ref: "./agent.yaml#/components/schemas/Quote"
+                        error:
+                          type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/tx/preview:
+    post:
+      operationId: previewTx
+      summary: Decodes an unsigned transaction into plain language
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tx_cbor]
+              properties:
+                tx_cbor:
+                  type: string
+                  pattern: "^[0-9a-f]+$"
+                network:
+                  type: string
+                  enum: ["cardano:preprod", "cardano:preview", "cardano:mainnet"]
+      responses:
+        "200":
+          description: Plain-language preview.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tx_body_hash, summary, actions, moves]
+                properties:
+                  tx_body_hash:
+                    $ref: "#/components/schemas/Hex32"
+                  summary:
+                    type: string
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      required: [type, text]
+                      properties:
+                        type:
+                          type: string
+                          enum: [FundRoot, TopUp, Draw, Submit, Accept, Challenge, Escalate, Resolve, Refund, SettleChild, CloseReceipt, CloseRoot, Cancel, Freeze, Unfreeze]
+                        node_id:
+                          $ref: "#/components/schemas/Hex28"
+                        text:
+                          type: string
+                  moves:
+                    type: array
+                    items:
+                      type: object
+                      required: [to, value]
+                      properties:
+                        to:
+                          type: string
+                        value:
+                          $ref: "#/components/schemas/Value"
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  # ---------------------------------------------------------------------------------------------
+  # W3 additions (lead-approved edit): read views served by services/indexer for apps/web.
+  # Shapes match apps/web/src/lib/api/schemas.ts.
+  /v1/ws:
+    get:
+      operationId: subscribeEvents
+      summary: WebSocket upgrade; one PRD 17.3 event (Event) per text frame
+      parameters:
+        - name: tree_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Hex28"
+        - name: since
+          in: query
+          required: false
+          description: Replay stored events after this `event_id` first (requires tree_id).
+          schema:
+            type: string
+      responses:
+        "101":
+          description: Switching protocols.
+  /v1/trees:
+    get:
+      operationId: listTrees
+      summary: Job history, optionally for one buyer
+      parameters:
+        - name: buyer
+          in: query
+          required: false
+          description: Buyer payment key hash or key address.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Newest trees to return (default 100).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Trees, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [trees]
+                properties:
+                  trees:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TreeListItem"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /v1/trees/{tree_id}/nodes/{node_id}:
+    get:
+      operationId: getNodeDetail
+      summary: Node drawer detail (spec, datum, verdicts, gate logs, transactions)
+      parameters:
+        - $ref: "#/components/parameters/TreeId"
+        - name: node_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Hex28"
+      responses:
+        "200":
+          description: Node detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/disputes:
+    get:
+      operationId: listDisputes
+      summary: Open Challenged and Disputed native nodes in trees that name arbiters
+      responses:
+        "200":
+          description: Disputes by deadline.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [disputes]
+                properties:
+                  disputes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Dispute"
+  /v1/ops/status:
+    get:
+      operationId: getOpsStatus
+      summary: Indexer lag, facilitator queue, watchtower cranks and execution units
+      responses:
+        "200":
+          description: Read-only operations view.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpsStatus"
+  /v1/agents/{asset_id}/work:
+    get:
+      operationId: getProviderWork
+      summary: Provider inbox, active jobs and earnings
+      parameters:
+        - name: asset_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/AgentId"
+      responses:
+        "200":
+          description: Provider view.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderWork"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  parameters:
+    TreeId:
+      name: tree_id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Hex28"
+  responses:
+    BadRequest:
+      description: Invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: Too many requests.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+    Hex28:
+      type: string
+      pattern: "^[0-9a-f]{56}$"
+    Hex32:
+      type: string
+      pattern: "^[0-9a-f]{64}$"
+    Amount:
+      type: string
+      pattern: "^(0|[1-9][0-9]*)$"
+    AssetId:
+      type: string
+      pattern: "^(lovelace|[0-9a-f]{56}\\.([0-9a-f]{2}){0,32})$"
+    AgentId:
+      type: string
+      pattern: "^[0-9a-f]{56}([0-9a-f]{2}){0,32}$"
+    Ms:
+      type: integer
+      minimum: 0
+    Rail:
+      type: string
+      enum: [native, masumi, metered, address]
+    OutRef:
+      type: string
+      pattern: "^[0-9a-f]{64}#[0-9]+$"
+    Value:
+      type: object
+      required: [asset, amount]
+      additionalProperties: false
+      properties:
+        asset:
+          $ref: "#/components/schemas/AssetId"
+        amount:
+          $ref: "#/components/schemas/Amount"
+    NodeState:
+      type: string
+      enum: [Funded, Submitted, Challenged, Disputed, Accepted, Refunded, Settled]
+    Node:
+      type: object
+      required:
+        [node_id, tree_id, parent_id, depth, kind, operator_vkh, payee, budget, fee, committed, spent, children_open, spec_hash, input_hash, result_hash, acceptance, submit_by, challenge_until, refund_after, dispute_until, state, current_utxo, external_ref, tx_ids]
+      properties:
+        node_id:
+          $ref: "#/components/schemas/Hex28"
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        parent_id:
+          oneOf:
+            - $ref: "#/components/schemas/Hex28"
+            - type: "null"
+        depth:
+          type: integer
+        kind:
+          type: string
+          enum: [Native, MasumiReceipt, MeteredReceipt]
+        operator_vkh:
+          $ref: "#/components/schemas/Hex28"
+        payee:
+          type: string
+        agent_asset_id:
+          oneOf:
+            - $ref: "#/components/schemas/AgentId"
+            - type: "null"
+        agent_name:
+          description: Display name of the node's agent, from the plan's primary agent or the directory by operator or payee key.
+          type: [string, "null"]
+        budget:
+          $ref: "#/components/schemas/Amount"
+        fee:
+          $ref: "#/components/schemas/Amount"
+        committed:
+          $ref: "#/components/schemas/Amount"
+        spent:
+          $ref: "#/components/schemas/Amount"
+          description: Asset units that left the tree from this node (ADR 0001 section 1.5). Held value is budget - committed - spent.
+        children_open:
+          type: integer
+        spec_hash:
+          $ref: "#/components/schemas/Hex32"
+        input_hash:
+          $ref: "#/components/schemas/Hex32"
+        result_hash:
+          oneOf:
+            - $ref: "#/components/schemas/Hex32"
+            - type: "null"
+        acceptance:
+          type: object
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum: [ParentAccept, VerifierQuorum, AutoAfterWindow, BuyerAccept]
+            key:
+              $ref: "#/components/schemas/Hex28"
+            keys:
+              type: array
+              items:
+                $ref: "#/components/schemas/Hex28"
+            k:
+              type: integer
+        submit_by:
+          $ref: "#/components/schemas/Ms"
+        challenge_until:
+          $ref: "#/components/schemas/Ms"
+        refund_after:
+          $ref: "#/components/schemas/Ms"
+        dispute_until:
+          $ref: "#/components/schemas/Ms"
+        state:
+          $ref: "#/components/schemas/NodeState"
+        current_utxo:
+          oneOf:
+            - $ref: "#/components/schemas/OutRef"
+            - type: "null"
+        external_ref:
+          oneOf:
+            - $ref: "#/components/schemas/OutRef"
+            - type: "null"
+        tx_ids:
+          type: array
+          description: Every transaction that touched this node, oldest first.
+          items:
+            $ref: "#/components/schemas/Hex32"
+    Tree:
+      type: object
+      required: [tree_id, buyer_vkh, asset, root_budget, plan_root, config_utxo, state, frozen, created_slot, closed_slot, nodes]
+      properties:
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        buyer_vkh:
+          $ref: "#/components/schemas/Hex28"
+        asset:
+          $ref: "#/components/schemas/AssetId"
+        root_budget:
+          $ref: "#/components/schemas/Amount"
+        plan_root:
+          $ref: "#/components/schemas/Hex32"
+        config_utxo:
+          $ref: "#/components/schemas/OutRef"
+        state:
+          type: string
+          enum: [open, closed, cancelled]
+        frozen:
+          type: boolean
+        created_slot:
+          type: integer
+        closed_slot:
+          type: [integer, "null"]
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+        config:
+          description: W3 addition. Tree Config fields from the config UTxO datum.
+          $ref: "#/components/schemas/TreeConfigView"
+    Receipt:
+      type: object
+      required: [tree_id, deposits, payouts, refunds, fees, structural_returned_lovelace, balanced, lines, key, signature]
+      properties:
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        deposits:
+          $ref: "#/components/schemas/Value"
+        payouts:
+          $ref: "#/components/schemas/Value"
+        refunds:
+          $ref: "#/components/schemas/Value"
+        fees:
+          $ref: "#/components/schemas/Value"
+        structural_deposited_lovelace:
+          $ref: "#/components/schemas/Amount"
+        structural_paid_lovelace:
+          description: Structural lovelace sent out with payouts (payee and escrow min-ADA).
+          $ref: "#/components/schemas/Amount"
+        structural_returned_lovelace:
+          $ref: "#/components/schemas/Amount"
+        balanced:
+          type: boolean
+          description: >-
+            Invariant 1. ADA tree: deposits (budget plus structural ADA in) equal payouts (including
+            structural ADA paid out) plus refunds plus fees plus structural_returned_lovelace. Token tree:
+            the token totals balance on their own and structural_deposited_lovelace equals
+            structural_paid_lovelace plus structural_returned_lovelace.
+        lines:
+          type: array
+          items:
+            type: object
+            required: [node_id, kind, to, value, tx_id]
+            properties:
+              node_id:
+                $ref: "#/components/schemas/Hex28"
+              kind:
+                type: string
+                enum: [deposit, fee, masumi, refund, protocol_fee, bond_return, bond_slash, structural]
+                description: "`masumi` is a Masumi hire paid to the purchase wallet P (ADR 0001 8.1); it counts as a payout."
+              to:
+                type: string
+              value:
+                $ref: "#/components/schemas/Value"
+              tx_id:
+                $ref: "#/components/schemas/Hex32"
+              blockchain_identifier:
+                type: string
+                description: Masumi lines only, the vested_pay lock's blockchainIdentifier.
+              payment_out_ref:
+                type: string
+                description: "`masumi` lines only, the AddressPayment output to P (`tx_id` is the Draw)."
+              lock_tx:
+                description: "`masumi` lines only, P's lock transaction, null until P locks."
+                oneOf:
+                  - $ref: "#/components/schemas/Hex32"
+                  - type: "null"
+              outcome:
+                type: string
+                enum: [awaiting_lock, locked, refunded, withdrawn]
+                description: "`masumi` lines only. `refunded` paid buyer_return_address (buyer_refund); `withdrawn` is the seller's withdrawal."
+              outcome_tx:
+                oneOf:
+                  - $ref: "#/components/schemas/Hex32"
+                  - type: "null"
+        key:
+          type: string
+          description: Indexer `COSE_Key` hex.
+        signature:
+          type: string
+          description: Indexer `COSE_Sign1` hex over SHA-256(JCS(receipt without signature)).
+    Event:
+      type: object
+      required: [type, event_id, tree_id, node_id, tx_id, slot, confirmations, value, emitted_at, payload]
+      properties:
+        type:
+          type: string
+          enum:
+            - tree.funded
+            - node.drawn
+            - node.working
+            - node.input_requested
+            - node.submitted
+            - node.verified
+            - node.challenged
+            - node.resolved
+            - node.accepted
+            - node.refunded
+            - node.settled
+            - receipt.closed
+            - tree.frozen
+            - tree.closed
+            - chain.rollback
+        event_id:
+          type: string
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        node_id:
+          $ref: "#/components/schemas/Hex28"
+        tx_id:
+          $ref: "#/components/schemas/Hex32"
+        slot:
+          type: integer
+          minimum: 0
+        confirmations:
+          type: integer
+          minimum: 0
+        value:
+          $ref: "#/components/schemas/Value"
+        emitted_at:
+          $ref: "#/components/schemas/Ms"
+        payload:
+          type: object
+          description: Type-specific fields; see `CascadeEventSchema`.
+    AgentSummary:
+      type: object
+      required: [agent_asset_id, name, api_url, categories, rails, availability, reputation]
+      properties:
+        agent_asset_id:
+          $ref: "#/components/schemas/AgentId"
+        name:
+          type: string
+        api_url:
+          type: string
+          format: uri
+        categories:
+          type: array
+          items:
+            type: string
+        rails:
+          type: array
+          items:
+            $ref: "#/components/schemas/Rail"
+        availability:
+          type: string
+          enum: [available, unavailable, unknown]
+        reputation:
+          type: object
+          required: [score, confidence]
+          properties:
+            score:
+              type: number
+              minimum: 0
+              maximum: 1
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+    AgentProfile:
+      allOf:
+        - $ref: "#/components/schemas/AgentSummary"
+        - type: object
+          required: [payment_vkh, capabilities, signals, last_seen]
+          properties:
+            payment_vkh:
+              $ref: "#/components/schemas/Hex28"
+            capabilities:
+              $ref: "./agent.yaml#/components/schemas/CascadeCapabilities"
+            signals:
+              type: object
+              description: Reputation signals per category (PRD 12.2).
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: number
+            last_seen:
+              $ref: "#/components/schemas/Ms"
+    # -------------------------------------------------------------------------------------------
+    # W3 additions (lead-approved edit): schemas for the read views above.
+    ActionType:
+      type: string
+      enum: [FundRoot, TopUp, Draw, Submit, Accept, Challenge, Escalate, Resolve, Refund, SettleChild, CloseReceipt, CloseRoot, Cancel, Freeze, Unfreeze]
+    VerdictSummary:
+      type: object
+      required: [verifier, verdict, score, evidence_hash, checks]
+      properties:
+        verifier:
+          type: string
+        verifier_name:
+          type: string
+        verdict:
+          type: string
+          enum: [accept, reject]
+        score:
+          type: number
+          minimum: 0
+          maximum: 1
+        evidence_hash:
+          $ref: "#/components/schemas/Hex32"
+        checks:
+          type: array
+          items:
+            type: object
+            required: [name, passed]
+            properties:
+              name:
+                type: string
+              passed:
+                type: boolean
+    GateLogSummary:
+      type: object
+      required: [tx_body_hash, action, decision, gates, at]
+      properties:
+        tx_body_hash:
+          $ref: "#/components/schemas/Hex32"
+        action:
+          $ref: "#/components/schemas/ActionType"
+        decision:
+          type: string
+          enum: [signed, refused]
+        gates:
+          type: array
+          items:
+            type: object
+            required: [name, passed]
+            properties:
+              name:
+                type: string
+              passed:
+                type: boolean
+              detail:
+                type: string
+        at:
+          $ref: "#/components/schemas/Ms"
+    NodeDetail:
+      type: object
+      required: [node_id, spec, datum, verdicts, gate_logs, txs, metered]
+      properties:
+        node_id:
+          $ref: "#/components/schemas/Hex28"
+        agent_asset_id:
+          type: [string, "null"]
+        agent_name:
+          type: [string, "null"]
+        spec:
+          description: NodeSpec from the buyer-approved plan, or null when the plan is not known.
+          oneOf:
+            - $ref: "./agent.yaml#/components/schemas/NodeSpec"
+            - type: "null"
+        datum:
+          type: object
+        verdicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerdictSummary"
+        gate_logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/GateLogSummary"
+        txs:
+          type: array
+          items:
+            type: object
+            required: [tx_id, action, slot]
+            properties:
+              tx_id:
+                $ref: "#/components/schemas/Hex32"
+              action:
+                $ref: "#/components/schemas/ActionType"
+              slot:
+                type: integer
+        masumi_leaves:
+          description: Masumi hires this node drew as AddressPayments to the purchase wallet P (ADR 0001 8.1).
+          type: array
+          items:
+            $ref: "#/components/schemas/MasumiLeaf"
+        metered:
+          oneOf:
+            - type: object
+              required: [calls, paid, l1_txs]
+              properties:
+                calls:
+                  type: integer
+                paid:
+                  $ref: "#/components/schemas/Value"
+                l1_txs:
+                  type: integer
+                remaining:
+                  description: Deposit not yet redeemed by the provider.
+                  $ref: "#/components/schemas/Value"
+            - type: "null"
+    MasumiLeaf:
+      type: object
+      required: [node_id, payment_out_ref, draw_tx, value, lock_tx, lock_out_ref, blockchain_identifier, lock_state, outcome, outcome_tx]
+      properties:
+        node_id:
+          $ref: "#/components/schemas/Hex28"
+        payment_out_ref:
+          type: string
+        draw_tx:
+          $ref: "#/components/schemas/Hex32"
+        value:
+          type: object
+          required: [lovelace, assets]
+          properties:
+            lovelace:
+              $ref: "#/components/schemas/Amount"
+            assets:
+              type: object
+              additionalProperties:
+                type: string
+        lock_tx:
+          oneOf:
+            - $ref: "#/components/schemas/Hex32"
+            - type: "null"
+        lock_out_ref:
+          description: The latest lock output (the lock moves on SetRefundRequested).
+          type: [string, "null"]
+        blockchain_identifier:
+          type: [string, "null"]
+        lock_state:
+          description: vested_pay state of the latest lock output.
+          type: [string, "null"]
+        outcome:
+          type: string
+          enum: [awaiting_lock, locked, refunded, withdrawn]
+        outcome_tx:
+          oneOf:
+            - $ref: "#/components/schemas/Hex32"
+            - type: "null"
+    TreeListItem:
+      type: object
+      required: [tree_id, goal, asset, root_budget, paid, refunded, recovered, state, created_at, node_count, agents, spend_by_category]
+      properties:
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        goal:
+          type: string
+        asset:
+          $ref: "#/components/schemas/AssetId"
+        root_budget:
+          $ref: "#/components/schemas/Amount"
+        paid:
+          $ref: "#/components/schemas/Amount"
+        refunded:
+          $ref: "#/components/schemas/Amount"
+        recovered:
+          $ref: "#/components/schemas/Amount"
+        state:
+          type: string
+          enum: [open, closed, cancelled]
+        created_at:
+          $ref: "#/components/schemas/Ms"
+        node_count:
+          type: integer
+        agents:
+          type: array
+          items:
+            type: string
+        spend_by_category:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Amount"
+    Dispute:
+      type: object
+      required: [tree_id, node_id, agent_name, state, dispute_until, locked, fee, arbiters, threshold, spec, spec_hash, input_hash, result_hash, reason_hash, bundles, verdicts, gate_logs, challenge_tx]
+      properties:
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        node_id:
+          $ref: "#/components/schemas/Hex28"
+        agent_name:
+          type: string
+        state:
+          type: string
+          enum: [Challenged, Disputed]
+        dispute_until:
+          $ref: "#/components/schemas/Ms"
+        locked:
+          $ref: "#/components/schemas/Value"
+        fee:
+          $ref: "#/components/schemas/Amount"
+        arbiters:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hex28"
+        threshold:
+          type: integer
+          minimum: 1
+        spec:
+          oneOf:
+            - $ref: "./agent.yaml#/components/schemas/NodeSpec"
+            - type: "null"
+        spec_hash:
+          $ref: "#/components/schemas/Hex32"
+        input_hash:
+          $ref: "#/components/schemas/Hex32"
+        result_hash:
+          oneOf:
+            - $ref: "#/components/schemas/Hex32"
+            - type: "null"
+        reason_hash:
+          $ref: "#/components/schemas/Hex32"
+        bundles:
+          type: object
+          required: [worker, challenger]
+          properties:
+            worker:
+              oneOf:
+                - $ref: "#/components/schemas/Hex32"
+                - type: "null"
+            challenger:
+              oneOf:
+                - $ref: "#/components/schemas/Hex32"
+                - type: "null"
+        verdicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerdictSummary"
+        gate_logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/GateLogSummary"
+        challenge_tx:
+          $ref: "#/components/schemas/Hex32"
+        alert:
+          description: Watchtower alert for a Disputed node near dispute_until (a lapse pays the worker its fee).
+          oneOf:
+            - type: object
+              required: [kind, raised_at, ms_left_at_raise, dispute_until]
+              properties:
+                kind:
+                  type: string
+                  enum: [dispute_deadline]
+                raised_at:
+                  $ref: "#/components/schemas/Ms"
+                ms_left_at_raise:
+                  type: integer
+                dispute_until:
+                  $ref: "#/components/schemas/Ms"
+            - type: "null"
+    OpsStatus:
+      type: object
+      required: [indexer, facilitator, cranks, failed_txs, exec_units]
+      properties:
+        indexer:
+          type: object
+          required: [tip_slot, indexed_slot, lag_ms, rollbacks_24h]
+          properties:
+            tip_slot:
+              type: integer
+            indexed_slot:
+              type: integer
+            lag_ms:
+              $ref: "#/components/schemas/Ms"
+            rollbacks_24h:
+              type: integer
+        facilitator:
+          type: object
+          required: [queued, settlement_pending, settled_24h, rejected_24h]
+          properties:
+            queued:
+              type: integer
+            settlement_pending:
+              type: integer
+            settled_24h:
+              type: integer
+            rejected_24h:
+              type: integer
+        cranks:
+          type: array
+          items:
+            type: object
+            required: [action, tree_id, node_id, tx_id, at]
+            properties:
+              action:
+                $ref: "#/components/schemas/ActionType"
+              tree_id:
+                $ref: "#/components/schemas/Hex28"
+              node_id:
+                $ref: "#/components/schemas/Hex28"
+              tx_id:
+                $ref: "#/components/schemas/Hex32"
+              at:
+                $ref: "#/components/schemas/Ms"
+        dispute_alerts_open:
+          type: integer
+          description: Disputed nodes inside the watchtower alert window that are still unresolved.
+        failed_txs:
+          type: array
+          items:
+            type: object
+            required: [action, tx_id, error, at]
+            properties:
+              action:
+                $ref: "#/components/schemas/ActionType"
+              tx_id:
+                oneOf:
+                  - $ref: "#/components/schemas/Hex32"
+                  - type: "null"
+              error:
+                type: string
+              at:
+                $ref: "#/components/schemas/Ms"
+        exec_units:
+          type: array
+          items:
+            type: object
+            required: [redeemer, mem, steps, max_mem, max_steps, samples]
+            properties:
+              redeemer:
+                $ref: "#/components/schemas/ActionType"
+              mem:
+                type: integer
+              steps:
+                type: integer
+              max_mem:
+                type: integer
+              max_steps:
+                type: integer
+              samples:
+                type: integer
+    ProviderWork:
+      type: object
+      required: [quote_requests, active_jobs, earnings, bonds_at_risk_lovelace]
+      properties:
+        quote_requests:
+          type: array
+          items:
+            type: object
+            required: [spec_hash, task, max_budget, submit_by, received_at]
+            properties:
+              spec_hash:
+                $ref: "#/components/schemas/Hex32"
+              task:
+                type: string
+              max_budget:
+                $ref: "#/components/schemas/Value"
+              submit_by:
+                $ref: "#/components/schemas/Ms"
+              received_at:
+                $ref: "#/components/schemas/Ms"
+        active_jobs:
+          type: array
+          items:
+            type: object
+            required: [tree_id, node_id, task, fee, state, state_tx, next_deadline]
+            properties:
+              tree_id:
+                $ref: "#/components/schemas/Hex28"
+              node_id:
+                $ref: "#/components/schemas/Hex28"
+              task:
+                type: string
+              fee:
+                $ref: "#/components/schemas/Value"
+              state:
+                $ref: "#/components/schemas/NodeState"
+              state_tx:
+                $ref: "#/components/schemas/Hex32"
+              next_deadline:
+                $ref: "#/components/schemas/Ms"
+        earnings:
+          type: object
+          required: [paid, pending, jobs_settled, jobs_refunded]
+          properties:
+            paid:
+              $ref: "#/components/schemas/Value"
+            pending:
+              $ref: "#/components/schemas/Value"
+            jobs_settled:
+              type: integer
+            jobs_refunded:
+              type: integer
+        bonds_at_risk_lovelace:
+          description: Unspent governed bonds (datum authority = cascade_node hash) owned by the agent's payment key.
+          $ref: "#/components/schemas/Amount"
+    TreeConfigView:
+      type: object
+      required: [asset, plan_root, buyer, arbiters, arbiter_threshold, max_depth, max_fanout, max_child_share_bps, min_challenge_window, min_safety_margin, min_dispute_window, allowed_leaf_kinds, protocol_fee_bps, challenge_bond, slash_wronged_bps]
+      properties:
+        asset:
+          $ref: "#/components/schemas/AssetId"
+        plan_root:
+          $ref: "#/components/schemas/Hex32"
+        buyer:
+          $ref: "#/components/schemas/Hex28"
+        arbiters:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hex28"
+        arbiter_threshold:
+          type: integer
+        max_depth:
+          type: integer
+        max_fanout:
+          type: integer
+        max_child_share_bps:
+          type: integer
+        min_challenge_window:
+          $ref: "#/components/schemas/Ms"
+        min_safety_margin:
+          $ref: "#/components/schemas/Ms"
+        min_dispute_window:
+          $ref: "#/components/schemas/Ms"
+        allowed_leaf_kinds:
+          type: array
+          items:
+            type: string
+            enum: [Native, MasumiReceipt, MeteredReceipt, AddressPayment]
+        protocol_fee_bps:
+          type: integer
+        challenge_bond:
+          $ref: "#/components/schemas/Amount"
+        slash_wronged_bps:
+          type: integer

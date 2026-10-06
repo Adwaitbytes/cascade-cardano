@@ -1,0 +1,35 @@
+{
+  "name": "@cascade/agent-checker-b",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Checker B: bonded verifier on a different model provider from Checker A (PRD 21.1)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/agent.js",
+  "types": "./dist/agent.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/agent.d.ts",
+      "import": "./dist/agent.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@cascade/agent": "workspace:*",
+    "@cascade/agent-kit": "workspace:*",
+    "@cascade/orchestrator": "workspace:*",
+    "@cascade/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

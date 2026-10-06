@@ -1,0 +1,941 @@
+openapi: 3.1.0
+info:
+  title: Cascade agent API
+  version: 0.1.0
+  summary: MIP-003 agent endpoints plus the Cascade extensions (PRD 9.1, 9.2).
+  description: |
+    Every Cascade agent is a superset of a Masumi MIP-003 agent. The MIP-003 endpoints follow
+    masumi-improvement-proposals commit 087a1d5d42c7b4f97b2590665321af423514337e exactly, including
+    its mixed casing (snake_case requests, camelCase `/start_job` response except `id` and `input_hash`).
+    `/start_job`, `/status`, `/availability` and `/input_schema` are required; `/provide_input` and
+    `/demo` are optional. `input_hash` follows MIP-004: lowercase hex SHA-256 of
+    `identifier_from_purchaser + ";" + JCS(input_data)`.
+
+    Cascade extensions: amounts are canonical decimal strings, hashes are lowercase hex, times are
+    POSIX milliseconds. Signed bodies carry a CIP-8 `COSE_Sign1` over SHA-256(JCS(body without
+    `signature`)) made with the key behind the agent's payment address.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+servers:
+  - url: https://agent.example.invalid
+    description: Replace with the agent's API base URL from its registry metadata.
+tags:
+  - name: mip-003
+    description: Masumi Agentic Service API (unchanged).
+  - name: cascade
+    description: Cascade extensions.
+  - name: discovery
+    description: Well-known discovery files.
+paths:
+  /start_job:
+    post:
+      tags: [mip-003]
+      operationId: startJob
+      summary: Start a job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier_from_purchaser]
+              properties:
+                identifier_from_purchaser:
+                  type: string
+                  examples: [resume-job-123]
+                input_data:
+                  type: object
+                  description: Keys are the `id`s defined by `/input_schema`.
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Job created with payment details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartJobResponse"
+        "400":
+          description: "`input_data` or `identifier_from_purchaser` is missing, invalid or does not match the schema."
+        "500":
+          description: Job initiation failed.
+  /status:
+    get:
+      tags: [mip-003]
+      operationId: getStatus
+      summary: Job status
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current status.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    $ref: "#/components/schemas/JobStatus"
+                  input_schema:
+                    $ref: "#/components/schemas/InputSchema"
+                  result:
+                    type: string
+                    description: Job result or pre-result, if available.
+        "404":
+          description: "`job_id` does not exist."
+        "500":
+          description: Status cannot be retrieved.
+  /provide_input:
+    post:
+      tags: [mip-003]
+      operationId: provideInput
+      summary: Extra input for a job that is awaiting input (optional endpoint)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [job_id, input_schema_hash, input_data]
+              properties:
+                job_id:
+                  type: string
+                input_schema_hash:
+                  $ref: "#/components/schemas/Hex32"
+                  description: SHA-256 of the canonical JSON of the `input_schema` from `/status`.
+                input_data:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Input accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [input_hash, signature]
+                properties:
+                  input_hash:
+                    type: string
+                  signature:
+                    type: string
+                    description: Ed25519 signature of the response data (MIP-003 does not define the signed bytes).
+        "400":
+          description: Invalid `job_id` or missing `input_data`.
+        "404":
+          description: Unknown `job_id`.
+        "500":
+          description: Server error.
+  /availability:
+    get:
+      tags: [mip-003]
+      operationId: getAvailability
+      summary: Server operational check
+      responses:
+        "200":
+          description: Availability.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, type]
+                properties:
+                  status:
+                    type: string
+                    enum: [available, unavailable]
+                  type:
+                    type: string
+                    const: masumi-agent
+                  message:
+                    type: string
+        "500":
+          description: Server error.
+  /input_schema:
+    get:
+      tags: [mip-003]
+      operationId: getInputSchema
+      summary: Expected input format
+      responses:
+        "200":
+          description: Either `input_data` or `input_groups`, never both.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputSchema"
+        "500":
+          description: Server error.
+  /demo:
+    get:
+      tags: [mip-003]
+      operationId: getDemo
+      summary: Demo data for marketing (optional endpoint)
+      responses:
+        "200":
+          description: Sample input and output.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [input, output]
+                properties:
+                  input:
+                    type: object
+                    additionalProperties: true
+                  output:
+                    type: object
+                    required: [result]
+                    properties:
+                      result:
+                        type: string
+        "500":
+          description: Server error.
+  /cascade/quote:
+    post:
+      tags: [cascade]
+      operationId: requestQuote
+      summary: Signed quote for a task spec and deadline window
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteRequest"
+      responses:
+        "200":
+          description: Signed quote.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: The agent declines this task or window.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /jobs:
+    post:
+      tags: [cascade]
+      operationId: purchaseJob
+      summary: x402-protected purchase
+      description: |
+        Without `PAYMENT-SIGNATURE` the agent answers 402 with a `PAYMENT-REQUIRED` header (base64 JSON
+        `PaymentRequired`, x402 version 2) whose `accepts` offers `script` (native Cascade child) and
+        `masumi` options, both `scheme: exact` on `cardano:preprod`. On a paid retry the agent verifies
+        and settles through the facilitator, starts the job and returns `PAYMENT-RESPONSE`.
+      parameters:
+        - name: PAYMENT-SIGNATURE
+          in: header
+          required: false
+          description: base64 of JSON `PaymentPayload`.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier_from_purchaser, input_data]
+              properties:
+                identifier_from_purchaser:
+                  type: string
+                input_data:
+                  type: object
+                  additionalProperties: true
+                spec_hash:
+                  $ref: "#/components/schemas/Hex32"
+                quote_id:
+                  type: string
+      responses:
+        "200":
+          description: Paid and started.
+          headers:
+            PAYMENT-RESPONSE:
+              description: base64 of JSON settle response (`success`, `network`, `transaction`, `extra`).
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [job_id, input_hash]
+                properties:
+                  job_id:
+                    type: string
+                  input_hash:
+                    $ref: "#/components/schemas/Hex32"
+                  tx_id:
+                    $ref: "#/components/schemas/Hex32"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "402":
+          description: Payment required, or settlement pending (resend the same `PAYMENT-SIGNATURE`).
+          headers:
+            PAYMENT-REQUIRED:
+              description: base64 of JSON `PaymentRequired`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [x402Version, accepts]
+                properties:
+                  x402Version:
+                    type: integer
+                    const: 2
+                  error:
+                    type: string
+                  accepts:
+                    type: array
+                    minItems: 1
+                    items:
+                      $ref: "#/components/schemas/PaymentRequirements"
+  /cascade/subtree:
+    get:
+      tags: [cascade]
+      operationId: getSubtree
+      summary: Signed report of the agent's child nodes for a job
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Signed subtree report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubtreeReport"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /cascade/result:
+    get:
+      tags: [cascade]
+      operationId: getResult
+      summary: Result payload, its hash and an evidence bundle
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Result with evidence.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultBundle"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: No result yet.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /cascade/challenge:
+    post:
+      tags: [cascade]
+      operationId: receiveChallenge
+      summary: Challenge notice; returns a rebuttal bundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tree_id, node_id, reason_hash, reason]
+              properties:
+                tree_id:
+                  $ref: "#/components/schemas/Hex28"
+                node_id:
+                  $ref: "#/components/schemas/Hex28"
+                reason_hash:
+                  $ref: "#/components/schemas/Hex32"
+                reason:
+                  type: object
+                  description: The reason document; `reason_hash` is SHA-256 of its JCS form.
+                  additionalProperties: true
+                tx_id:
+                  $ref: "#/components/schemas/Hex32"
+      responses:
+        "200":
+          description: Rebuttal.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [node_id, concede, rebuttal_hash, bundle, key, signature]
+                properties:
+                  node_id:
+                    $ref: "#/components/schemas/Hex28"
+                  concede:
+                    type: boolean
+                  rebuttal_hash:
+                    $ref: "#/components/schemas/Hex32"
+                  bundle:
+                    type: object
+                    additionalProperties: true
+                  key:
+                    $ref: "#/components/schemas/CoseKey"
+                  signature:
+                    $ref: "#/components/schemas/CoseSign1"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /output_schema:
+    get:
+      tags: [cascade]
+      operationId: getOutputSchema
+      summary: JSON Schema of the result, used by deterministic verification
+      responses:
+        "200":
+          description: A JSON Schema document.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /.well-known/x402.json:
+    get:
+      tags: [discovery]
+      operationId: getX402Discovery
+      summary: Paid resources, prices and rails
+      responses:
+        "200":
+          description: Discovery file.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [x402Version, resources]
+                properties:
+                  x402Version:
+                    type: integer
+                    const: 2
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                      required: [resource, method, accepts]
+                      properties:
+                        resource:
+                          type: string
+                          format: uri
+                        method:
+                          type: string
+                          enum: [GET, POST]
+                        description:
+                          type: string
+                        accepts:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/PaymentRequirements"
+  /.well-known/cascade.json:
+    get:
+      tags: [discovery]
+      operationId: getCascadeCapabilities
+      summary: Cascade capabilities
+      responses:
+        "200":
+          description: Capabilities.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CascadeCapabilities"
+  /.well-known/agent-card.json:
+    get:
+      tags: [discovery]
+      operationId: getAgentCard
+      summary: A2A agent card
+      responses:
+        "200":
+          description: A2A agent card for non-Cardano agent stacks.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [name, description, url, version, capabilities, skills]
+                properties:
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  version:
+                    type: string
+                  capabilities:
+                    type: object
+                    additionalProperties: true
+                  skills:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                additionalProperties: true
+components:
+  responses:
+    BadRequest:
+      description: Invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Unknown job.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+    Hex28:
+      type: string
+      pattern: "^[0-9a-f]{56}$"
+    Hex32:
+      type: string
+      pattern: "^[0-9a-f]{64}$"
+    Amount:
+      type: string
+      pattern: "^(0|[1-9][0-9]*)$"
+      description: Canonical decimal integer in base units.
+    AssetId:
+      type: string
+      pattern: "^(lovelace|[0-9a-f]{56}\\.([0-9a-f]{2}){0,32})$"
+    AgentId:
+      type: string
+      pattern: "^[0-9a-f]{56}([0-9a-f]{2}){0,32}$"
+      description: Masumi registry asset id (policy id followed by asset name).
+    Ms:
+      type: integer
+      minimum: 0
+      maximum: 9007199254740991
+      description: POSIX milliseconds or a duration in milliseconds.
+    CoseKey:
+      type: string
+      pattern: "^[0-9a-f]+$"
+      description: CBOR `COSE_Key` hex.
+    CoseSign1:
+      type: string
+      pattern: "^[0-9a-f]+$"
+      description: CBOR `COSE_Sign1` hex.
+    Rail:
+      type: string
+      enum: [native, masumi, metered, address]
+    JobStatus:
+      type: string
+      enum: [awaiting_payment, awaiting_input, running, completed, failed]
+    StartJobResponse:
+      type: object
+      required:
+        - id
+        - blockchainIdentifier
+        - payByTime
+        - submitResultTime
+        - unlockTime
+        - externalDisputeUnlockTime
+        - agentIdentifier
+        - sellerVKey
+        - identifierFromPurchaser
+        - input_hash
+      properties:
+        id:
+          type: string
+        blockchainIdentifier:
+          type: string
+        payByTime:
+          type: integer
+        submitResultTime:
+          type: integer
+        unlockTime:
+          type: integer
+        externalDisputeUnlockTime:
+          type: integer
+        agentIdentifier:
+          type: string
+        sellerVKey:
+          type: string
+        identifierFromPurchaser:
+          type: string
+        input_hash:
+          type: string
+    InputField:
+      type: object
+      required: [id, type, name]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          description: MIP-003 types (`string`, `number`, `boolean`, `option`, `none`) or the Attachment 01 HTML types.
+        name:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        validations:
+          type: array
+          items:
+            type: object
+            required: [validation, value]
+            properties:
+              validation:
+                type: string
+                enum: [min, max, format, accept, optional]
+              value:
+                type: string
+    InputSchema:
+      oneOf:
+        - type: object
+          required: [input_data]
+          properties:
+            input_data:
+              type: array
+              items:
+                $ref: "#/components/schemas/InputField"
+          not:
+            required: [input_groups]
+        - type: object
+          required: [input_groups]
+          properties:
+            input_groups:
+              type: array
+              items:
+                type: object
+                required: [id, title, input_data]
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  input_data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/InputField"
+          not:
+            required: [input_data]
+    NodeSpec:
+      type: object
+      description: Closed object; `spec_hash` is SHA-256 of its JCS form. Mirrors `NodeSpecSchema` in packages/shared/src/plan.ts.
+      additionalProperties: false
+      required:
+        [version, id, task, category, input_schema, output_schema, acceptance, rail, price, deadlines, may_sub_hire, max_sub_budget_share_bps, verifier]
+      properties:
+        version:
+          type: string
+          const: "1"
+        id:
+          type: string
+          pattern: "^[A-Za-z0-9_.-]{1,64}$"
+        task:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        category:
+          type: string
+        input_schema:
+          type: object
+        output_schema:
+          type: object
+        acceptance:
+          type: string
+          enum: [ParentAccept, VerifierQuorum, AutoAfterWindow, BuyerAccept]
+        rail:
+          $ref: "#/components/schemas/Rail"
+        price:
+          type: object
+          additionalProperties: false
+          required: [asset, max_budget, max_fee]
+          properties:
+            asset:
+              $ref: "#/components/schemas/AssetId"
+            max_budget:
+              $ref: "#/components/schemas/Amount"
+            max_fee:
+              $ref: "#/components/schemas/Amount"
+        deadlines:
+          type: object
+          additionalProperties: false
+          required: [work_ms, compose_ms, challenge_window_ms, dispute_window_ms]
+          properties:
+            work_ms:
+              $ref: "#/components/schemas/Ms"
+            compose_ms:
+              $ref: "#/components/schemas/Ms"
+            challenge_window_ms:
+              $ref: "#/components/schemas/Ms"
+            dispute_window_ms:
+              $ref: "#/components/schemas/Ms"
+        may_sub_hire:
+          type: boolean
+        max_sub_budget_share_bps:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        verifier:
+          type: object
+          additionalProperties: false
+          required: [deterministic, quorum, challenge, arbitration]
+          properties:
+            deterministic:
+              type: array
+              minItems: 1
+              items:
+                type: string
+            quorum:
+              oneOf:
+                - type: "null"
+                - type: object
+                  additionalProperties: false
+                  required: [n, k, fee, bond_lovelace, keys]
+                  properties:
+                    n:
+                      type: integer
+                      minimum: 1
+                      maximum: 9
+                    k:
+                      type: integer
+                      minimum: 1
+                      maximum: 9
+                    fee:
+                      $ref: "#/components/schemas/Amount"
+                    bond_lovelace:
+                      $ref: "#/components/schemas/Amount"
+                    keys:
+                      type: array
+                      description: Verifier key hashes in datum order, bound into the plan leaf's acceptance_hash (ADR 0001 section 1.6).
+                      minItems: 1
+                      maxItems: 9
+                      items:
+                        $ref: "#/components/schemas/Hex28"
+            challenge:
+              type: boolean
+            arbitration:
+              type: boolean
+        payee_hash:
+          $ref: "#/components/schemas/Hex28"
+          description: Seller payment key hash; present exactly when `rail` is `address` (ADR 0001 section 5.2).
+        masumi_followup:
+          type: object
+          additionalProperties: false
+          required: [agent_identifier]
+          description: ADR 0001 section 8.1. Only on the address rail; the payment funds the purchase wallet, which then buys from this Masumi seller.
+          properties:
+            agent_identifier:
+              $ref: "#/components/schemas/AgentId"
+    QuoteRequest:
+      type: object
+      additionalProperties: false
+      required: [spec, spec_hash, window]
+      properties:
+        spec:
+          $ref: "#/components/schemas/NodeSpec"
+        spec_hash:
+          $ref: "#/components/schemas/Hex32"
+        window:
+          type: object
+          additionalProperties: false
+          required: [start_by, submit_by]
+          properties:
+            start_by:
+              $ref: "#/components/schemas/Ms"
+            submit_by:
+              $ref: "#/components/schemas/Ms"
+    Quote:
+      type: object
+      additionalProperties: false
+      required:
+        [version, quote_id, agent_id, spec_hash, price, asset, eta_ms, rails, may_sub_hire, max_sub_budget_share_bps, operator, payee, issued_at, expires_at, key, signature]
+      properties:
+        version:
+          type: string
+          const: "1"
+        quote_id:
+          type: string
+        agent_id:
+          $ref: "#/components/schemas/AgentId"
+        spec_hash:
+          $ref: "#/components/schemas/Hex32"
+        price:
+          $ref: "#/components/schemas/Amount"
+        asset:
+          $ref: "#/components/schemas/AssetId"
+        eta_ms:
+          $ref: "#/components/schemas/Ms"
+        rails:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Rail"
+        may_sub_hire:
+          type: boolean
+        max_sub_budget_share_bps:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        operator:
+          $ref: "#/components/schemas/Hex28"
+        payee:
+          type: string
+          description: Bech32 key address; its payment key signs the quote.
+        issued_at:
+          $ref: "#/components/schemas/Ms"
+        expires_at:
+          $ref: "#/components/schemas/Ms"
+        key:
+          $ref: "#/components/schemas/CoseKey"
+        signature:
+          $ref: "#/components/schemas/CoseSign1"
+    PaymentRequirements:
+      type: object
+      required: [scheme, network, amount, asset, payTo, maxTimeoutSeconds]
+      properties:
+        scheme:
+          type: string
+          const: exact
+        network:
+          type: string
+          enum: ["cardano:mainnet", "cardano:preprod", "cardano:preview"]
+        amount:
+          $ref: "#/components/schemas/Amount"
+        asset:
+          $ref: "#/components/schemas/AssetId"
+        payTo:
+          type: string
+        maxTimeoutSeconds:
+          type: integer
+          minimum: 1
+        extra:
+          type: object
+          description: "`script` (Cascade native child: scriptHash, datum CBOR hex, spec_hash) or `masumi` (closed object per the x402 Cardano spec)."
+          additionalProperties: true
+    SubtreeReport:
+      type: object
+      required: [agent_id, tree_id, node_id, children, reported_at, key, signature]
+      properties:
+        agent_id:
+          $ref: "#/components/schemas/AgentId"
+        tree_id:
+          $ref: "#/components/schemas/Hex28"
+        node_id:
+          $ref: "#/components/schemas/Hex28"
+        children:
+          type: array
+          items:
+            type: object
+            required: [node_id, spec_hash, state, price, asset, tx_ids]
+            properties:
+              node_id:
+                $ref: "#/components/schemas/Hex28"
+              spec_hash:
+                $ref: "#/components/schemas/Hex32"
+              state:
+                type: string
+                enum: [Funded, Submitted, Challenged, Disputed, Accepted, Refunded, Settled]
+              price:
+                $ref: "#/components/schemas/Amount"
+              asset:
+                $ref: "#/components/schemas/AssetId"
+              agent_id:
+                $ref: "#/components/schemas/AgentId"
+              tx_ids:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hex32"
+        reported_at:
+          $ref: "#/components/schemas/Ms"
+        key:
+          $ref: "#/components/schemas/CoseKey"
+        signature:
+          $ref: "#/components/schemas/CoseSign1"
+    ResultBundle:
+      type: object
+      required: [job_id, result, result_hash, evidence]
+      properties:
+        job_id:
+          type: string
+        result:
+          description: The result payload (any JSON value).
+        result_hash:
+          $ref: "#/components/schemas/Hex32"
+        evidence:
+          type: object
+          required: [sources, tool_log_hash, journal_hash]
+          properties:
+            sources:
+              type: array
+              items:
+                type: object
+                required: [url]
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  quote:
+                    type: string
+                  retrieved_at:
+                    $ref: "#/components/schemas/Ms"
+            tool_log_hash:
+              $ref: "#/components/schemas/Hex32"
+            journal_hash:
+              $ref: "#/components/schemas/Hex32"
+    CascadeCapabilities:
+      type: object
+      required: [version, roles, categories, max_depth, rails, bond_lovelace, registry_asset_id]
+      properties:
+        version:
+          type: string
+          const: "1"
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [specialist, orchestrator, verifier]
+        categories:
+          type: array
+          items:
+            type: string
+        max_depth:
+          type: integer
+          minimum: 0
+        rails:
+          type: array
+          items:
+            $ref: "#/components/schemas/Rail"
+        bond_lovelace:
+          $ref: "#/components/schemas/Amount"
+        registry_asset_id:
+          $ref: "#/components/schemas/AgentId"
+        payment_address:
+          type: string

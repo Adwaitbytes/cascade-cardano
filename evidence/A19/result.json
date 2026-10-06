@@ -1,0 +1,43 @@
+{
+  "id": "A19",
+  "title": "Security suite",
+  "criterion": "All adversarial transactions fail; zero critical or high findings open.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:14.969Z",
+  "finished_at": "2026-10-01T00:40:14.971Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [
+    {
+      "name": "adversarial report is from this commit",
+      "expected": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+      "actual": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+      "passed": true
+    },
+    {
+      "name": "adversarial cases ran",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "adversarial unexpected successes",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "adversarial harness errors",
+      "expected": 0,
+      "actual": 0,
+      "passed": true
+    }
+  ],
+  "transactions": [],
+  "artefacts": [
+    "tests/adversarial/report.json"
+  ],
+  "notes": [
+    "failed: not yet implemented: open critical and high finding count parsed from security/review-report.md"
+  ]
+}

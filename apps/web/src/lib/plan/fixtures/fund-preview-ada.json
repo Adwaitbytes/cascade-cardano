@@ -1,0 +1,13 @@
+{
+  "tx_body_hash": "4d9f0f8f5f0f2a6f56f3a7e39a0a1c3c0f0d7a6e0f11b7a4c64e23b8f2a7f001",
+  "summary": "Fund root 8c1b2f14…9d21 with 171.00 ADA (budget 150.00 ADA, structural 21.00 ADA). Network fee 0.62 ADA.",
+  "actions": [{ "type": "FundRoot", "node_id": "8c1b2f14a0c3e5d7f9b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1c39d21", "text": "Fund root 8c1b2f14…9d21 with 171.00 ADA." }],
+  "moves": [
+    { "to": "addr_test1xp043wsr6delw5ggy74yedwrjc2apej75d3sz6d04fy2hmjltzaq85mn7agssfa2fj6u89s46rn9agmrq956l2jg40hqp8puxf", "value": { "asset": "lovelace", "amount": "171000000" } },
+    { "to": "addr_test1xp043wsr6delw5ggy74yedwrjc2apej75d3sz6d04fy2hmjltzaq85mn7agssfa2fj6u89s46rn9agmrq956l2jg40hqp8puxf", "value": { "asset": "5f58ba03d373f7510827aa4cb5c39615d0e65ea3630169afaa48abee.8c1b2f14a0c3e5d7f9b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1c39d21", "amount": "1" } },
+    { "to": "addr_test1wz34dvr4vnefvfpht6ckztx88ply2n4mphcmac43axxd5nqgm0ljq", "value": { "asset": "lovelace", "amount": "2133150" } },
+    { "to": "addr_test1wz34dvr4vnefvfpht6ckztx88ply2n4mphcmac43axxd5nqgm0ljq", "value": { "asset": "5f58ba03d373f7510827aa4cb5c39615d0e65ea3630169afaa48abee.638c1b2f14a0c3e5d7f9b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1c39d21", "amount": "1" } },
+    { "to": "addr_test1qqcpl6pst4j2wh0jdnya4hmhglhz0kj0rfa9pc6as9t7x8004y7jr7qlnj4wnxxle0jw5l9jsu0uyc53e47w3gyc0ddsl6xewv", "value": { "asset": "lovelace", "amount": "9826245718" } }
+  ],
+  "warnings": []
+}

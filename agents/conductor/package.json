@@ -1,0 +1,56 @@
+{
+  "name": "@cascade/agent-conductor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Conductor: root orchestrator that plans a goal into a priced escrow tree (PRD 21.1)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/agent.js",
+  "types": "./dist/agent.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/agent.d.ts",
+      "import": "./dist/agent.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@cascade/agent": "workspace:*",
+    "@cascade/agent-flaky-lisan": "workspace:*",
+    "@cascade/agent-kit": "workspace:*",
+    "@cascade/agent-lookup-api": "workspace:*",
+    "@cascade/agent-pricer": "workspace:*",
+    "@cascade/agent-scout": "workspace:*",
+    "@cascade/agent-scribe": "workspace:*",
+    "@cascade/orchestrator": "workspace:*",
+    "@cascade/policy": "workspace:*",
+    "@cascade/sdk": "workspace:*",
+    "@cascade/shared": "workspace:*",
+    "@temporalio/client": "1.24.0",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@cascade/agent-checker-a": "workspace:*",
+    "@cascade/agent-checker-b": "workspace:*",
+    "@cascade/agent-checker-c": "workspace:*",
+    "@cascade/facilitator": "workspace:*",
+    "@cascade/indexer": "workspace:*",
+    "@cascade/service-kit": "workspace:*",
+    "@cascade/signer": "workspace:*",
+    "@lucid-evolution/lucid": "0.6.5",
+    "@temporalio/worker": "1.24.0",
+    "@types/node": "24.19.0",
+    "@types/pg": "8.23.1",
+    "pino": "10.3.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

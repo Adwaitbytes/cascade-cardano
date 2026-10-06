@@ -1,0 +1,102 @@
+{
+  "A1": {
+    "passes": false,
+    "evidence": "evidence/A1/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A2": {
+    "passes": false,
+    "evidence": "evidence/A2/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A3": {
+    "passes": false,
+    "evidence": "evidence/A3/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A4": {
+    "passes": false,
+    "evidence": "evidence/A4/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A5": {
+    "passes": false,
+    "evidence": "evidence/A5/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A6": {
+    "passes": false,
+    "evidence": "evidence/A6/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A7": {
+    "passes": false,
+    "evidence": "evidence/A7/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A8": {
+    "passes": false,
+    "evidence": "evidence/A8/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A9": {
+    "passes": false,
+    "evidence": "evidence/A9/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A10": {
+    "passes": false,
+    "evidence": "evidence/A10/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A11": {
+    "passes": false,
+    "evidence": "evidence/A11/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A12": {
+    "passes": false,
+    "evidence": "evidence/A12/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A13": {
+    "passes": false,
+    "evidence": "evidence/A13/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A14": {
+    "passes": false,
+    "evidence": "evidence/A14/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A15": {
+    "passes": false,
+    "evidence": "evidence/A15/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A16": {
+    "passes": false,
+    "evidence": "evidence/A16/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A17": {
+    "passes": false,
+    "evidence": "evidence/A17/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A18": {
+    "passes": false,
+    "evidence": "evidence/A18/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A19": {
+    "passes": false,
+    "evidence": "evidence/A19/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  },
+  "A20": {
+    "passes": false,
+    "evidence": "evidence/A20/result.json",
+    "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339"
+  }
+}

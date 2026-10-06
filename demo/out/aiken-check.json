@@ -1,0 +1,1 @@
+{"commit":"86cb9a1","total":735,"unit":672,"property":63,"failed":0,"checks":6972,"command":"cd contracts && aiken check"}

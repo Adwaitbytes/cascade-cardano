@@ -1,0 +1,43 @@
+# secrets
+.env*
+!.env.example
+*.skey
+*.mnemonic
+
+# deps and builds
+node_modules/
+.turbo/
+dist/
+build/
+.next/
+.next-*/
+out/
+!demo/out/
+__pycache__/
+.venv/
+*.pyc
+contracts/build/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# logs and local state
+*.log
+AGENT_STOP
+.DS_Store
+.yaci/
+infra/.data/
+deployments/local.runtime.json
+deployments/agents.preprod.runtime.json
+
+# operator's original input bundle (copied into docs/)
+/files/
+/files.zip
+/Cascade PRD Hierarchical Agent Subcontracting on Cardano.md
+.pnpm-agent.lock/
+.vercel
+.heavy-job.lock/
+.heavy-job-2.lock/
+.long-run.lock/
+.heavy-job-3.lock/

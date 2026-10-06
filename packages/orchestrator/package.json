@@ -1,0 +1,57 @@
+{
+  "name": "@cascade/orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cascade orchestrator: planner, plan validation, quote scoring, recovery policy, LLM client and Temporal workflows",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./llm": {
+      "types": "./dist/llm.d.ts",
+      "import": "./dist/llm.js"
+    },
+    "./workflows": {
+      "types": "./dist/workflows/index.d.ts",
+      "import": "./dist/workflows/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@cascade/agent": "workspace:*",
+    "@cascade/policy": "workspace:*",
+    "@cascade/sdk": "workspace:*",
+    "@cascade/shared": "workspace:*",
+    "@lucid-evolution/lucid": "0.6.5",
+    "@temporalio/activity": "1.24.0",
+    "@temporalio/client": "1.24.0",
+    "@temporalio/common": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
+    "ajv": "8.20.0",
+    "hono": "4.13.12",
+    "lz-string": "1.5.0",
+    "pg": "8.23.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@temporalio/testing": "1.24.0",
+    "@types/node": "24.19.0",
+    "@types/pg": "8.23.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

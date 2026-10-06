@@ -1,0 +1,16 @@
+{
+  "id": "A12",
+  "title": "Deadline nesting",
+  "criterion": "A child whose `dispute_until` breaks the parent's window fails on chain.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:16.441Z",
+  "finished_at": "2026-10-01T00:40:16.442Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: [\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"urls\",\n      \"explorer_demo_tree\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+  ]
+}

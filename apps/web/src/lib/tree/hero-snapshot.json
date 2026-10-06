@@ -1,0 +1,652 @@
+{
+ "captured_at": "2026-10-04",
+ "source": "https://cascade-alpha-amber.vercel.app/api/v1/trees/458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+ "tree": {
+  "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+  "buyer_vkh": "301fe8305d64a75df26cc9dadf7747ee27da4f1a7a50e35d8157e31d",
+  "asset": "lovelace",
+  "root_budget": "21000000",
+  "plan_root": "8c7f72613160d14aaa4ad9a2cd8c3850453c32d068cadc9e08207d89df423ef8",
+  "config_utxo": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341#1",
+  "state": "closed",
+  "frozen": false,
+  "created_slot": 135164341,
+  "closed_slot": 135165422,
+  "config": {
+   "asset": "lovelace",
+   "plan_root": "8c7f72613160d14aaa4ad9a2cd8c3850453c32d068cadc9e08207d89df423ef8",
+   "buyer": "301fe8305d64a75df26cc9dadf7747ee27da4f1a7a50e35d8157e31d",
+   "arbiters": [
+    "9d2045440ede3f73297aed1a4387b4cd72fa0e06d9958f096930b415",
+    "30da2d94fb9f38d1802f7ad22bd9d75dbc7f73fb74a7d2843c1a237e"
+   ],
+   "arbiter_threshold": 2,
+   "max_depth": 3,
+   "max_fanout": 6,
+   "max_child_share_bps": 10000,
+   "min_challenge_window": 60000,
+   "min_safety_margin": 60000,
+   "min_dispute_window": 60000,
+   "allowed_leaf_kinds": [
+    "Native",
+    "MasumiReceipt",
+    "MeteredReceipt"
+   ],
+   "protocol_fee_bps": 0,
+   "challenge_bond": "4000000",
+   "slash_wronged_bps": 7000
+  },
+  "nodes": [
+   {
+    "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "parent_id": null,
+    "depth": 0,
+    "kind": "Native",
+    "operator_vkh": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d",
+    "payee": "addr_test1qrvf2j6hy6v5yrdupr6fnv7nr7zwhhhv3aem6xvj5ecjjn0k9mdjvj6eutnpaez6qtmglarnjsgwgt9guynkhaur8qkq8cgqtl",
+    "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+    "budget": "21000000",
+    "fee": "1000000",
+    "committed": "0",
+    "spent": "5500000",
+    "children_open": 0,
+    "spec_hash": "ca68c74bae2930f1810d92665e4073076935f9ce41bf79277f3ce235b05782f5",
+    "input_hash": "7a4e184f24adfef8fe25b01f2560cb700c6971bb264ba9ca400c52b53caea26d",
+    "result_hash": "002fd8f1e644cd3567ed826070deee947ff3f405e5e9721d3af76148cdb8d408",
+    "acceptance": {
+     "type": "BuyerAccept",
+     "key": "301fe8305d64a75df26cc9dadf7747ee27da4f1a7a50e35d8157e31d"
+    },
+    "submit_by": 1790851115000,
+    "challenge_until": 1790851175000,
+    "refund_after": 1790851115000,
+    "dispute_until": 1790851235000,
+    "state": "Settled",
+    "current_utxo": null,
+    "external_ref": null,
+    "tx_ids": [
+     "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341",
+     "d525ce88bd775070ad1c5ef0d19ce9ac9d65ae42b60dfbce0c2e7c55b364919e",
+     "3478b1545fbf8e4bf391ca2849843ad0ddc808687581a0b1160623f43740110f",
+     "c6c13dc163d58f7872bed6efb0813959ee9e21323a6787909d5bb2d14747b75c",
+     "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+     "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+     "f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc",
+     "426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285",
+     "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
+     "5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489",
+     "41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b",
+     "5b4e08ca132cb7efc228baf41292ed88d28f16b8a6759673c70c808474edff65",
+     "56ef4316ee1fa16914b1db0ee956cb5c29fd8fb8c864498422a6f9a82e251699",
+     "d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217"
+    ],
+    "agent_name": "Cascade Conductor"
+   },
+   {
+    "node_id": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
+    "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "depth": 1,
+    "kind": "Native",
+    "operator_vkh": "a2ed7af9e0409484f01ac189fb7643ab855b421b19a98f9339cdb7f4",
+    "payee": "addr_test1qz3w67heupqffp8srtqcn7mkgw4c2k6zrvv6nrun88xm0a9mnzfenpxqdhndklp0ha2lnhzawlx5vfj69gggdc4tmr6sr3yc8x",
+    "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b11afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+    "budget": "3000000",
+    "fee": "1000000",
+    "committed": "0",
+    "spent": "0",
+    "children_open": 0,
+    "spec_hash": "b25bafc2abfeebe78bd432cf5faa504ef62f032577086574e5f8afc80e15b7ac",
+    "input_hash": "341ff76bb9f85e96e49c9a322bdc3917ae4e159a09d865b05590c8b9dca7ee60",
+    "result_hash": "ba41e71e217d2dafd1df21f220b6c19d62246a5ecae80843a6f00172ddba410b",
+    "acceptance": {
+     "type": "ParentAccept",
+     "key": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d"
+    },
+    "submit_by": 1790848278000,
+    "challenge_until": 1790848998000,
+    "refund_after": 1790848278000,
+    "dispute_until": 1790849898000,
+    "state": "Settled",
+    "current_utxo": null,
+    "external_ref": null,
+    "tx_ids": [
+     "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+     "3f3515dfbdfca2fcc3b95564f44b754e999d3c769e6fcf8c73f5502cea4a627a",
+     "0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
+     "f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc"
+    ],
+    "agent_name": "Cascade Scout"
+   },
+   {
+    "node_id": "c1f49ab2b6d7c6fc380214547dc68031369a2fa6321e9b37c01345b1",
+    "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "depth": 1,
+    "kind": "Native",
+    "operator_vkh": "2a48c193f513f79c79a382b5b99b194b8aeb9d5b3c95799b9e434788",
+    "payee": "addr_test1qq4y3svn75fl08re5wpttwvmr99c46uatv7f27vmnep50zpvny53ctt7kw98uxg7uhc5r8jwkfgtsnlfj3t768j5t89qcx9356",
+    "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b14afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+    "budget": "2000000",
+    "fee": "1000000",
+    "committed": "0",
+    "spent": "0",
+    "children_open": 0,
+    "spec_hash": "90617a8e43a61c13acd289f7f33d6624fc605c09aaa06475fd1dfbe313cdfa15",
+    "input_hash": "10e31dab3d1d3357f2e95c30bf2910bec7d30a83fcc4aad6c65bd78c9121a284",
+    "result_hash": null,
+    "acceptance": {
+     "type": "ParentAccept",
+     "key": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d"
+    },
+    "submit_by": 1790848038000,
+    "challenge_until": 1790848098000,
+    "refund_after": 1790848038000,
+    "dispute_until": 1790848158000,
+    "state": "Refunded",
+    "current_utxo": null,
+    "external_ref": null,
+    "tx_ids": [
+     "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+     "426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285"
+    ],
+    "agent_name": "Flaky Lisan (test agent)"
+   },
+   {
+    "node_id": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
+    "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "depth": 1,
+    "kind": "Native",
+    "operator_vkh": "d2ef59a63791bb602d475b2020dbb1c36a925b3068ee963f0aae72ae",
+    "payee": "addr_test1qrfw7kdxx7gmkcpdgadjqgxmk8pk4yjmxp5wa93lp2h89t59uv26xnkml5nhacxr2magmd5u3p2teh5s2fh8jmxaqr7s8h8vwz",
+    "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b12afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+    "budget": "3000000",
+    "fee": "1000000",
+    "committed": "0",
+    "spent": "0",
+    "children_open": 0,
+    "spec_hash": "23b3bce8ba5371f03e55838461ba67db06c3ce2afa00c749fc091267b2b5a82b",
+    "input_hash": "6fd3bda0de1654ea47edb5e1196cc83a90726c97d7150ab88d85c04a4d06854e",
+    "result_hash": "29824f884b540e05c866c665a0b69c19815ff72288d42cb575a04fbd87072242",
+    "acceptance": {
+     "type": "ParentAccept",
+     "key": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d"
+    },
+    "submit_by": 1790848278000,
+    "challenge_until": 1790848998000,
+    "refund_after": 1790848278000,
+    "dispute_until": 1790849898000,
+    "state": "Settled",
+    "current_utxo": null,
+    "external_ref": null,
+    "tx_ids": [
+     "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+     "7f8b365f656097b1a67a7f9e7ff98a4ecab3b75ac5d4f520aa87150566767817",
+     "0accdf81c601e9c8608436f2c960dd4f16cf2c5ce0a4b95a5b1cf25c4a4f2232",
+     "2cb65930d439c835813f6674c92de59ab5990d2b46efb8d8c2cefe2eea8b6d8d",
+     "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb"
+    ],
+    "agent_name": "Cascade Pricer"
+   },
+   {
+    "node_id": "696c07e851aa04bc91ba58f6e307964eab08d86a0f10ce8d173fa404",
+    "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "depth": 1,
+    "kind": "MeteredReceipt",
+    "operator_vkh": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d",
+    "payee": "addr_test1qrqg4fm8v496uc7cy99tmvnqzs4udr62gagkamexet24z7ln2qqtfynh7d63ca4kadge4g48uptv402s4pjvk4xzlwtskxe9s6",
+    "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+    "budget": "3000000",
+    "fee": "0",
+    "committed": "0",
+    "spent": "0",
+    "children_open": 0,
+    "spec_hash": "12f9d915a0cda677893b1cc0f65a7677f28f440b73bea1167856d9cd40b0a49b",
+    "input_hash": "6bf550cbdb048bdf477d9153cb322d5136f1f82a10aa5bfc2205b949d1ee716f",
+    "result_hash": null,
+    "acceptance": {
+     "type": "ParentAccept",
+     "key": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d"
+    },
+    "submit_by": 1790848442000,
+    "challenge_until": 1790848502000,
+    "refund_after": 1790848442000,
+    "dispute_until": 1790848562000,
+    "state": "Settled",
+    "current_utxo": null,
+    "external_ref": null,
+    "tx_ids": [
+     "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+     "5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489"
+    ],
+    "agent_name": "Cascade Conductor"
+   },
+   {
+    "node_id": "9efe3a1069e591cdab998e3a8e252afb20e6419d6bedb3c2ad313c12",
+    "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "depth": 1,
+    "kind": "MasumiReceipt",
+    "operator_vkh": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d",
+    "payee": "addr_test1qzne4nwv2mwg6apy7cv8px7ce3calanm0kzvy5q6mh5u94dzgfl34dpmtvg7azewyqx4a5jkeph3uz2qtspgmqumekuq94h3ee",
+    "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+    "budget": "3000000",
+    "fee": "0",
+    "committed": "0",
+    "spent": "0",
+    "children_open": 0,
+    "spec_hash": "46b8475aa43a7c9233f20a8ca8789d09518baa6fd8188c7afe0da26d273f1278",
+    "input_hash": "4527254e780f78bca77659ff31f075c82734a06fe5012819b2852eda6ecd89e6",
+    "result_hash": null,
+    "acceptance": {
+     "type": "ParentAccept",
+     "key": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d"
+    },
+    "submit_by": 1790848442000,
+    "challenge_until": 1790848502000,
+    "refund_after": 1790848442000,
+    "dispute_until": 1790848562000,
+    "state": "Settled",
+    "current_utxo": null,
+    "external_ref": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5#4",
+    "tx_ids": [
+     "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+     "41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b"
+    ],
+    "agent_name": "Cascade Conductor"
+   }
+  ]
+ },
+ "events": [
+  {
+   "type": "tree.funded",
+   "event_id": "126",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341",
+   "slot": 135164341,
+   "confirmations": 9675,
+   "value": {
+    "asset": "lovelace",
+    "amount": "20000000"
+   },
+   "emitted_at": 1790847764806,
+   "payload": {
+    "plan_root": "8c7f72613160d14aaa4ad9a2cd8c3850453c32d068cadc9e08207d89df423ef8",
+    "config_utxo": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341#1"
+   }
+  },
+  {
+   "type": "tree.funded",
+   "event_id": "132",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "d525ce88bd775070ad1c5ef0d19ce9ac9d65ae42b60dfbce0c2e7c55b364919e",
+   "slot": 135164484,
+   "confirmations": 9670,
+   "value": {
+    "asset": "lovelace",
+    "amount": "1000000"
+   },
+   "emitted_at": 1790847857293,
+   "payload": {
+    "plan_root": "8c7f72613160d14aaa4ad9a2cd8c3850453c32d068cadc9e08207d89df423ef8",
+    "config_utxo": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341#1"
+   }
+  },
+  {
+   "type": "tree.frozen",
+   "event_id": "134",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "3478b1545fbf8e4bf391ca2849843ad0ddc808687581a0b1160623f43740110f",
+   "slot": 135164536,
+   "confirmations": 9669,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790847857293,
+   "payload": {
+    "frozen": true
+   }
+  },
+  {
+   "type": "tree.frozen",
+   "event_id": "135",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "c6c13dc163d58f7872bed6efb0813959ee9e21323a6787909d5bb2d14747b75c",
+   "slot": 135164588,
+   "confirmations": 9666,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790847918034,
+   "payload": {
+    "frozen": false
+   }
+  },
+  {
+   "type": "node.drawn",
+   "event_id": "138",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
+   "tx_id": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+   "slot": 135164629,
+   "confirmations": 9664,
+   "value": {
+    "asset": "lovelace",
+    "amount": "3000000"
+   },
+   "emitted_at": 1790848000450,
+   "payload": {
+    "kind": "Native",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "spec_hash": "b25bafc2abfeebe78bd432cf5faa504ef62f032577086574e5f8afc80e15b7ac"
+   }
+  },
+  {
+   "type": "node.drawn",
+   "event_id": "139",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
+   "tx_id": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+   "slot": 135164629,
+   "confirmations": 9664,
+   "value": {
+    "asset": "lovelace",
+    "amount": "3000000"
+   },
+   "emitted_at": 1790848000450,
+   "payload": {
+    "kind": "Native",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "spec_hash": "23b3bce8ba5371f03e55838461ba67db06c3ce2afa00c749fc091267b2b5a82b"
+   }
+  },
+  {
+   "type": "node.drawn",
+   "event_id": "140",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "c1f49ab2b6d7c6fc380214547dc68031369a2fa6321e9b37c01345b1",
+   "tx_id": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+   "slot": 135164629,
+   "confirmations": 9664,
+   "value": {
+    "asset": "lovelace",
+    "amount": "2000000"
+   },
+   "emitted_at": 1790848000450,
+   "payload": {
+    "kind": "Native",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "spec_hash": "90617a8e43a61c13acd289f7f33d6624fc605c09aaa06475fd1dfbe313cdfa15"
+   }
+  },
+  {
+   "type": "node.drawn",
+   "event_id": "141",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "696c07e851aa04bc91ba58f6e307964eab08d86a0f10ce8d173fa404",
+   "tx_id": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+   "slot": 135164655,
+   "confirmations": 9662,
+   "value": {
+    "asset": "lovelace",
+    "amount": "3000000"
+   },
+   "emitted_at": 1790848039135,
+   "payload": {
+    "kind": "MeteredReceipt",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "spec_hash": "12f9d915a0cda677893b1cc0f65a7677f28f440b73bea1167856d9cd40b0a49b"
+   }
+  },
+  {
+   "type": "node.drawn",
+   "event_id": "142",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "9efe3a1069e591cdab998e3a8e252afb20e6419d6bedb3c2ad313c12",
+   "tx_id": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+   "slot": 135164655,
+   "confirmations": 9662,
+   "value": {
+    "asset": "lovelace",
+    "amount": "3000000"
+   },
+   "emitted_at": 1790848039135,
+   "payload": {
+    "kind": "MasumiReceipt",
+    "parent_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "spec_hash": "46b8475aa43a7c9233f20a8ca8789d09518baa6fd8188c7afe0da26d273f1278"
+   }
+  },
+  {
+   "type": "node.submitted",
+   "event_id": "143",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
+   "tx_id": "3f3515dfbdfca2fcc3b95564f44b754e999d3c769e6fcf8c73f5502cea4a627a",
+   "slot": 135164688,
+   "confirmations": 9660,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848073043,
+   "payload": {
+    "result_hash": "ba41e71e217d2dafd1df21f220b6c19d62246a5ecae80843a6f00172ddba410b"
+   }
+  },
+  {
+   "type": "node.accepted",
+   "event_id": "144",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
+   "tx_id": "0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
+   "slot": 135164764,
+   "confirmations": 9659,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848073043,
+   "payload": {}
+  },
+  {
+   "type": "node.settled",
+   "event_id": "145",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "789b0a4bb72d927461af6b9980901766098afb743eb1ae3051f1d4fe",
+   "tx_id": "f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc",
+   "slot": 135164789,
+   "confirmations": 9657,
+   "value": {
+    "asset": "lovelace",
+    "amount": "1000000"
+   },
+   "emitted_at": 1790848073043,
+   "payload": {
+    "fee_paid": "1000000",
+    "returned_to_parent": "2000000"
+   }
+  },
+  {
+   "type": "node.submitted",
+   "event_id": "146",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
+   "tx_id": "7f8b365f656097b1a67a7f9e7ff98a4ecab3b75ac5d4f520aa87150566767817",
+   "slot": 135164822,
+   "confirmations": 9655,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848176099,
+   "payload": {
+    "result_hash": "29824f884b540e05c866c665a0b69c19815ff72288d42cb575a04fbd87072242"
+   }
+  },
+  {
+   "type": "node.challenged",
+   "event_id": "147",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
+   "tx_id": "0accdf81c601e9c8608436f2c960dd4f16cf2c5ce0a4b95a5b1cf25c4a4f2232",
+   "slot": 135164850,
+   "confirmations": 9652,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848176099,
+   "payload": {
+    "challenger": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d",
+    "reason_hash": "deacfaf7ea94ecee96a35f531cb941f0f7f50c40fc3218ad2ad986f1ff365c73",
+    "bond_lovelace": "4000000"
+   }
+  },
+  {
+   "type": "node.refunded",
+   "event_id": "148",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "c1f49ab2b6d7c6fc380214547dc68031369a2fa6321e9b37c01345b1",
+   "tx_id": "426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285",
+   "slot": 135164922,
+   "confirmations": 9646,
+   "value": {
+    "asset": "lovelace",
+    "amount": "2000000"
+   },
+   "emitted_at": 1790848237374,
+   "payload": {}
+  },
+  {
+   "type": "node.resolved",
+   "event_id": "149",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "f087b35b3922c3a989716024ee051c6ef11c68a2a1d2c53505b63d6a",
+   "tx_id": "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
+   "slot": 135165007,
+   "confirmations": 9641,
+   "value": {
+    "asset": "lovelace",
+    "amount": "1500000"
+   },
+   "emitted_at": 1790848341902,
+   "payload": {
+    "parent": "1500000",
+    "worker": "1500000"
+   }
+  },
+  {
+   "type": "receipt.closed",
+   "event_id": "152",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "696c07e851aa04bc91ba58f6e307964eab08d86a0f10ce8d173fa404",
+   "tx_id": "5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489",
+   "slot": 135165246,
+   "confirmations": 9626,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848616990,
+   "payload": {
+    "external_ref": "0000000000000000000000000000000000000000000000000000000000000000#0"
+   }
+  },
+  {
+   "type": "receipt.closed",
+   "event_id": "154",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "9efe3a1069e591cdab998e3a8e252afb20e6419d6bedb3c2ad313c12",
+   "tx_id": "41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b",
+   "slot": 135165325,
+   "confirmations": 9622,
+   "value": {
+    "asset": "lovelace",
+    "amount": "3000000"
+   },
+   "emitted_at": 1790848648118,
+   "payload": {
+    "external_ref": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5#4"
+   }
+  },
+  {
+   "type": "node.submitted",
+   "event_id": "155",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "5b4e08ca132cb7efc228baf41292ed88d28f16b8a6759673c70c808474edff65",
+   "slot": 135165366,
+   "confirmations": 9621,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848648118,
+   "payload": {
+    "result_hash": "002fd8f1e644cd3567ed826070deee947ff3f405e5e9721d3af76148cdb8d408"
+   }
+  },
+  {
+   "type": "node.accepted",
+   "event_id": "156",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "56ef4316ee1fa16914b1db0ee956cb5c29fd8fb8c864498422a6f9a82e251699",
+   "slot": 135165394,
+   "confirmations": 9618,
+   "value": {
+    "asset": "lovelace",
+    "amount": "0"
+   },
+   "emitted_at": 1790848772548,
+   "payload": {}
+  },
+  {
+   "type": "node.settled",
+   "event_id": "157",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217",
+   "slot": 135165422,
+   "confirmations": 9616,
+   "value": {
+    "asset": "lovelace",
+    "amount": "1000000"
+   },
+   "emitted_at": 1790848807014,
+   "payload": {
+    "fee_paid": "1000000",
+    "returned_to_parent": "0"
+   }
+  },
+  {
+   "type": "tree.closed",
+   "event_id": "158",
+   "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "node_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+   "tx_id": "d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217",
+   "slot": 135165422,
+   "confirmations": 9616,
+   "value": {
+    "asset": "lovelace",
+    "amount": "14500000"
+   },
+   "emitted_at": 1790848807014,
+   "payload": {
+    "paid": "1000000",
+    "refunded": "14500000",
+    "structural_returned_lovelace": "19896400"
+   }
+  }
+ ]
+}

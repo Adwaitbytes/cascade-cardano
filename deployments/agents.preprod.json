@@ -1,0 +1,251 @@
+{
+  "network": "preprod",
+  "note": "Registry facts. Live public URLs are in the git-ignored deployments/agents.preprod.runtime.json (scripts/agents-gateway.ts).",
+  "registrations": [
+    {
+      "agent": "checker-a",
+      "name": "Cascade Checker A",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorsj7w0019m4qijcv74d68",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b1038dbef204d429c5b8207175d900b1c5999f7b96d5da1c3c353655eed000001",
+      "state": "UpdateConfirmed",
+      "txHash": "46bab4ff451d261ceaa1f05b2258d81c0381fbe19f976e3a2b3ae53c58b009c6",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/checker-a",
+      "paymentVkh": "41b535ef979cc24f55f1f6aea2cd816b0e9551798deb295275c474d0",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "500000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "2000000"
+        }
+      ],
+      "onChainVerified": true,
+      "updatedAt": "2026-10-01T01:38:33.358Z"
+    },
+    {
+      "agent": "checker-b",
+      "name": "Cascade Checker B",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorsjsr001im4qib2k60fg1",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b1138dbef204d429c5b8207175d900b1c5999f7b96d5da1c3c353655eed000001",
+      "state": "UpdateConfirmed",
+      "txHash": "46bab4ff451d261ceaa1f05b2258d81c0381fbe19f976e3a2b3ae53c58b009c6",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/checker-b",
+      "paymentVkh": "14221c24e622501f946a88caf2ec130e16d527d2d0a3e2ea5da7fa0f",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "500000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "2000000"
+        }
+      ],
+      "onChainVerified": true,
+      "updatedAt": "2026-10-01T01:38:33.895Z"
+    },
+    {
+      "agent": "checker-c",
+      "name": "Cascade Checker C",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuovdm70003xm4qijmtw5ry1",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10c71aeb376b22de8a8c86a36adcb0f9b558ee210c17e91b22c9eb15a5000000",
+      "state": "RegistrationConfirmed",
+      "txHash": "12bee7e16d1a542f6dfb541ca919ff162de8950d517ee1d5b659c0570689b4a1",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/checker-c",
+      "paymentVkh": "fcc95699f82e01dfe5ec9acc671b0fc597057cf2ea3f3be56bbabd63",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "500000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "2000000"
+        }
+      ],
+      "onChainVerified": false,
+      "updatedAt": "2026-10-01T01:45:13.098Z"
+    },
+    {
+      "agent": "conductor",
+      "name": "Cascade Conductor",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorsgsu0000m4qixiemi45c",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "state": "UpdateConfirmed",
+      "txHash": "2e206ae83fde6af014d173d3cadcc8986190d28cc0474633eb4e745369369889",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/conductor",
+      "paymentVkh": "d8954b572699420dbc08f499b3d31f84ebdeec8f73bd1992a671294d",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "2000000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "5000000"
+        }
+      ],
+      "onChainVerified": false,
+      "updatedAt": "2026-10-01T01:37:29.340Z"
+    },
+    {
+      "agent": "flaky-lisan",
+      "name": "Flaky Lisan (test agent)",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorsivk0010m4qixb6ubqjc",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b14afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "state": "UpdateConfirmed",
+      "txHash": "46bab4ff451d261ceaa1f05b2258d81c0381fbe19f976e3a2b3ae53c58b009c6",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/flaky-lisan",
+      "paymentVkh": "2a48c193f513f79c79a382b5b99b194b8aeb9d5b3c95799b9e434788",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "1000000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "3000000"
+        }
+      ],
+      "onChainVerified": true,
+      "updatedAt": "2026-10-01T01:38:32.895Z"
+    },
+    {
+      "agent": "lisan",
+      "name": "Lisan",
+      "paymentService": "lisan",
+      "registryRequestId": "cmuorslax0000m4n25iomcql4",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10a267ff321dc80072585af00e20fe66395d43356f3634dbf1efacabe0000002",
+      "state": "UpdateConfirmed",
+      "txHash": "f06dc7513c1ba2b7e6ad223321229bc0b0416f54a4c9fb0144524fe7275a8a55",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/lisan",
+      "paymentVkh": "12dabe85656d609706d3a3d3d3e0c7fc95ab0b42d16afae5fc5be6b8",
+      "pricing": [
+        {
+          "asset": "lovelace",
+          "amount": "10000000"
+        }
+      ],
+      "onChainVerified": false,
+      "updatedAt": "2026-10-01T03:33:58.588Z"
+    },
+    {
+      "agent": "lisan-b",
+      "name": "Lisan-B (test agent: fails on purpose)",
+      "paymentService": "lisan-b",
+      "registryRequestId": "cmuoye4pm0001b9msztsczggj",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b103e5b119abe2948df5a6037484ee0821c9d17cfb2587fc90345c2381e000001",
+      "state": "UpdateConfirmed",
+      "txHash": "766a678211a0438cb15ad2e1418755827650ef668207342f7a929f8af1504857",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/lisan-b",
+      "paymentVkh": "7959810edb73aa1659a96f6b31a2b7fc266b87601c5fcc38716de873",
+      "pricing": [
+        {
+          "asset": "lovelace",
+          "amount": "10000000"
+        }
+      ],
+      "onChainVerified": true,
+      "updatedAt": "2026-10-01T03:34:19.602Z"
+    },
+    {
+      "agent": "lookup-api",
+      "name": "Cascade Lookup API",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorsibg000rm4qiibuvyy5u",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b13afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "state": "UpdateConfirmed",
+      "txHash": "46bab4ff451d261ceaa1f05b2258d81c0381fbe19f976e3a2b3ae53c58b009c6",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/lookup-api",
+      "paymentVkh": "c08aa767654bae63d8214abdb260142bc68f4a47516eef26cad5517b",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "100000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "1000000"
+        }
+      ],
+      "onChainVerified": true,
+      "updatedAt": "2026-10-01T01:38:32.414Z"
+    },
+    {
+      "agent": "pricer",
+      "name": "Cascade Pricer",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorshr0000im4qimsd25tmi",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b12afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "state": "UpdateConfirmed",
+      "txHash": "46bab4ff451d261ceaa1f05b2258d81c0381fbe19f976e3a2b3ae53c58b009c6",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/pricer",
+      "paymentVkh": "d2ef59a63791bb602d475b2020dbb1c36a925b3068ee963f0aae72ae",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "1000000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "3000000"
+        }
+      ],
+      "onChainVerified": true,
+      "updatedAt": "2026-10-01T01:38:31.888Z"
+    },
+    {
+      "agent": "scout",
+      "name": "Cascade Scout",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorsh910009m4qiony93z76",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b11afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "state": "UpdateConfirmed",
+      "txHash": "2e206ae83fde6af014d173d3cadcc8986190d28cc0474633eb4e745369369889",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/scout",
+      "paymentVkh": "a2ed7af9e0409484f01ac189fb7643ab855b421b19a98f9339cdb7f4",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "1000000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "3000000"
+        }
+      ],
+      "onChainVerified": false,
+      "updatedAt": "2026-10-01T01:37:29.859Z"
+    },
+    {
+      "agent": "scribe",
+      "name": "Cascade Scribe",
+      "paymentService": "orchestrator",
+      "registryRequestId": "cmuorske1001rm4qiuwfa9c0p",
+      "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b1238dbef204d429c5b8207175d900b1c5999f7b96d5da1c3c353655eed000001",
+      "state": "UpdateConfirmed",
+      "txHash": "bcc3a26d63bb7cd45fdda11f97dcdad968e371d012da702b1c6ca70cd1dc0d6e",
+      "apiBaseUrl": "https://caenogenetic-varnishy-shaunte.ngrok-free.dev/scribe",
+      "paymentVkh": "a79acdcc56dc8d7424f618709bd8cc71dff67b7d84c2501adde9c2d5",
+      "pricing": [
+        {
+          "asset": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+          "amount": "1000000"
+        },
+        {
+          "asset": "lovelace",
+          "amount": "3000000"
+        }
+      ],
+      "onChainVerified": false,
+      "updatedAt": "2026-10-01T01:39:54.960Z"
+    }
+  ]
+}

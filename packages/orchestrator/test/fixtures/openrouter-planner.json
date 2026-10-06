@@ -1,0 +1,42 @@
+{
+  "recorded_at": "2026-09-30T23:04:58.146Z",
+  "note": "Real OpenRouter chat completion for the PRD 21.2 demo goal, recorded by the live planner smoke run. Usage and content only.",
+  "model": "google/gemini-2.5-flash-lite",
+  "choices": [
+    {
+      "index": 0,
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "STOP",
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"summary\": \"Plan for a market entry brief for selling cold-pressed juice in Dubai.\",\n  \"tasks\": [\n    {\n      \"id\": \"market-research\",\n      \"parent\": \"root\",\n      \"title\": \"Research the cold-pressed juice market in Dubai, including consumer trends, regulations, and distribution channels.\",\n      \"category\": \"research\",\n      \"rail\": \"native\",\n      \"output_fields\": [\n        {\n          \"name\": \"market_overview\",\n          \"type\": \"string\",\n          \"description\": \"An overview of the cold-pressed juice market in Dubai.\"\n        },\n        {\n          \"name\": \"consumer_trends\",\n          \"type\": \"array\",\n          \"description\": \"Key consumer trends in the Dubai juice market.\"\n        },\n        {\n          \"name\": \"regulations\",\n          \"type\": \"string\",\n          \"description\": \"Relevant regulations for food and beverage businesses in Dubai.\"\n        },\n        {\n          \"name\": \"distribution_channels\",\n          \"type\": \"array\",\n          \"description\": \"Potential distribution channels for cold-pressed juice in Dubai.\"\n        }\n      ],\n      \"acceptance\": \"VerifierQuorum\",\n      \"effort_minutes\": 60,\n      \"may_sub_hire\": true,\n      \"budget_weight\": 30,\n      \"verifies\": \"\",\n      \"contingency_for\": \"\",\n      \"after\": []\n    },\n    {\n      \"id\": \"competitor-pricing\",\n      \"parent\": \"root\",\n      \"title\": \"Identify key competitors in the Dubai cold-pressed juice market and compile a pricing table.\",\n      \"category\": \"pricing\",\n      \"rail\": \"native\",\n      \"output_fields\": [\n        {\n          \"name\": \"competitors\",\n          \"type\": \"array\",\n          \"description\": \"List of key competitors.\"\n        },\n        {\n          \"name\": \"pricing_table\",\n          \"type\": \"object\",\n          \"description\": \"A table comparing competitor prices for similar products.\"\n        }\n      ],\n      \"acceptance\": \"VerifierQuorum\",\n      \"effort_minutes\": 45,\n      \"may_sub_hire\": true,\n      \"budget_weight\": 25,\n      \"verifies\": \"\",\n      \"contingency_for\": \"\",\n      \"after\": [\n        \"market-research\"\n      ]\n    },\n    {\n      \"id\": \"fact-check-market\",\n      \"parent\": \"root\",\n      \"title\": \"Fact-check the market research findings for accuracy and reliability.\",\n      \"category\": \"verification\",\n      \"rail\": \"native\",\n      \"output_fields\": [\n        {\n          \"name\": \"verified\",\n          \"type\": \"boolean\",\n          \"description\": \"Indicates if the fact check was successful.\"\n        },\n        {\n          \"name\": \"sources\",\n          \"type\": \"array\",\n          \"description\": \"List of sources used for verification.\"\n        }\n      ],\n      \"acceptance\": \"ParentAccept\",\n      \"effort_minutes\": 30,\n      \"may_sub_hire\": false,\n      \"budget_weight\": 10,\n      \"verifies\": \"market-research\",\n      \"contingency_for\": \"\",\n      \"after\": [\n        \"market-research\"\n      ]\n    },\n    {\n      \"id\": \"fact-check-pricing\",\n      \"parent\": \"root\",\n      \"title\": \"Fact-check the competitor pricing data for accuracy and reliability.\",\n      \"category\": \"verification\",\n      \"rail\": \"native\",\n      \"output_fields\": [\n        {\n          \"name\": \"verified\",\n          \"type\": \"boolean\",\n          \"description\": \"Indicates if the fact check was successful.\"\n        },\n        {\n          \"name\": \"sources\",\n          \"type\": \"array\",\n          \"description\": \"List of sources used for verification.\"\n        }\n      ],\n      \"acceptance\": \"ParentAccept\",\n      \"effort_minutes\": 30,\n      \"may_sub_hire\": false,\n      \"budget_weight\": 10,\n      \"verifies\": \"competitor-pricing\",\n      \"contingency_for\": \"\",\n      \"after\": [\n        \"competitor-pricing\"\n      ]\n    },\n    {\n      \"id\": \"brief-writing\",\n      \"parent\": \"root\",\n      \"title\": \"Write the market entry brief based on the research and pricing data.\",\n      \"category\": \"writing\",\n      \"rail\": \"native\",\n      \"output_fields\": [\n        {\n          \"name\": \"market_entry_brief\",\n          \"type\": \"string\",\n          \"description\": \"The comprehensive market entry brief.\"\n        }\n      ],\n      \"acceptance\": \"VerifierQuorum\",\n      \"effort_minutes\": 75,\n      \"may_sub_hire\": true,\n      \"budget_weight\": 20,\n      \"verifies\": \"\",\n      \"contingency_for\": \"\",\n      \"after\": [\n        \"fact-check-market\",\n        \"fact-check-pricing\"\n      ]\n    },\n    {\n      \"id\": \"arabic-translation\",\n      \"parent\": \"root\",\n      \"title\": \"Translate the summary of the market entry brief into Arabic.\",\n      \"category\": \"translation\",\n      \"rail\": \"masumi\",\n      \"output_fields\": [\n        {\n          \"name\": \"translated_summary\",\n          \"type\": \"string\",\n          \"description\": \"The Arabic translation of the brief's summary.\"\n        }\n      ],\n      \"acceptance\": \"AutoAfterWindow\",\n      \"effort_minutes\": 30,\n      \"may_sub_hire\": false,\n      \"budget_weight\": 15,\n      \"verifies\": \"\",\n      \"contingency_for\": \"\",\n      \"after\": [\n        \"brief-writing\"\n      ]\n    }\n  ]\n}",
+        "refusal": null,
+        "reasoning": null
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1887,
+    "completion_tokens": 1387,
+    "total_tokens": 3274,
+    "cost": 0.0007435,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0007435,
+      "upstream_inference_prompt_cost": 0.0001887,
+      "upstream_inference_completions_cost": 0.0005548
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  }
+}

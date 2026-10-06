@@ -1,0 +1,43 @@
+{
+  "name": "@cascade/agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cascade agent server: MIP-003 endpoints plus Cascade extensions, job store, status machine, result and evidence bundling",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@cascade/shared": "workspace:*",
+    "@hono/node-server": "2.1.3",
+    "@noble/curves": "2.4.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "cbor-x": "1.6.6",
+    "hono": "4.13.12",
+    "pg": "8.23.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@types/node": "24.19.0",
+    "@types/pg": "8.23.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@cascade/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cascade tree client and transaction builders on Lucid Evolution",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "vendor"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run test/unit",
+    "test:local": "vitest run test/local",
+    "test:preprod": "CASCADE_PREPROD_SMOKE=1 vitest run test/preprod/smoke.test.ts",
+    "test:preprod:a3": "CASCADE_PREPROD_A3=1 vitest run test/preprod/masumi-leaf.test.ts",
+    "test:preprod:a4": "vitest run test/preprod/masumi-refund.test.ts"
+  },
+  "dependencies": {
+    "@cascade/shared": "workspace:*",
+    "@lucid-evolution/lucid": "0.6.5",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@noble/curves": "2.4.0",
+    "@types/node": "24.19.0",
+    "dotenv": "17.2.3",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

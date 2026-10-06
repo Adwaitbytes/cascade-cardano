@@ -1,0 +1,34 @@
+{
+  "name": "@cascade/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "cascade: terminal access to plans, trees, receipts, cranks and agent scaffolding",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "cascade": "./dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@cascade/mcp": "workspace:*",
+    "@cascade/sdk": "workspace:*",
+    "@cascade/service-kit": "workspace:*",
+    "@cascade/shared": "workspace:*",
+    "@cascade/watchtower": "workspace:*",
+    "@lucid-evolution/lucid": "0.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "tsx": "4.20.0",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

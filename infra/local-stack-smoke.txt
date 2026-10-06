@@ -1,0 +1,96 @@
+# pnpm local:up, recorded 2026-10-01T00:59:24Z at commit 7827505 (build output trimmed)
+$ bash infra/local-up.sh
+ Container cascade-local-postgres-1 Running 
+ Container cascade-local-temporal-1 Running 
+ Container cascade-local-yaci-1 Running 
+ Container cascade-local-minio-1 Running 
+ Container cascade-local-yaci-viewer-1 Running 
+ Container cascade-local-yaci-1 Waiting 
+ Container cascade-local-yaci-1 Healthy 
+ Container cascade-local-yaci-viewer-1 Waiting 
+ Container cascade-local-postgres-1 Waiting 
+ Container cascade-local-temporal-1 Waiting 
+ Container cascade-local-minio-1 Waiting 
+ Container cascade-local-yaci-1 Waiting 
+ Container cascade-local-postgres-1 Healthy 
+ Container cascade-local-temporal-1 Healthy 
+ Container cascade-local-yaci-viewer-1 Healthy 
+ Container cascade-local-minio-1 Healthy 
+ Container cascade-local-yaci-1 Healthy 
+deployments/local.runtime.json: devnet start 1790806538, zeroTime 1790806538000
+Network local via yaci-store
+Every wallet is at or near its target. Nothing to do.
+Buyer already holds 100000000000 base units of tUSDM. Nothing to mint.
+Recorded tUSDM policy 82fd3cc57e6ca8abef166e35735a1107c7f2254a3485946f92bf02b0 in deployments/local.runtime.json
+Deploying 7 scripts to local via yaci-store
+Blueprint <repo>/contracts/plutus.json sha256 55088f2db634ec0fd23d5197cbe4b2be3ff5fb4ee3b36bf24ab155750d908ec4, v1.1.24+bacbeb3
+Reference holder (always-fail native script): addr_test1wq02sn2xfw4hmcnse2ewfu0mflnntpg59nlhq2t9c9ex3qc0d0yqs
+  cascade_config: reference already at d3c872ee118239074e451c66c1b8a7070c237277459edffe840cdab607c8185f#0
+  cascade_bond: reference already at e400f58b06fe75b05e9157210e7f45503773cfaff4c6b04aee6daa658d787c43#0
+  cascade_channel: reference already at 4431b85c3b7be0bc7dd016e116a9b393d06224f8550bd0026d7685b047c4189e#0
+  cascade_logic_core: reference already at f9a9a03893067fdc36a5f5ce94e1db511a2a5a327a3903c60dc356555a130fcc#0
+  cascade_logic_draw: reference already at 48f9ceffddab86254b0355ccd9e2d6efe48205da9e5531d285fd505f849af19e#0
+  cascade_logic_ext: reference already at 1c3d19830ab60b3dc27e2eea7847bd18d54a4f4d04c418be36658c19fc69bed4#0
+  cascade_node: reference already at 991c5db3f135b68c5ecc9113c7809721d7a85d6fdd9b3652201bd0c7b5c10fff#0
+  cascade_logic_core: stake credential already registered (stake_test17zsd0d8zrhry6a9er6dvej8fcyq34df5mxa9gg8wltkhrzcq8vgsd; ledger rejected a duplicate)
+  cascade_logic_draw: stake credential already registered (stake_test17rzwqxeals4gq6vwvuj80gh5sjdwja3emua8ae8c2yxtm5s8ylvlq; ledger rejected a duplicate)
+  cascade_logic_ext: stake credential already registered (stake_test17qhqj724arplc3rg6xefmjydr8xq86z0lvn5j2hqcrze9agyrkqmq; ledger rejected a duplicate)
+Wrote <repo>/deployments/local.runtime.json
+Building services, agents and the web app's dependencies...
+   • turbo 2.11.5
+   • Packages in scope: @cascade/agent-checker-a, @cascade/agent-checker-b, @cascade/agent-checker-c, @cascade/agent-conductor, @cascade/agent-flaky-lisan, @cascade/agent-kit, @cascade/agent-lookup-api, @cascade/agent-pricer, @cascade/agent-scout, @cascade/agent-scribe, @cascade/facilitator, @cascade/indexer, @cascade/policy, @cascade/sdk, @cascade/service-kit, @cascade/services-e2e, @cascade/services-run, @cascade/shared, @cascade/signer, @cascade/watchtower
+   • Running build in 20 packages
+   • Remote caching disabled
+ Tasks:    21 successful, 21 total
+Cached:    2 cached, 21 total
+  Time:    10.437s 
+kind     component    health         url
+infra    ogmios       healthy        http://localhost:21337
+infra    kupo         healthy        http://localhost:21442
+infra    yaci-store   healthy        http://localhost:28080/api/v1
+infra    postgres     healthy        localhost:55432
+infra    temporal     healthy        localhost:27233
+infra    minio        healthy        http://localhost:29000
+service  indexer      healthy        http://127.0.0.1:36100
+service  facilitator  healthy        http://127.0.0.1:36200
+service  signer       healthy        http://127.0.0.1:36300
+service  watchtower   healthy        http://127.0.0.1:36400
+agent    conductor    healthy        http://127.0.0.1:34001
+agent    scout        healthy        http://127.0.0.1:34002
+agent    pricer       healthy        http://127.0.0.1:34003
+agent    lookup-api   healthy        http://127.0.0.1:34004
+agent    flaky-lisan  healthy        http://127.0.0.1:34005
+agent    checker-a    healthy        http://127.0.0.1:34006
+agent    checker-b    healthy        http://127.0.0.1:34007
+agent    checker-c    healthy        http://127.0.0.1:34010
+agent    scribe       healthy        http://127.0.0.1:34008
+web      web          healthy        http://localhost:3100/console
+20/20 components healthy.
+Logs: infra/.data/local/<component>.log. Stop with pnpm local:down.
+exit=0
+
+# app layer cycled: tsx scripts/local-stack.ts down, then up
+
+kind     component    health         url
+infra    ogmios       healthy        http://localhost:21337
+infra    kupo         healthy        http://localhost:21442
+infra    yaci-store   healthy        http://localhost:28080/api/v1
+infra    postgres     healthy        localhost:55432
+infra    temporal     healthy        localhost:27233
+infra    minio        healthy        http://localhost:29000
+service  indexer      healthy        http://127.0.0.1:36100
+service  facilitator  healthy        http://127.0.0.1:36200
+service  signer       healthy        http://127.0.0.1:36300
+service  watchtower   healthy        http://127.0.0.1:36400
+agent    conductor    healthy        http://127.0.0.1:34001
+agent    scout        healthy        http://127.0.0.1:34002
+agent    pricer       healthy        http://127.0.0.1:34003
+agent    lookup-api   healthy        http://127.0.0.1:34004
+agent    flaky-lisan  healthy        http://127.0.0.1:34005
+agent    checker-a    healthy        http://127.0.0.1:34006
+agent    checker-b    healthy        http://127.0.0.1:34007
+agent    checker-c    healthy        http://127.0.0.1:34010
+agent    scribe       healthy        http://127.0.0.1:34008
+web      web          healthy        http://localhost:3100/console
+
+20/20 components healthy.

@@ -1,0 +1,33 @@
+{
+  "name": "@cascade/scripts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "gen-treasury": "tsx gen-treasury.ts",
+    "derive-wallets": "tsx derive-wallets.ts",
+    "fund-wallets": "tsx fund-wallets.ts",
+    "mint-test-usdm": "tsx mint-test-usdm.ts",
+    "check-env": "tsx check-env.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "deploy-scripts": "tsx deploy-scripts.ts",
+    "record-local-runtime": "tsx record-local-runtime.ts",
+    "register-agents": "tsx register-agents.ts",
+    "fund-masumi": "tsx fund-masumi.ts",
+    "agents-gateway": "tsx agents-gateway.ts",
+    "migrate-preprod": "tsx migrate-preprod.ts"
+  },
+  "dependencies": {
+    "@cascade/service-kit": "workspace:*",
+    "@lucid-evolution/lucid": "0.6.5",
+    "dotenv": "18.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

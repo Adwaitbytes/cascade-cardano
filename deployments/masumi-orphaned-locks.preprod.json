@@ -1,0 +1,45 @@
+{
+  "network": "preprod",
+  "note": "Test purchases of Lisan made through the orchestrator Masumi Payment Service (purchasing wallet) on 2026-10-01 while diagnosing Lisan job failures. Lisan never submitted a result, so each 10 tADA lock is refundable to the purchasing wallet once unlockTime passes: request the refund through POST /api/v1/purchase/request-refund on http://localhost:23100 (admin key MASUMI_ORCH_ADMIN_KEY), then let the service withdraw it.",
+  "buyer": "orchestrator purchasing wallet (deployments/masumi.preprod.json)",
+  "seller": "Lisan (selling vkey 12dabe85656d609706d3a3d3d3e0c7fc95ab0b42d16afae5fc5be6b8)",
+  "amountLovelace": "10000000",
+  "locks": [
+    {
+      "lisanJobId": "9da54e60-57cd-45b0-a04e-eb0c53a808fe",
+      "purchaseRequestId": "cmupcyl9f004km4qilqwg11u1",
+      "lockTxHash": "e1e13389be161d28e349580c02cf2d42ab137870048f8ec92fed175df52e2c49",
+      "explorer": "https://preprod.cardanoscan.io/transaction/e1e13389be161d28e349580c02cf2d42ab137870048f8ec92fed175df52e2c49",
+      "why": "crew ran; submit-result rejected (masumi 1.x callback bug, since fixed)",
+      "payByTime": "2026-10-01T21:55:02Z",
+      "submitResultTime": "2026-10-02T09:55:02Z",
+      "unlockTime": "2026-10-02T15:55:02Z",
+      "externalDisputeUnlockTime": "2026-10-02T21:55:02Z",
+      "unlockTimeMs": "1790956502057"
+    },
+    {
+      "lisanJobId": "e862397b-b56b-4720-80c3-853703a9adbd",
+      "purchaseRequestId": "cmupd2xno004tm4qi15qd6wf2",
+      "lockTxHash": "13fc60714b693e60b2269b0c39b8f619c67dcf3b0bc18cba62c3510fdac40fcf",
+      "explorer": "https://preprod.cardanoscan.io/transaction/13fc60714b693e60b2269b0c39b8f619c67dcf3b0bc18cba62c3510fdac40fcf",
+      "why": "job lost: Lisan restarted mid-job",
+      "payByTime": "2026-10-01T21:58:24Z",
+      "submitResultTime": "2026-10-02T09:58:24Z",
+      "unlockTime": "2026-10-02T15:58:24Z",
+      "externalDisputeUnlockTime": "2026-10-02T21:58:24Z",
+      "unlockTimeMs": "1790956704829"
+    },
+    {
+      "lisanJobId": "6e80391b-c3a1-45cb-bc8a-fe153f739cf3",
+      "purchaseRequestId": "cmupdge6o0050m4qiptrcnp9r",
+      "lockTxHash": "0be0b796fd46a71186af1163f1f9ac4a493ad9f2ea380b51b517365f45a2b050",
+      "explorer": "https://preprod.cardanoscan.io/transaction/0be0b796fd46a71186af1163f1f9ac4a493ad9f2ea380b51b517365f45a2b050",
+      "why": "job lost: Lisan restarted mid-job",
+      "payByTime": "2026-10-01T22:08:53Z",
+      "submitResultTime": "2026-10-02T10:08:53Z",
+      "unlockTime": "2026-10-02T16:08:53Z",
+      "externalDisputeUnlockTime": "2026-10-02T22:08:53Z",
+      "unlockTimeMs": "1790957333124"
+    }
+  ]
+}

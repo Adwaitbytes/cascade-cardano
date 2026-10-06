@@ -1,0 +1,30 @@
+{
+  "name": "cascade",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Escrow trees for the agent supply chain on Cardano",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@12.8.1",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "aiken:check": "cd contracts && aiken check",
+    "aiken:build": "cd contracts && aiken build",
+    "verify:all": "tsx scripts/verify-all.ts",
+    "report:final": "tsx scripts/final-report.ts",
+    "local:up": "bash infra/local-up.sh",
+    "local:down": "bash infra/local-down.sh",
+    "masumi:up": "bash infra/masumi-up.sh",
+    "masumi:down": "bash infra/masumi-down.sh"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "@types/node": "^24.0.0"
+  }
+}

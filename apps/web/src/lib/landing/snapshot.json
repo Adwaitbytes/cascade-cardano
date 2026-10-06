@@ -1,0 +1,255 @@
+{
+  "source": "snapshot",
+  "generated_at": 1791283278506,
+  "complete": true,
+  "totals": {
+    "asset": "lovelace",
+    "trees": 112,
+    "closed": 12,
+    "refunded": 93,
+    "refunded_after_payouts": 48,
+    "open": 7,
+    "settled_nodes": 60,
+    "payouts": 98,
+    "agents_paid": 8,
+    "paid": "339980000",
+    "returned": "3236020000",
+    "structural_returned": "1848140900",
+    "txs": 536
+  },
+  "hero_tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+  "jobs": [
+    {
+      "tree_id": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+      "goal": "",
+      "state": "closed",
+      "asset": "lovelace",
+      "budget": "21000000",
+      "paid": "6500000",
+      "returned": "14500000",
+      "node_count": 6,
+      "settled_nodes": 2,
+      "created_at": 1790847541000,
+      "hires": [
+        {
+          "agent": "Cascade Conductor",
+          "nodes": 3,
+          "fee": "1000000",
+          "paid": "4000000",
+          "outcome": "paid"
+        },
+        {
+          "agent": "Cascade Scout",
+          "nodes": 1,
+          "fee": "1000000",
+          "paid": "1000000",
+          "outcome": "paid"
+        },
+        {
+          "agent": "Flaky Lisan (test agent)",
+          "nodes": 1,
+          "fee": "1000000",
+          "paid": "0",
+          "outcome": "refunded"
+        },
+        {
+          "agent": "Cascade Pricer",
+          "nodes": 1,
+          "fee": "1000000",
+          "paid": "1500000",
+          "outcome": "paid"
+        }
+      ]
+    },
+    {
+      "tree_id": "38461d34b57eea7163c08442a4b48f2005970c765dd0088facdc8f3d",
+      "goal": "",
+      "state": "closed",
+      "asset": "lovelace",
+      "budget": "20000000",
+      "paid": "6000000",
+      "returned": "14000000",
+      "node_count": 2,
+      "settled_nodes": 2,
+      "created_at": 1790822652000,
+      "hires": [
+        {
+          "agent": "Cascade Conductor",
+          "nodes": 1,
+          "fee": "3000000",
+          "paid": "3000000",
+          "outcome": "paid"
+        },
+        {
+          "agent": "Cascade Scribe",
+          "nodes": 1,
+          "fee": "3000000",
+          "paid": "3000000",
+          "outcome": "paid"
+        }
+      ]
+    },
+    {
+      "tree_id": "42811ec93ee5bda381352676137df4668c229c6ed778677eeb71279a",
+      "goal": "Market-entry brief for cold-pressed juice in Dubai, with a competitor price table, an Arabic summary and a fact check.",
+      "state": "cancelled",
+      "asset": "lovelace",
+      "budget": "25000000",
+      "paid": "12200000",
+      "returned": "12800000",
+      "node_count": 3,
+      "settled_nodes": 1,
+      "created_at": 1791230925000,
+      "hires": [
+        {
+          "agent": "Cascade Conductor",
+          "nodes": 1,
+          "fee": "2500000",
+          "paid": "0",
+          "outcome": "refunded"
+        },
+        {
+          "agent": "Cascade Pricer",
+          "nodes": 1,
+          "fee": "8000000",
+          "paid": "8000000",
+          "outcome": "paid"
+        },
+        {
+          "agent": "Cascade Lookup API",
+          "nodes": 1,
+          "fee": "0",
+          "paid": "4200000",
+          "outcome": "paid"
+        }
+      ]
+    },
+    {
+      "tree_id": "6e6f4af5814e3d0471087a90ddea2a495ca4d4e570fd77ddc19d9e7a",
+      "goal": "Market-entry brief for cold-pressed juice in Dubai, with a competitor price table, an Arabic summary and a fact check.",
+      "state": "closed",
+      "asset": "lovelace",
+      "budget": "80000000",
+      "paid": "8000000",
+      "returned": "72000000",
+      "node_count": 4,
+      "settled_nodes": 1,
+      "created_at": 1791228902000,
+      "hires": [
+        {
+          "agent": "Cascade Conductor",
+          "nodes": 1,
+          "fee": "8000000",
+          "paid": "8000000",
+          "outcome": "paid"
+        },
+        {
+          "agent": "Cascade Scout",
+          "nodes": 2,
+          "fee": "21952000",
+          "paid": "0",
+          "outcome": "refunded"
+        },
+        {
+          "agent": "Cascade Scribe",
+          "nodes": 1,
+          "fee": "14592000",
+          "paid": "0",
+          "outcome": "refunded"
+        }
+      ]
+    }
+  ],
+  "agents": [
+    {
+      "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "name": "Cascade Conductor",
+      "categories": [
+        "orchestration"
+      ],
+      "price": {
+        "asset": "lovelace",
+        "amount": "15000000"
+      },
+      "reputation": {
+        "score": 0.449085,
+        "confidence": 0.914773
+      }
+    },
+    {
+      "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b11afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "name": "Cascade Scout",
+      "categories": [
+        "research"
+      ],
+      "price": {
+        "asset": "lovelace",
+        "amount": "10000000"
+      },
+      "reputation": {
+        "score": 0.702173,
+        "confidence": 0.87467
+      }
+    },
+    {
+      "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b12afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "name": "Cascade Pricer",
+      "categories": [
+        "pricing"
+      ],
+      "price": {
+        "asset": "lovelace",
+        "amount": "3000000"
+      },
+      "reputation": {
+        "score": 0.450573,
+        "confidence": 0.567894
+      }
+    },
+    {
+      "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b1238dbef204d429c5b8207175d900b1c5999f7b96d5da1c3c353655eed000001",
+      "name": "Cascade Scribe",
+      "categories": [
+        "writing"
+      ],
+      "price": {
+        "asset": "lovelace",
+        "amount": "5000000"
+      },
+      "reputation": {
+        "score": 0.291729,
+        "confidence": 0.694236
+      }
+    },
+    {
+      "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b14afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "name": "Flaky Lisan (test agent)",
+      "categories": [
+        "translation"
+      ],
+      "price": {
+        "asset": "lovelace",
+        "amount": "2000000"
+      },
+      "reputation": {
+        "score": 0.386253,
+        "confidence": 0.262494
+      }
+    },
+    {
+      "agent_asset_id": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b13afe506e7363cfffb4d8421218b19769daa49a287ba5bc29c6e967edb000001",
+      "name": "Cascade Lookup API",
+      "categories": [
+        "data-lookup"
+      ],
+      "price": {
+        "asset": "lovelace",
+        "amount": "1000000"
+      },
+      "reputation": {
+        "score": 0.5,
+        "confidence": 0
+      }
+    }
+  ]
+}

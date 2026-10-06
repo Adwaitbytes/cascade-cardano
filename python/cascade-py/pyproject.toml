@@ -1,0 +1,30 @@
+[project]
+name = "cascade-py"
+version = "0.1.0"
+description = "Cascade agent server for Python agents: MIP-003 endpoints plus Cascade extensions, byte-compatible with @cascade/agent"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = [
+    "cbor2>=6.1.4",
+    "cryptography>=50.0.2",
+    "fastapi>=0.142.2",
+    "httpx>=0.28.1",
+    "jsonschema>=4.26.0",
+    "rfc8785>=0.1.4",
+    "uvicorn>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pyyaml>=6.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]

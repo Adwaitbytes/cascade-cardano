@@ -1,0 +1,31 @@
+// Cedar schema for the Cascade signer (PRD 13.2). One request per signature: the principal is the
+// agent role whose key would sign, the resource is the transaction body hash, and the context
+// carries the facts the eight gates decide on. Amounts are in the tree asset's base units.
+namespace Cascade {
+  entity Agent;
+  entity Tx;
+
+  type PlanFacts = { unmatchedOutputs: Long, specMismatches: Long, unapprovedSellers: Long };
+  type PriceFacts = { maxExcessBps: Long, slippageBps: Long };
+  type ReputationFacts = { minScoreMilli: Long, minConfidenceMilli: Long, floorScoreMilli: Long, floorConfidenceMilli: Long };
+  type DeadlineFacts = { violations: Long };
+  type RailFacts = { used: Set<String>, allowed: Set<String> };
+  type CounterpartyFacts = { sellers: Set<String>, blocked: Set<String> };
+  type VelocityFacts = { treeDrawn: Long, treeLimit: Long, agentDrawn: Long, agentLimit: Long };
+  type SimulationFacts = { ok: Bool, memory: Long, memoryBudget: Long, cpu: Long, cpuBudget: Long };
+
+  action SignTx appliesTo {
+    principal: [Agent],
+    resource: [Tx],
+    context: {
+      plan: PlanFacts,
+      price: PriceFacts,
+      reputation: ReputationFacts,
+      deadlines: DeadlineFacts,
+      rails: RailFacts,
+      counterparty: CounterpartyFacts,
+      velocity: VelocityFacts,
+      simulation: SimulationFacts,
+    }
+  };
+}

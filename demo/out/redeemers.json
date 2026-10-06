@@ -1,0 +1,398 @@
+{
+  "network": "preprod",
+  "generatedAt": "2026-10-01T10:55:06.188Z",
+  "deployment": {
+    "cascadeNode": "5f58ba03d373f7510827aa4cb5c39615d0e65ea3630169afaa48abee",
+    "blueprintSha256": "3439017459348ca71ef160ee0d4c2963e691e4ed8987eef487ab94371d895129",
+    "aikenVersion": "v1.1.24+bacbeb3"
+  },
+  "trees": {
+    "main": "458310f2eacb01e8f6a5750f812f8d4e38d81304359c5467d26f9856",
+    "spare": "f073ac10fc9d3b0a60b0b31c00991f7879f3188a30f9cb1a14871018",
+    "channel": "fa6d28b31ab6d0a0c6c68eee143056dbc65572452568b06a31b0fd85"
+  },
+  "skipped": {},
+  "verification": "Each transaction was read back from Blockfrost (block height, valid_contract) and its Cascade withdraw redeemer decoded from chain.",
+  "rows": [
+    {
+      "redeemer": "FundRoot",
+      "primary": true,
+      "txHash": "1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341",
+      "proved": "Buyer locks 20 ADA plus 18 ADA structural reserve; root and config thread tokens minted from a one-shot seed; plan root set.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240765,
+        "blockTime": "2026-10-01T09:39:01.000Z",
+        "feeLovelace": "552760",
+        "cascadeActions": [
+          "FundRoot"
+        ]
+      }
+    },
+    {
+      "redeemer": "TopUp",
+      "primary": true,
+      "txHash": "d525ce88bd775070ad1c5ef0d19ce9ac9d65ae42b60dfbce0c2e7c55b364919e",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/d525ce88bd775070ad1c5ef0d19ce9ac9d65ae42b60dfbce0c2e7c55b364919e",
+      "proved": "Buyer raises the root budget by 1 ADA; nothing else in the datum changes.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240770,
+        "blockTime": "2026-10-01T09:41:24.000Z",
+        "feeLovelace": "507930",
+        "cascadeActions": [
+          "TopUp"
+        ]
+      }
+    },
+    {
+      "redeemer": "Freeze",
+      "primary": true,
+      "txHash": "3478b1545fbf8e4bf391ca2849843ad0ddc808687581a0b1160623f43740110f",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/3478b1545fbf8e4bf391ca2849843ad0ddc808687581a0b1160623f43740110f",
+      "proved": "Buyer sets frozen on the root; no value moves. Acceptance test A13 checks that a Draw fails while frozen.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240771,
+        "blockTime": "2026-10-01T09:42:16.000Z",
+        "feeLovelace": "486792",
+        "cascadeActions": [
+          "Freeze"
+        ]
+      }
+    },
+    {
+      "redeemer": "Unfreeze",
+      "primary": true,
+      "txHash": "c6c13dc163d58f7872bed6efb0813959ee9e21323a6787909d5bb2d14747b75c",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/c6c13dc163d58f7872bed6efb0813959ee9e21323a6787909d5bb2d14747b75c",
+      "proved": "Buyer clears frozen; Draws are allowed again.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240774,
+        "blockTime": "2026-10-01T09:43:08.000Z",
+        "feeLovelace": "486963",
+        "cascadeActions": [
+          "Unfreeze"
+        ]
+      }
+    },
+    {
+      "redeemer": "Draw (native)",
+      "primary": true,
+      "txHash": "1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914",
+      "proved": "Conductor draws Scout, Pricer and Flaky Lisan as native children: three child tokens minted, each spec proven against plan_root, deadlines nested inside the root.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240776,
+        "blockTime": "2026-10-01T09:43:49.000Z",
+        "feeLovelace": "775466",
+        "cascadeActions": [
+          "Draw"
+        ]
+      }
+    },
+    {
+      "redeemer": "Draw (receipt)",
+      "primary": true,
+      "txHash": "ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/ad5617ecd09b1510821cd9ce2c442e7aefb961cd8e399fecd085254a787192b5",
+      "proved": "Conductor draws a Metered receipt (voucher channel to the Lookup API, channel token minted) and a Masumi receipt (vested_pay V2 lock at the canonical Masumi script) in one transaction.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240778,
+        "blockTime": "2026-10-01T09:44:15.000Z",
+        "feeLovelace": "759669",
+        "cascadeActions": [
+          "Draw"
+        ]
+      }
+    },
+    {
+      "redeemer": "Submit",
+      "primary": true,
+      "txHash": "3f3515dfbdfca2fcc3b95564f44b754e999d3c769e6fcf8c73f5502cea4a627a",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/3f3515dfbdfca2fcc3b95564f44b754e999d3c769e6fcf8c73f5502cea4a627a",
+      "proved": "Scout commits its result hash before submit_by with no open children.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240780,
+        "blockTime": "2026-10-01T09:44:48.000Z",
+        "feeLovelace": "496433",
+        "cascadeActions": [
+          "Submit"
+        ]
+      }
+    },
+    {
+      "redeemer": "Accept",
+      "primary": true,
+      "txHash": "0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/0d4a943180b7e4076145c33ecee6e4f2b560b2b6dfe596e1cd0401f0fad4d145",
+      "proved": "The parent operator's signature satisfies Scout's ParentAccept rule.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240781,
+        "blockTime": "2026-10-01T09:46:04.000Z",
+        "feeLovelace": "492872",
+        "cascadeActions": [
+          "Accept"
+        ]
+      }
+    },
+    {
+      "redeemer": "SettleChild",
+      "primary": true,
+      "txHash": "f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/f93df02f0b7f612277d9a6a7507df25e631d04d1c94c6a0b412ba2e44f4540dc",
+      "proved": "Scout's 1 ADA fee goes to its payee, the unused 2 ADA folds back into the root, the child token burns (withdraw-zero settlement).",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240783,
+        "blockTime": "2026-10-01T09:46:29.000Z",
+        "feeLovelace": "558287",
+        "cascadeActions": [
+          "SettleChild"
+        ]
+      }
+    },
+    {
+      "redeemer": "Challenge",
+      "primary": true,
+      "txHash": "0accdf81c601e9c8608436f2c960dd4f16cf2c5ce0a4b95a5b1cf25c4a4f2232",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/0accdf81c601e9c8608436f2c960dd4f16cf2c5ce0a4b95a5b1cf25c4a4f2232",
+      "proved": "The parent operator challenges Pricer's submitted result before challenge_until and posts a 4 ADA bond at cascade_bond.",
+      "submittedBy": "conductor",
+      "onChain": {
+        "blockHeight": 5240788,
+        "blockTime": "2026-10-01T09:47:30.000Z",
+        "feeLovelace": "548452",
+        "cascadeActions": [
+          "Challenge"
+        ]
+      }
+    },
+    {
+      "redeemer": "Escalate",
+      "primary": true,
+      "txHash": "2cb65930d439c835813f6674c92de59ab5990d2b46efb8d8c2cefe2eea8b6d8d",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/2cb65930d439c835813f6674c92de59ab5990d2b46efb8d8c2cefe2eea8b6d8d",
+      "proved": "Pricer, the challenged worker, escalates to the arbiters before dispute_until.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240790,
+        "blockTime": "2026-10-01T09:48:27.000Z",
+        "feeLovelace": "494942",
+        "cascadeActions": [
+          "Escalate"
+        ]
+      }
+    },
+    {
+      "redeemer": "Resolve",
+      "primary": true,
+      "txHash": "3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/3b6145b240d100d96123b231ed96f1b698ed5c7dfc846643e97f1889472074bb",
+      "proved": "Arbiters 1 and 2 (threshold 2) split Pricer's 3 ADA: 1.5 ADA to the worker, 1.5 ADA back into the root. The challenger's bond is slashed 70/30: 2.8 ADA to the worker, 1.2 ADA to the arbiter fee address.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240799,
+        "blockTime": "2026-10-01T09:50:07.000Z",
+        "feeLovelace": "577420",
+        "cascadeActions": [
+          "Resolve"
+        ]
+      }
+    },
+    {
+      "redeemer": "Refund",
+      "primary": true,
+      "txHash": "426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285",
+      "proved": "Flaky Lisan, a test agent that fails on purpose, missed submit_by. After refund_after anyone may crank Refund; its whole value returns into the root in one transaction.",
+      "submittedBy": "preprod watchtower service (cranked before this script)",
+      "onChain": {
+        "blockHeight": 5240794,
+        "blockTime": "2026-10-01T09:48:42.000Z",
+        "feeLovelace": "536314",
+        "cascadeActions": [
+          "Refund"
+        ]
+      }
+    },
+    {
+      "redeemer": "CloseReceipt (Metered)",
+      "primary": true,
+      "txHash": "5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/5dce5000a644ba7fcd10f1c5f90ccdd5ac9c78fc84b60f2ba98d76f1c083b489",
+      "proved": "Operator and provider close the metered receipt: the part of the 3 ADA deposit the provider did not redeem returns from the channel into the root; channel and receipt tokens burn.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240814,
+        "blockTime": "2026-10-01T09:54:06.000Z",
+        "feeLovelace": "547560",
+        "cascadeActions": [
+          "CloseReceipt"
+        ]
+      }
+    },
+    {
+      "redeemer": "CloseReceipt (Masumi)",
+      "primary": true,
+      "txHash": "41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/41b453be4ebdd4975220d270e2e966529079763c415ebe03d3a192a2a15f140b",
+      "proved": "After the Masumi lock refunded to buyer_refund, the operator closes the Masumi receipt; parent counters drop and the receipt token burns.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240818,
+        "blockTime": "2026-10-01T09:55:25.000Z",
+        "feeLovelace": "482572",
+        "cascadeActions": [
+          "CloseReceipt"
+        ]
+      }
+    },
+    {
+      "redeemer": "CloseRoot",
+      "primary": true,
+      "txHash": "d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217",
+      "proved": "Buyer accepted the root; the Conductor gets its 1 ADA fee, everything else (unused budget and all structural ADA) returns to buyer_refund, root and config tokens burn.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240824,
+        "blockTime": "2026-10-01T09:57:02.000Z",
+        "feeLovelace": "565580",
+        "cascadeActions": [
+          "CloseRoot"
+        ]
+      }
+    },
+    {
+      "redeemer": "Cancel",
+      "primary": true,
+      "txHash": "46c6dc88268cced653430f61ce1d5008953f9b016aedbbca28603292b22aa21b",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/46c6dc88268cced653430f61ce1d5008953f9b016aedbbca28603292b22aa21b",
+      "proved": "Buyer cancels a funded tree with nothing drawn: full refund, both tokens burn.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240827,
+        "blockTime": "2026-10-01T09:58:14.000Z",
+        "feeLovelace": "544947",
+        "cascadeActions": [
+          "Cancel"
+        ]
+      }
+    },
+    {
+      "redeemer": "Submit (root)",
+      "primary": false,
+      "txHash": "5b4e08ca132cb7efc228baf41292ed88d28f16b8a6759673c70c808474edff65",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/5b4e08ca132cb7efc228baf41292ed88d28f16b8a6759673c70c808474edff65",
+      "proved": "The Conductor submits the root result once every child is closed (children_open is 0).",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240819,
+        "blockTime": "2026-10-01T09:56:06.000Z",
+        "feeLovelace": "495414",
+        "cascadeActions": [
+          "Submit"
+        ]
+      }
+    },
+    {
+      "redeemer": "Accept (root)",
+      "primary": false,
+      "txHash": "56ef4316ee1fa16914b1db0ee956cb5c29fd8fb8c864498422a6f9a82e251699",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/56ef4316ee1fa16914b1db0ee956cb5c29fd8fb8c864498422a6f9a82e251699",
+      "proved": "The buyer's signature satisfies the root's BuyerAccept rule.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240822,
+        "blockTime": "2026-10-01T09:56:34.000Z",
+        "feeLovelace": "487552",
+        "cascadeActions": [
+          "Accept"
+        ]
+      }
+    },
+    {
+      "redeemer": "Submit (Pricer)",
+      "primary": false,
+      "txHash": "7f8b365f656097b1a67a7f9e7ff98a4ecab3b75ac5d4f520aa87150566767817",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/7f8b365f656097b1a67a7f9e7ff98a4ecab3b75ac5d4f520aa87150566767817",
+      "proved": "Pricer submits the result that is then challenged.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240785,
+        "blockTime": "2026-10-01T09:47:02.000Z",
+        "feeLovelace": "496433",
+        "cascadeActions": [
+          "Submit"
+        ]
+      }
+    },
+    {
+      "redeemer": "Redeem (cascade_channel)",
+      "primary": false,
+      "txHash": "8924aab51904951588a261c3b81b1c8d3a1be1734c0eb7454d4aaa83a4f6259a",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/8924aab51904951588a261c3b81b1c8d3a1be1734c0eb7454d4aaa83a4f6259a",
+      "proved": "On a third tree: the Lookup API redeems one cumulative Ed25519 voucher for 1 ADA from a 3 ADA channel; the channel continues with redeemed = 1 ADA. Only the provider's signature decides where the claim goes.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240980,
+        "blockTime": "2026-10-01T10:53:01.000Z",
+        "feeLovelace": "251866",
+        "cascadeActions": []
+      }
+    },
+    {
+      "redeemer": "CloseReceipt (Metered, after a redeem)",
+      "primary": false,
+      "txHash": "62f5c2630a0279ac2f6eae4b89efbef1ee7b0a0e3965ec4a039c8eef439c9691",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/62f5c2630a0279ac2f6eae4b89efbef1ee7b0a0e3965ec4a039c8eef439c9691",
+      "proved": "The redeemed channel closes: the 2 ADA left in it returns into the root, channel and receipt tokens burn.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240982,
+        "blockTime": "2026-10-01T10:53:48.000Z",
+        "feeLovelace": "552007",
+        "cascadeActions": [
+          "CloseReceipt"
+        ]
+      }
+    },
+    {
+      "redeemer": "WithdrawRefund (Masumi vested_pay)",
+      "primary": false,
+      "txHash": "cdd3cf934223c590c6abb0b9e9e88b964fd84f978949d700f9c0ef24225d216c",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/cdd3cf934223c590c6abb0b9e9e88b964fd84f978949d700f9c0ef24225d216c",
+      "proved": "The Masumi seller never submitted; after submit_result_time Masumi's own validator refunds the 3 ADA lock to the tree's buyer_refund address, not to the orchestrator.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240817,
+        "blockTime": "2026-10-01T09:55:00.000Z",
+        "feeLovelace": "663160",
+        "cascadeActions": []
+      }
+    },
+    {
+      "redeemer": "FundRoot (spare tree)",
+      "primary": false,
+      "txHash": "6a753c242111b47fd0aa4b024f6e30c0cb9c688aaa3a3edb3886e36cbde9ca50",
+      "cardanoscan": "https://preprod.cardanoscan.io/transaction/6a753c242111b47fd0aa4b024f6e30c0cb9c688aaa3a3edb3886e36cbde9ca50",
+      "proved": "A second small tree, funded only to show Cancel.",
+      "submittedBy": "buyer",
+      "onChain": {
+        "blockHeight": 5240826,
+        "blockTime": "2026-10-01T09:57:38.000Z",
+        "feeLovelace": "552708",
+        "cascadeActions": [
+          "FundRoot"
+        ]
+      }
+    }
+  ]
+}

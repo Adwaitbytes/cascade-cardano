@@ -1,0 +1,11 @@
+Build Cascade exactly as specified in docs/PRD.md by following docs/MASTER_PROMPT.md and CLAUDE.md, leading a team of parallel agents, without asking me anything. Read both files fully first and resume from PROGRESS.md if it shows work in progress.
+
+The goal is met only when ALL of these are shown in this conversation on the latest commit:
+1. `pnpm verify:all` exits 0 and its printed CASCADE VERIFY SUMMARY shows acceptance 20/20 pass against Cardano preprod, aiken 0 failures, adversarial 0 unexpected successes, integration pass, e2e pass, and console and explorer URLs returning 200.
+2. `test-results.json` has every test A1 to A20 with "passes": true, an evidence path that exists, and the current commit SHA, written by the verify script and never edited by hand.
+3. The evaluator subagent, run fresh on that commit, returns PASS with no open NEEDS_WORK findings.
+4. README.md lists a preprod transaction link for every redeemer in PRD section 7.5 and the deployed script hashes.
+5. demo/out/cascade-demo.mp4 and demo/out/cascade-deck.pptx exist, with the video embedded in the deck.
+6. FINAL_REPORT.md exists, `git status` is clean, and all commits are pushed.
+
+Rules on the way there: preprod and local devnet only, never mainnet; never print or commit secrets; never mock chain calls in acceptance tests, weaken assertions, skip tests, or hand-edit test-results.json. If an outside dependency blocks an item, record it in BLOCKERS.md with the workaround, keep building everything else, and keep retrying it. End every turn with the STATUS block from MASTER_PROMPT section 12.

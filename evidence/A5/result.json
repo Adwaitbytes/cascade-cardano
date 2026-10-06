@@ -1,0 +1,16 @@
+{
+  "id": "A5",
+  "title": "x402 buy",
+  "criterion": "The orchestrator pays a third-party x402 Cardano endpoint with `default` method from a tree budget; `PAYMENT-RESPONSE` recorded.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:15.310Z",
+  "finished_at": "2026-10-01T00:40:15.312Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: [\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"urls\",\n      \"explorer_demo_tree\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+  ]
+}

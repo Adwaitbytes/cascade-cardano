@@ -1,0 +1,94 @@
+# Masumi Payment Service on Cardano preprod: one instance per operator (PRD 15.5):
+# the orchestrator (buyer), Lisan (seller) and Lisan-B (test seller that fails on purpose, A4). Start with `pnpm masumi:up`, stop with `pnpm masumi:down`.
+# Secrets are interpolated from the repo-root .env (see scripts/masumi-secrets.ts);
+# nothing secret lives in this file. Ports bind to 127.0.0.1 only.
+# V2 (vested_pay) contract and registry-v2 policy, first released in v0.28.0.
+name: cascade-masumi
+
+x-masumi-common: &masumi-common
+  # Built from a pinned upstream commit newer than 0.28.0; masumi/Dockerfile says why
+  # the published 0.28.0 image cannot seed a V2 payment source.
+  image: cascade/masumi-payment-service:69297f30
+  build:
+    context: ./masumi
+  command: ["sh", "-c", "pnpm run prisma:migrate && pnpm run prisma:seed && pnpm run start"]
+  depends_on:
+    masumi-postgres:
+      condition: service_healthy
+  healthcheck:
+    # The image ships neither curl nor wget.
+    test: ["CMD", "node", "-e", "fetch('http://localhost:3001/api/v1/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+    interval: 5s
+    timeout: 5s
+    retries: 60
+    start_period: 60s
+  restart: unless-stopped
+
+services:
+  masumi-postgres:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: masumi
+      POSTGRES_PASSWORD: ${MASUMI_PG_PASSWORD:?run scripts/masumi-secrets.ts}
+      POSTGRES_DB: masumi_orchestrator
+    volumes:
+      - masumi-pg-data:/var/lib/postgresql/data
+      - ./masumi/init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U masumi -d masumi_orchestrator"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    # Without it the database stays down after a reboot while the payment services crash-loop on it.
+    restart: unless-stopped
+
+  masumi-orchestrator:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    <<: *masumi-common
+    environment:
+      PORT: "3001"
+      DATABASE_URL: postgresql://masumi:${MASUMI_PG_PASSWORD}@masumi-postgres:5432/masumi_orchestrator
+      BLOCKFROST_API_KEY_PREPROD: ${BLOCKFROST_PROJECT_ID_PREPROD:?BLOCKFROST_PROJECT_ID_PREPROD missing from .env}
+      ADMIN_KEY: ${MASUMI_ORCH_ADMIN_KEY:?run scripts/masumi-secrets.ts}
+      ENCRYPTION_KEY: ${MASUMI_ORCH_ENCRYPTION_KEY:?run scripts/masumi-secrets.ts}
+      PURCHASE_WALLET_V2_PREPROD_MNEMONIC: ${MASUMI_ORCH_PURCHASE_WALLET_V2_PREPROD_MNEMONIC:?run scripts/masumi-secrets.ts}
+      SELLING_WALLET_V2_PREPROD_MNEMONIC: ${MASUMI_ORCH_SELLING_WALLET_V2_PREPROD_MNEMONIC:?run scripts/masumi-secrets.ts}
+      SEED_ONLY_IF_EMPTY: "true"
+    ports:
+      - "127.0.0.1:23100:3001"
+
+  masumi-lisan:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    <<: *masumi-common
+    environment:
+      PORT: "3001"
+      DATABASE_URL: postgresql://masumi:${MASUMI_PG_PASSWORD}@masumi-postgres:5432/masumi_lisan
+      BLOCKFROST_API_KEY_PREPROD: ${BLOCKFROST_PROJECT_ID_PREPROD:?BLOCKFROST_PROJECT_ID_PREPROD missing from .env}
+      ADMIN_KEY: ${MASUMI_LISAN_ADMIN_KEY:?run scripts/masumi-secrets.ts}
+      ENCRYPTION_KEY: ${MASUMI_LISAN_ENCRYPTION_KEY:?run scripts/masumi-secrets.ts}
+      PURCHASE_WALLET_V2_PREPROD_MNEMONIC: ${MASUMI_LISAN_PURCHASE_WALLET_V2_PREPROD_MNEMONIC:?run scripts/masumi-secrets.ts}
+      SELLING_WALLET_V2_PREPROD_MNEMONIC: ${MASUMI_LISAN_SELLING_WALLET_V2_PREPROD_MNEMONIC:?run scripts/masumi-secrets.ts}
+      SEED_ONLY_IF_EMPTY: "true"
+    ports:
+      - "127.0.0.1:23101:3001"
+
+  # Lisan-B: second copy of the unmodified template, configured to fail every job, so A4 can
+  # prove a Masumi refund. Its own selling source keeps its registry entry and payouts separate.
+  masumi-lisan-b:
+    cpus: 1  # capped so the operator laptop stays cool; see scripts/heavy.sh
+    <<: *masumi-common
+    environment:
+      PORT: "3001"
+      DATABASE_URL: postgresql://masumi:${MASUMI_PG_PASSWORD}@masumi-postgres:5432/masumi_lisan_b
+      BLOCKFROST_API_KEY_PREPROD: ${BLOCKFROST_PROJECT_ID_PREPROD:?BLOCKFROST_PROJECT_ID_PREPROD missing from .env}
+      ADMIN_KEY: ${MASUMI_LISAN_B_ADMIN_KEY:?run scripts/masumi-secrets.ts}
+      ENCRYPTION_KEY: ${MASUMI_LISAN_B_ENCRYPTION_KEY:?run scripts/masumi-secrets.ts}
+      PURCHASE_WALLET_V2_PREPROD_MNEMONIC: ${MASUMI_LISAN_B_PURCHASE_WALLET_V2_PREPROD_MNEMONIC:?run scripts/masumi-secrets.ts}
+      SELLING_WALLET_V2_PREPROD_MNEMONIC: ${MASUMI_LISAN_B_SELLING_WALLET_V2_PREPROD_MNEMONIC:?run scripts/masumi-secrets.ts}
+      SEED_ONLY_IF_EMPTY: "true"
+    ports:
+      - "127.0.0.1:23102:3001"
+
+volumes:
+  masumi-pg-data:

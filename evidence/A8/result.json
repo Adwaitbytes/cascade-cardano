@@ -1,0 +1,16 @@
+{
+  "id": "A8",
+  "title": "Verification reject",
+  "criterion": "A result that fails its output schema is rejected at L0; the challenge resolves in the parent's favour after the window.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:15.761Z",
+  "finished_at": "2026-10-01T00:40:15.763Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: [\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"urls\",\n      \"explorer_demo_tree\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+  ]
+}

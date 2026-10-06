@@ -1,0 +1,16 @@
+{
+  "id": "A16",
+  "title": "Rollback",
+  "criterion": "A forced rollback on Yaci is reflected in the indexer and UI within one block, with no phantom states.",
+  "network": "yaci",
+  "started_at": "2026-10-01T00:40:17.149Z",
+  "finished_at": "2026-10-01T00:40:17.149Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: not yet implemented: A16 flow: rollback-aware indexer (W3), Yaci snapshot rollback driver and Tree Explorer (W5)"
+  ]
+}

@@ -1,0 +1,581 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource/dm-mono/400.css";
+@import "@fontsource/dm-mono/500.css";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Cascade tokens. Colour carries meaning: the chrome is ink on paper with one mint accent, and the
+ * only other saturated hues are the six node states from PRD 14.3, so colour always says where money stands.
+ */
+:root {
+  color-scheme: light;
+  --bg: #f7f7f6;
+  --surface: #ffffff;
+  --surface-2: #f1f2f1;
+  --ink: #0b0b0c;
+  --ink-2: #4a4e52;
+  --ink-3: #686d72;
+  --line: #e7e8e7;
+  --line-strong: #d4d6d5;
+  --focus: #0c8a64;
+  --accent: #0c8a64;
+  --accent-soft: #dcf5ea;
+  --dot: rgb(11 11 12 / 0.13);
+  --grid: rgb(11 11 12 / 0.05);
+
+  --s-funded: #1d56d8;
+  --s-funded-bg: #e7efff;
+  --s-working: #9a4a05;
+  --s-working-bg: #fdf0dc;
+  --s-submitted: #6337c4;
+  --s-submitted-bg: #f0eaff;
+  --s-accepted: #13773a;
+  --s-accepted-bg: #e2f5e9;
+  --s-refunded: #525d6b;
+  --s-refunded-bg: #eceff3;
+  --s-challenged: #b42323;
+  --s-challenged-bg: #fde8e8;
+
+  --shadow-card: 0 0 0 1px rgb(11 11 12 / 0.02), 0 1px 2px rgb(11 11 12 / 0.04), 0 10px 30px -14px rgb(11 11 12 / 0.12);
+  --shadow-pop: 0 0 0 1px rgb(11 11 12 / 0.03), 0 2px 4px rgb(11 11 12 / 0.04), 0 24px 60px -20px rgb(11 11 12 / 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #09090a;
+    --surface: #111213;
+    --surface-2: #18191b;
+    --ink: #f2f2f0;
+    --ink-2: #b3b6b9;
+    --ink-3: #8b8f94;
+    --line: #222426;
+    --line-strong: #33363a;
+    --focus: #5fe0b4;
+    --accent: #5fe0b4;
+    --accent-soft: rgb(95 224 180 / 0.12);
+    --dot: rgb(242 242 240 / 0.09);
+    --grid: rgb(242 242 240 / 0.03);
+
+    --s-funded: #8cb4ff;
+    --s-funded-bg: rgb(59 116 246 / 0.16);
+    --s-working: #f7c261;
+    --s-working-bg: rgb(245 158 11 / 0.14);
+    --s-submitted: #c0a8ff;
+    --s-submitted-bg: rgb(139 92 246 / 0.18);
+    --s-accepted: #6fdc98;
+    --s-accepted-bg: rgb(34 197 94 / 0.14);
+    --s-refunded: #a7b2bf;
+    --s-refunded-bg: rgb(148 163 184 / 0.14);
+    --s-challenged: #ff9c94;
+    --s-challenged-bg: rgb(239 68 68 / 0.16);
+
+    --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --shadow-pop: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 16px 48px -8px rgb(0 0 0 / 0.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #09090a;
+  --surface: #111213;
+  --surface-2: #18191b;
+  --ink: #f2f2f0;
+  --ink-2: #b3b6b9;
+  --ink-3: #8b8f94;
+  --line: #222426;
+  --line-strong: #33363a;
+  --focus: #5fe0b4;
+  --accent: #5fe0b4;
+  --accent-soft: rgb(95 224 180 / 0.12);
+  --dot: rgb(242 242 240 / 0.09);
+  --grid: rgb(242 242 240 / 0.03);
+  --s-funded: #8cb4ff;
+  --s-funded-bg: rgb(59 116 246 / 0.16);
+  --s-working: #f7c261;
+  --s-working-bg: rgb(245 158 11 / 0.14);
+  --s-submitted: #c0a8ff;
+  --s-submitted-bg: rgb(139 92 246 / 0.18);
+  --s-accepted: #6fdc98;
+  --s-accepted-bg: rgb(34 197 94 / 0.14);
+  --s-refunded: #a7b2bf;
+  --s-refunded-bg: rgb(148 163 184 / 0.14);
+  --s-challenged: #ff9c94;
+  --s-challenged-bg: rgb(239 68 68 / 0.16);
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-pop: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 16px 48px -8px rgb(0 0 0 / 0.7);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: var(--font-geist-pixel-square), "DM Mono", ui-monospace, monospace;
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-focus: var(--focus);
+
+  --color-funded: var(--s-funded);
+  --color-funded-bg: var(--s-funded-bg);
+  --color-working: var(--s-working);
+  --color-working-bg: var(--s-working-bg);
+  --color-submitted: var(--s-submitted);
+  --color-submitted-bg: var(--s-submitted-bg);
+  --color-accepted: var(--s-accepted);
+  --color-accepted-bg: var(--s-accepted-bg);
+  --color-refunded: var(--s-refunded);
+  --color-refunded-bg: var(--s-refunded-bg);
+  --color-challenged: var(--s-challenged);
+  --color-challenged-bg: var(--s-challenged-bg);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+    scroll-padding-top: 5rem;
+  }
+  a, button, [role="button"], label, summary, input, select, textarea {
+    touch-action: manipulation;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11" on, "ss01" on;
+  }
+  /* Halftone field behind every page: two soft dot clouds, never under the reading column's centre. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(circle at center, var(--dot) 0.9px, transparent 1.3px);
+    background-size: 7px 7px;
+    mask-image: radial-gradient(ellipse 55% 45% at 8% 18%, black, transparent 70%), radial-gradient(ellipse 50% 50% at 96% 72%, black, transparent 70%);
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--focus) 28%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+  /* Page titles share the landing's pixel face. It has one weight, so never synthesise bold. */
+  h1 {
+    font-family: var(--font-display);
+    font-synthesis: none;
+    letter-spacing: -0.03em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer utilities {
+  /* Lining figures only: this face's tabular period is as wide as a digit and reads as a gap. */
+  .tabular {
+    font-variant-numeric: lining-nums;
+  }
+  .hairline-grid {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+/* React Flow: keep its chrome inside the Cascade palette. */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--line-strong);
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--surface-2);
+  --xy-controls-button-color: var(--ink-2);
+  --xy-controls-button-border-color: var(--line);
+  --xy-attribution-background-color: transparent;
+}
+.react-flow__node:focus-visible {
+  outline: none;
+}
+.react-flow__controls {
+  box-shadow: var(--shadow-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateX(24px); }
+}
+@keyframes sheet-up {
+  from { transform: translateY(40px); opacity: 0; }
+}
+@keyframes label-in {
+  from { opacity: 0; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+.agent-avatar {
+  /* Neutral on purpose: saturated colour on screen always means a node state. */
+  color: var(--ink-2);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.timeline-range::-webkit-slider-runnable-track { height: 24px; background: transparent; }
+.timeline-range::-moz-range-track { height: 24px; background: transparent; }
+.timeline-range::-webkit-slider-thumb {
+  appearance: none;
+  margin-top: 2px;
+  width: 14px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-card);
+}
+.timeline-range::-moz-range-thumb {
+  width: 10px;
+  height: 16px;
+  border-radius: 5px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+}
+.timeline-range:focus-visible { outline: none; }
+.timeline-range:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--focus); outline-offset: 2px; }
+.timeline-range:focus-visible::-moz-range-thumb { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Landing live tree: a node fades in once, the moment its escrow is created. */
+@media (prefers-reduced-motion: no-preference) {
+  .live-node { animation: live-node-in 420ms var(--ease-out-quint) both; }
+}
+@keyframes live-node-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+/* Landing hero: a mint wash behind the stage, and the halftone dots thickening toward it. */
+.hero-glow {
+  background:
+    radial-gradient(ellipse 38% 32% at 50% 62%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 0%, var(--surface), transparent 70%);
+}
+.hero-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center, var(--dot) 1px, transparent 1.4px);
+  background-size: 6px 6px;
+  mask-image: radial-gradient(ellipse 50% 40% at 50% 60%, black, transparent 75%);
+}
+.tile {
+  transition: transform 320ms var(--ease-out-quint), box-shadow 320ms var(--ease-out-quint), border-color 200ms;
+}
+.tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-pop);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+  }
+}
+@keyframes hero-in { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } }
+@keyframes flow-dash { to { stroke-dashoffset: -16; } }
+@keyframes reveal { from { opacity: 0; transform: translateY(28px); } }
+
+/* ---------- Hero stage ---------- */
+
+/* Opening: the vault assembles first, then copy and flanks rise out of a blur in order. */
+@media (prefers-reduced-motion: no-preference) {
+  .intro { animation: hero-in 1s var(--ease-out-quint) both; }
+  .intro-1 { animation-delay: 0.25s; }
+  .intro-2 { animation-delay: 0.38s; }
+  .intro-3 { animation-delay: 0.52s; }
+  .intro-4 { animation-delay: 0.64s; }
+  .intro-5 { animation-delay: 0.76s; }
+  .intro-6 { animation-delay: 1.05s; }
+  .intro-7 { animation-delay: 1.15s; }
+  .intro-8 { animation: route-draw 1.4s var(--ease-out-quint) 1.3s both; }
+  .intro-9 { animation-delay: 1.45s; }
+}
+@keyframes route-draw { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+
+.wheel-track { transition: transform 700ms var(--ease-out-quint); }
+
+.routes .route {
+  fill: none;
+  stroke-width: 1.25;
+  stroke-dasharray: 2 4;
+  opacity: 0.6;
+  transition: stroke 500ms, opacity 400ms, stroke-width 300ms;
+}
+.routes .route-idle { opacity: 0.35; }
+.routes .route-focus { stroke-width: 2; stroke-dasharray: none; opacity: 1; }
+.pulse { fill: currentColor; offset-rotate: 0deg; opacity: 0; }
+.pulse-halo { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .routes .route { animation: flow-dash 1.2s linear infinite; }
+  .pulse { animation: pulse-travel 1.05s var(--ease-out-quint) both; }
+  .pulse-halo { animation-name: pulse-travel-halo; }
+}
+@keyframes pulse-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+@keyframes pulse-travel-halo {
+  0% { offset-distance: 0%; opacity: 0; }
+  15% { opacity: 0.55; }
+  85% { opacity: 0.55; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* The escrow vault: stacked glass panes, one per tree level, tilted toward the reader. */
+@property --spread { syntax: "<number>"; inherits: true; initial-value: 1; }
+.vault { perspective: 1200px; }
+.vault-halo {
+  background: radial-gradient(circle at 50% 55%, color-mix(in oklab, var(--accent) 30%, transparent), transparent 62%);
+  filter: blur(30px);
+}
+.vault-body {
+  --rx: 0deg;
+  --ry: 0deg;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(6deg + var(--rx))) rotateY(calc(-22deg + var(--ry)));
+  transition: transform 700ms var(--ease-out-quint);
+}
+.vault-pane {
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+  transform: translate3d(calc(var(--i) * -9px * var(--spread)), calc(var(--i) * 3px * var(--spread)), calc(var(--i) * -30px * var(--spread)));
+}
+.vault-pane-back {
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 48%, var(--surface)), color-mix(in oklab, var(--accent) 22%, var(--surface)) 55%, color-mix(in oklab, var(--accent) 40%, var(--surface)));
+  border: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
+  opacity: calc(1 - var(--i) * 0.14);
+  box-shadow: inset 0 0 0 14px color-mix(in oklab, var(--surface) 22%, transparent);
+  overflow: hidden;
+}
+.vault-pane-front {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, color-mix(in oklab, var(--surface) 98%, white), color-mix(in oklab, var(--surface) 86%, var(--accent)) 120%);
+  border: 1px solid var(--line);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--surface) 60%, white) inset,
+    0 -10px 24px -12px color-mix(in oklab, var(--accent) 30%, transparent) inset,
+    0 50px 90px -40px rgb(11 11 12 / 0.35),
+    -18px 0 40px -24px color-mix(in oklab, var(--accent) 45%, transparent);
+}
+.vault-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 74%;
+  height: 74%;
+  overflow: hidden;
+  border-radius: 24px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in oklab, var(--accent) 20%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in oklab, var(--bg) 92%, var(--accent)), var(--surface));
+  box-shadow: inset 0 2px 10px rgb(11 11 12 / 0.08), inset 0 0 0 1px color-mix(in oklab, var(--accent) 25%, var(--line));
+}
+.vault-mark {
+  position: absolute;
+  top: 5.5%;
+  left: 6%;
+  width: 18px;
+  color: var(--ink-3);
+  opacity: 0.7;
+}
+.vault-glow, .vault-flash { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0; }
+.vault-glow { box-shadow: inset 0 0 26px 2px var(--accent); }
+.vault-flash { background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 35%, transparent), transparent 70%); }
+@media (prefers-reduced-motion: no-preference) {
+  .vault-body { animation: vault-in 2.2s var(--ease-out-quint) both; }
+  .vault-halo { animation: halo-breathe 6s ease-in-out infinite; }
+  .vault-glow { animation: vault-glow 900ms ease-out both; }
+  .vault-flash { animation: vault-glow 700ms ease-out both; }
+}
+@keyframes vault-in {
+  0% { opacity: 0; --spread: 5; transform: translateY(30px) scale(0.62) rotateX(30deg) rotateY(-70deg); }
+  35% { opacity: 1; }
+  100% { --spread: 1; }
+}
+@keyframes vault-glow { 0% { opacity: 0; } 30% { opacity: 0.9; } 100% { opacity: 0; } }
+@keyframes halo-breathe { 50% { transform: scale(1.08); opacity: 0.75; } }
+
+/* Text that changes with the scenario fades up; the command types itself. */
+@media (prefers-reduced-motion: no-preference) {
+  .swap-in { animation: swap-in 450ms var(--ease-out-quint) both; }
+  .check-in { animation: check-in 380ms var(--ease-out-quint) both; }
+  .typed {
+    display: inline-block;
+    max-width: calc(var(--n) * 1ch);
+    animation: typed 1.3s steps(var(--n), end) both;
+  }
+}
+@keyframes swap-in { from { opacity: 0; transform: translateY(5px); filter: blur(3px); } }
+@keyframes check-in { from { opacity: 0; transform: scale(0.4); } }
+@keyframes typed { from { max-width: 0; } }
+
+/* A ribbon in the node-state colours runs around the terminal block. */
+@property --beam { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.beam-ring, .beam-glow {
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--beam), transparent 0deg 200deg, var(--s-funded) 240deg, var(--s-submitted) 275deg, var(--accent) 310deg, var(--s-working) 340deg, transparent 360deg);
+  pointer-events: none;
+}
+.beam-ring {
+  padding: 1.5px;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.beam-glow { inset: -6px; filter: blur(18px); opacity: 0.55; z-index: -1; }
+@media (prefers-reduced-motion: no-preference) {
+  .beam-ring, .beam-glow { animation: beam-spin 5.5s linear infinite; }
+}
+@keyframes beam-spin { to { --beam: 360deg; } }
+
+/* Header: transparent over the hero, a frosted bar once the page scrolls under it. */
+.site-header[data-scrolled="true"] {
+  background: color-mix(in oklab, var(--bg) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 1px 0 var(--line);
+}
+
+/* ---------- Touch and small screens ---------- */
+
+/* iOS zooms into any field under 16px on focus; utilities set smaller sizes, so this sits outside layers. */
+@media (pointer: coarse) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select, textarea { font-size: 16px; }
+}
+
+/* Mobile menu sheet: the page fades out and the rows rise in one after another. */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-sheet { animation: fade-in 220ms ease-out both; }
+  .sheet-item { animation: sheet-rise 520ms var(--ease-out-quint) both; }
+}
+@keyframes sheet-rise { from { opacity: 0; transform: translateY(14px); } }
+
+/* Horizontal snap rails for card rows on phones; the scrollbar stays out of sight. */
+.snap-rail { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.snap-rail::-webkit-scrollbar { display: none; }
+
+/* Footer: dots on ink, and the pixel wordmark sinking off the bottom edge. */
+.footer-dots::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center, rgb(242 242 240 / 0.1) 0.9px, transparent 1.3px);
+  background-size: 7px 7px;
+  mask-image: linear-gradient(to bottom, transparent, black 60%);
+}
+.footer-wordmark {
+  background: linear-gradient(180deg, rgb(242 242 240 / 0.16), rgb(242 242 240 / 0.02) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A node's state change: one soft ring in the new state's colour. */
+.state-ring { box-shadow: 0 0 0 0 currentColor; opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .state-ring { animation: state-ring 900ms var(--ease-out-quint) 1; }
+}
+@keyframes state-ring {
+  0% { opacity: 0.55; box-shadow: 0 0 0 0 currentColor; }
+  100% { opacity: 0; box-shadow: 0 0 0 10px currentColor; }
+}
+
+/* Stage view: one soft glow behind the tree so the projector picture has a focal point. */
+.stage-canvas {
+  background-image:
+    radial-gradient(ellipse 50% 40% at 50% 20%, rgb(140 180 255 / 0.08), transparent 70%),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: auto, 32px 32px, 32px 32px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stage-caption { animation: caption-in 420ms var(--ease-out-quint) both; }
+}
+@keyframes caption-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+/* Refund moment: the failed node flashes red, then settles into its refunded grey. */
+@media (prefers-reduced-motion: no-preference) {
+  .node-refund-flash { animation: node-refund-flash 900ms var(--ease-out-quint) both; }
+  .node-enter { animation: node-enter 700ms var(--ease-out-quint) both; }
+}
+@keyframes node-refund-flash {
+  0%, 35% { border-color: var(--s-challenged); box-shadow: 0 0 0 3px var(--s-challenged-bg), var(--shadow-card); background: var(--s-challenged-bg); }
+  100% { border-color: var(--line); background: var(--surface); }
+}
+@keyframes node-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+/* Receipt print: the invoice as a plain document. */
+@media print {
+  @page { margin: 14mm; }
+  :root { --bg: #fff; --surface: #fff; --surface-2: #f5f7fa; }
+  body { background: #fff; }
+  header.sticky, .no-print, nav, [data-testid="sample-data-label"] { display: none !important; }
+  .invoice, .invoice * { box-shadow: none !important; }
+  .invoice { border-color: #c3ccd7; break-inside: auto; }
+  .invoice tr { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}

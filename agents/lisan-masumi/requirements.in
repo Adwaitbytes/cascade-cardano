@@ -1,0 +1,15 @@
+# The template's requirements.txt, resolved as of its commit date (2025-12-04) with crewai pinned to
+# 1.6.1, the release current then. crewai 1.15 makes a synchronous kickoff() inside a running event
+# loop return a coroutine and fail, which the unmodified template does in its async job handler.
+# masumi resolves to 0.1.41: 1.x passes the whole payment object to the status callback, which the
+# template forwards to submit-result as blockchainIdentifier (rejected with HTTP 400).
+# crewai 1.6 needs the litellm extra for OpenRouter models. pytest is for tests/test_shim.py.
+fastapi
+uvicorn
+python-dotenv
+crewai[litellm]==1.6.1
+masumi
+pydantic
+python-multipart
+httpx
+pytest

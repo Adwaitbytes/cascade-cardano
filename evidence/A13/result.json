@@ -1,0 +1,16 @@
+{
+  "id": "A13",
+  "title": "Freeze",
+  "criterion": "After Freeze, any new Draw in the tree fails; existing children still reach terminal states.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:15.653Z",
+  "finished_at": "2026-10-01T00:40:15.655Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: [\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"urls\",\n      \"explorer_demo_tree\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+  ]
+}

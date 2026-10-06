@@ -1,0 +1,16 @@
+{
+  "id": "A14",
+  "title": "Liveness without operator",
+  "criterion": "With the orchestrator offline, every node still reaches a terminal state through permissionless cranks.",
+  "network": "preprod",
+  "started_at": "2026-10-01T00:40:16.575Z",
+  "finished_at": "2026-10-01T00:40:16.576Z",
+  "commit": "dcac7f3df35d9ee74cd7aaf924dbe434deec9339",
+  "passed": false,
+  "assertions": [],
+  "transactions": [],
+  "artefacts": [],
+  "notes": [
+    "failed: [\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"urls\",\n      \"explorer_demo_tree\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+  ]
+}

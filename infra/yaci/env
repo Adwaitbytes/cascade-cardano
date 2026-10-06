@@ -1,0 +1,6 @@
+# Environment for the yaci-cli container (Yaci DevKit v0.12.0-beta5).
+yaci_store_enabled=true
+ogmios_enabled=true
+kupo_enabled=true
+yaci_cli_mode=native
+yaci_store_mode=native

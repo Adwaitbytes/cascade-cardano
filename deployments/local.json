@@ -1,0 +1,47 @@
+{
+  "network": "local",
+  "chain": "Yaci DevKit v0.12.0-beta5 (cardano-node 11.0.1, protocol 11)",
+  "composeFile": "infra/docker-compose.local.yml",
+  "networkMagic": 42,
+  "lucidNetwork": "Custom",
+  "slotConfig": {
+    "zeroTime": null,
+    "zeroTimeSource": "Changes whenever the devnet is recreated. Read deployments/local.runtime.json (slotConfig.zeroTime) or GET http://localhost:20000/local-cluster/api/admin/devnet -> startTime * 1000.",
+    "zeroSlot": 0,
+    "slotLength": 1000
+  },
+  "validityHorizonSeconds": 300,
+  "maxTxExUnits": {
+    "memory": 17500000,
+    "steps": 10000000000
+  },
+  "endpoints": {
+    "ogmiosWs": "ws://localhost:21337",
+    "ogmiosHttp": "http://localhost:21337",
+    "kupo": "http://localhost:21442",
+    "blockfrostCompatible": "http://localhost:28080/api/v1",
+    "adminApi": "http://localhost:20000",
+    "adminDevnetInfo": "http://localhost:20000/local-cluster/api/admin/devnet",
+    "adminTopup": "http://localhost:20000/local-cluster/api/addresses/topup",
+    "submitApi": "http://localhost:28090/api/submit/tx",
+    "nodeToNode": "localhost:23001",
+    "nodeToClientTcp": "localhost:23333",
+    "viewer": "http://localhost:25173",
+    "postgres": "postgres://cascade@localhost:55432/cascade",
+    "temporal": "localhost:27233",
+    "temporalNamespace": "cascade",
+    "temporalUi": "http://localhost:28233",
+    "minioS3": "http://localhost:29000",
+    "minioConsole": "http://localhost:29001"
+  },
+  "credentials": {
+    "postgresPassword": "env CASCADE_LOCAL_PG_PASSWORD (local default: cascade)",
+    "minioUser": "env CASCADE_LOCAL_MINIO_USER (local default: cascade)",
+    "minioPassword": "env CASCADE_LOCAL_MINIO_PASSWORD (local default: cascade-local)"
+  },
+  "runtimeFile": {
+    "path": "deployments/local.runtime.json",
+    "gitIgnored": true,
+    "contains": "devnetStartTime, slotConfig.zeroTime, testToken, aikenVersion, blueprintSha256, referenceScriptHolder, scripts (hash, address, referenceUtxo, rewardAddress), stakeRegistrations. Same deployment shape as deployments/preprod.json. Rewritten by pnpm local:up."
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "network": "preprod",
+  "service": "masumi-payment-service",
+  "image": "cascade/masumi-payment-service:69297f30 (built by infra/masumi/Dockerfile from upstream commit 69297f308f603bffbdfd4efccb54398eaff1bd87, newer than 0.28.0)",
+  "composeFile": "infra/docker-compose.masumi.yml",
+  "paymentSourceType": "Web3CardanoV2",
+  "vestedPayV2Address": "addr_test1wzs4e6wc95hkwezlccjw9mdvq0r0rsgx6zk34avptga3ftgn37w4g",
+  "registryPolicyIdV2": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b",
+  "instances": [
+    {
+      "id": "orchestrator",
+      "operator": "Cascade orchestrator (buys from Masumi leaves)",
+      "apiBase": "http://localhost:23100/api/v1",
+      "health": "http://localhost:23100/api/v1/health",
+      "docs": "http://localhost:23100/docs",
+      "adminUi": "http://localhost:23100/admin/",
+      "adminKeyEnv": "MASUMI_ORCH_ADMIN_KEY",
+      "v2PurchasingWallet": "addr_test1qzs09qtq4lfje3cecc353xc86tvtytsfgnsw4hrlzmh3wkqpkqyxukhjdcy82qref72gw35r3vlsun2qrny2fadvsn6q55sx7m",
+      "v2SellingWallet": "addr_test1qrfkwa9q6etsgnt84pc9mdypsls0a3248wdm66ma4j798awhjdjse2vv0kjn9mj05xhd6u6ux30dl7fhx04ptquhlngspt05mm"
+    },
+    {
+      "id": "lisan",
+      "operator": "Lisan agent operator (sells as a Masumi agent)",
+      "apiBase": "http://localhost:23101/api/v1",
+      "health": "http://localhost:23101/api/v1/health",
+      "docs": "http://localhost:23101/docs",
+      "adminUi": "http://localhost:23101/admin/",
+      "adminKeyEnv": "MASUMI_LISAN_ADMIN_KEY",
+      "v2PurchasingWallet": "addr_test1qqs0z4vgmuzcxlm9jrrtp2zdc2yw4hqtkllqwak0458j6t7r5pv2quc9r20mwlktp88hwnt5vtjgse2wz0pqef2sz0rs4dr5y3",
+      "v2SellingWallet": "addr_test1qqfd4059v4kkp9cx6w3a85lqcl7ft2ctgtgk47h9l3d7dwqq3aacfepssvkht08pwzshcqe227xckkxlq8pzw5yfq8yqds8ttl"
+    },
+    {
+      "id": "lisan-b",
+      "operator": "Lisan-B operator. Test agent: fails on purpose to demonstrate Masumi refunds (A4)",
+      "apiBase": "http://localhost:23102/api/v1",
+      "health": "http://localhost:23102/api/v1/health",
+      "docs": "http://localhost:23102/docs",
+      "adminUi": "http://localhost:23102/admin/",
+      "adminKeyEnv": "MASUMI_LISAN_B_ADMIN_KEY",
+      "v2PurchasingWallet": "addr_test1qz620563myysdjgckjxd8g6zpxx0vvlzna7rqeun3qpcpfp8qtqlypwxehrh6vyhrt25p7suqxd2k2qjzle8sxh048fsy0ck6g",
+      "v2SellingWallet": "addr_test1qpu4nqgwmde659je49hkkvdzkl7zv6u8vqw9lnpcw9k7sumqf8n7u39cadhle6rr5v7vwp7meckkypg480ukmj92r8msaj84ca"
+    }
+  ]
+}

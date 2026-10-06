@@ -1,0 +1,37 @@
+{
+  "name": "@cascade/agent-pricer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pricer: competitor price collector that buys per-call lookups (PRD 21.1)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/agent.js",
+  "types": "./dist/agent.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/agent.d.ts",
+      "import": "./dist/agent.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@cascade/agent": "workspace:*",
+    "@cascade/agent-kit": "workspace:*",
+    "@cascade/agent-lookup-api": "workspace:*",
+    "@cascade/orchestrator": "workspace:*",
+    "@cascade/sdk": "workspace:*",
+    "@cascade/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}
