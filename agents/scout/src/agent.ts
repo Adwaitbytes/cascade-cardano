@@ -8,7 +8,7 @@ import { cascadeAgent, type AgentSigner, type CascadeAgent,
 import { acceptedChildResults, CONTEXT_FIELD, loggedJson, readContext, type AgentRuntime, type SubtreeHire } from "@cascade/agent-kit";
 import { DETERMINISTIC_FALLBACK, type LlmClient } from "@cascade/orchestrator/llm";
 
-export const SCOUT_PROMPT_VERSION = "scout-v1";
+export const SCOUT_PROMPT_VERSION = "scout-v2";
 
 export const SCOUT_OUTPUT_SCHEMA = {
   type: "object",
@@ -32,6 +32,14 @@ const RESEARCH_SCHEMA = {
     findings: { type: "array", items: { type: "object", additionalProperties: false, required: ["claim", "source_url"], properties: { claim: { type: "string" }, source_url: { type: "string" } } } },
   },
 };
+
+const SCOUT_SYSTEM = [
+  "You are a market researcher. Research the market in the user message and return JSON only.",
+  "competitors: up to 6 real brands that sell in that market. positioning is one line naming price tier, main channel and differentiator, for example \"Premium; mall kiosks and delivery apps; organic certified\".",
+  "findings: up to 6 specific, checkable claims, each with a number, a date or a named source (market size, growth rate, regulation, channel share, consumer behaviour). One claim per finding, at most 30 words.",
+  "source_url: a real https page you are confident exists and supports the claim (regulator, statistics office, company site, established publication). If you are not confident, omit the finding: never invent or guess a URL.",
+  "No generic statements such as \"the market is growing\", no marketing language, no duplicates. Fewer, solid items beat six weak ones.",
+].join("\n");
 
 const isRecord = (v: JsonValue | undefined): v is Record<string, JsonValue> => typeof v === "object" && v !== null && !Array.isArray(v);
 
@@ -82,8 +90,7 @@ export function createScoutAgent(deps: ScoutDeps): CascadeAgent {
       const research = await loggedJson<Research>(deps.llm, ctx, {
         role: "worker",
         promptVersion: SCOUT_PROMPT_VERSION,
-        system:
-          "You are a market researcher. List up to 6 competitor brands with one-line positioning, and up to 6 findings about the market. Every finding needs a real https source URL you are confident exists; omit a finding rather than invent a URL.",
+        system: SCOUT_SYSTEM,
         user: JSON.stringify({ market }),
         schemaName: "market_research",
         schema: RESEARCH_SCHEMA,

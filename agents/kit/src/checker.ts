@@ -11,7 +11,7 @@ import type { AgentRuntime } from "./config.js";
 import { CONTEXT_FIELD, ContextError, readContext } from "./context.js";
 import { loggedJson } from "./llm-tools.js";
 
-export const CHECKER_PROMPT_VERSION = "checker-v1";
+export const CHECKER_PROMPT_VERSION = "checker-v2";
 
 const JUDGEMENT_SCHEMA = {
   type: "object",
@@ -129,8 +129,12 @@ export function createCheckerAgent(deps: CheckerDeps): CascadeAgent {
       const judged = await loggedJson(llm, ctx, {
         role: deps.llmRole,
         promptVersion: CHECKER_PROMPT_VERSION,
-        system:
-          "You verify work delivered by another AI agent. Judge whether the result is internally consistent, answers its task, and cites sources for factual claims. Deterministic checks already ran; their failures are listed. Reject if any deterministic check failed. Score from 0 to 1. Give short reasons.",
+        system: [
+          "You verify work delivered by another AI agent against its task. Deterministic checks already ran; their failures are listed, and any failure means reject.",
+          "Otherwise judge three things: it answers the task (not a neighbouring question); each factual claim has a plausible source URL from a relevant domain, or is clearly labelled as an estimate or sample; it is internally consistent (numbers, names and units agree).",
+          "Reject for invented-looking or irrelevant sources, unlabelled guesses presented as fact, or a result that is mostly generic filler. Do not reject for style.",
+          "Score from 0 to 1 (0.8 or more: solid; under 0.5: reject). Give at most three short, specific reasons that name the claim or field concerned.",
+        ].join("\n"),
         user: JSON.stringify({ task: context["task"] ?? null, result, deterministic_failures: problems }),
         schemaName: "verdict_judgement",
         schema: JUDGEMENT_SCHEMA,

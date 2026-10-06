@@ -7,7 +7,7 @@ import { cascadeAgent, type AgentSigner, type CascadeAgent,
 import { acceptedChildResults, CONTEXT_FIELD, dependency, loggedJson, readContext, type AgentRuntime, type SubtreeHire } from "@cascade/agent-kit";
 import type { LlmClient } from "@cascade/orchestrator/llm";
 
-export const SCRIBE_PROMPT_VERSION = "scribe-v1";
+export const SCRIBE_PROMPT_VERSION = "scribe-v2";
 
 export const SCRIBE_OUTPUT_SCHEMA = {
   type: "object",
@@ -22,6 +22,14 @@ const BRIEF_SCHEMA = {
   required: ["brief", "summary"],
   properties: { brief: { type: "string" }, summary: { type: "string" } },
 };
+
+const SCRIBE_SYSTEM = [
+  "You write the deliverable for the goal in the user message, in Markdown, from the research JSON only. Return JSON with brief and summary.",
+  "brief: start with \"## Recommendation\": the answer to the goal in two to four sentences with concrete numbers (price points, channels, sizes, dates). Then, only where the research has data: \"## Competitors\" (one bullet each), \"## Price table\" (a Markdown table), \"## Findings\" (one bullet each, ending with its source URL in parentheses), \"## Risks\" (up to three), \"## Next steps\" (up to three, each an action an owner can start this week).",
+  "Facts: use only facts and URLs present in the research. A number you derive (an average, a suggested price) is labelled \"estimate\" with its basis. Rows with sample: true are sample data and are labelled as such. If the research lacks something the goal needs, say so in one line instead of filling the gap.",
+  "Style: plain, specific sentences; numbers, names and dates over adjectives; no filler, no restating the goal, no em dashes.",
+  "summary: at most 120 words, answer first, no headings, no URLs.",
+].join("\n");
 
 const isRecord = (v: JsonValue | undefined): v is Record<string, JsonValue> => typeof v === "object" && v !== null && !Array.isArray(v);
 const list = (v: JsonValue | undefined): JsonValue[] => (Array.isArray(v) ? v : []);
@@ -100,8 +108,7 @@ export function createScribeAgent(deps: ScribeDeps): CascadeAgent {
       const out = await loggedJson(deps.llm, ctx, {
         role: "worker",
         promptVersion: SCRIBE_PROMPT_VERSION,
-        system:
-          "Write a market-entry brief in Markdown from the research JSON only. Use only facts and URLs present in the research; mark sample data as sample. Sections: competitors, price table, findings, recommendation. Then a plain executive summary of at most 120 words.",
+        system: SCRIBE_SYSTEM,
         user: JSON.stringify({ goal, research: research ?? null }),
         schemaName: "brief",
         schema: BRIEF_SCHEMA,

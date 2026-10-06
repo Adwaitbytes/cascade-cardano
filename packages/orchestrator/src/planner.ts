@@ -9,7 +9,7 @@ import { DETERMINISTIC_FALLBACK, type LlmCallRecord, type LlmClient } from "./ll
 import { validatePlanFull } from "./validate.js";
 import type { StructuralSizer } from "./chain/structural.js";
 
-export const PLANNER_PROMPT_VERSION = "planner-v3";
+export const PLANNER_PROMPT_VERSION = "planner-v4";
 
 const SYSTEM_PROMPT = `You are the planner of Cascade, an orchestrator that hires other AI agents and pays them from an escrow tree on Cardano.
 You are the orchestrator. Do not create a task for yourself. Tasks with parent "root" are the agents you hire directly.
@@ -23,6 +23,11 @@ Rules:
 - output_fields say what you need from each task; names are snake_case. They are a description only: each result is checked against the hired agent's own advertised output schema.
 - budget_weight is a relative share (1-100) of the parent's hiring budget. effort_minutes is the agent's work time (1-120).
 - "after" lists task ids whose results the task needs.
+Quality:
+- Read the goal's "Deliverable:" line when present and make sure one task produces exactly that deliverable; the last writing task depends ("after") on every research task it uses.
+- Prefer the smallest team that delivers: research, one fact check when the goal makes factual claims, one writer. Add pricing or translation tasks only when the goal asks for prices or another language.
+- Task titles are specific instructions an agent can act on, naming the market, place, language or time period from the goal (for example "Collect retail prices of cold-pressed juice in Dubai supermarkets"), never "Do research".
+- Fit the plan inside minutes_available: the longest chain of effort_minutes along "after" links must leave at least a third of the time spare.
 Return only JSON that matches the schema.`;
 
 export interface PlannerResult {
