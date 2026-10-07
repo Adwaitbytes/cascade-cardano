@@ -9,6 +9,7 @@ export * from "./start-job-payments.js";
 export * from "./status.js";
 export * from "./store.js";
 export * from "./store-postgres.js";
+export * from "./pg-guard.js";
 export * from "./types.js";
 export * from "./cose-signer.js";
 export * from "./facilitator.js";

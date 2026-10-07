@@ -3,6 +3,7 @@
  * so a restarted Conductor resumes its Temporal workflows with nothing lost (A15).
  */
 import type { Pool } from "pg";
+import { guardPool, withPgClient } from "@cascade/agent";
 import type { PlanStore, StoredPlan } from "../api/store.js";
 import type { HireLedger, HireLedgerEntry } from "./hire-ledger.js";
 
@@ -43,6 +44,7 @@ export class PostgresPlanStore implements PlanStore {
     prefix = "orchestrator",
   ) {
     if (!IDENT.test(prefix)) throw new Error("prefix must be a lowercase SQL identifier");
+    guardPool(pool);
     this.table = `${prefix}_plans`;
   }
 
@@ -60,54 +62,52 @@ export class PostgresPlanStore implements PlanStore {
   }
 
   async update(planId: string, mutate: (p: StoredPlan) => StoredPlan): Promise<StoredPlan> {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      const { rows } = await client.query<{ record: unknown }>(`SELECT record FROM ${this.table} WHERE plan_id = $1 FOR UPDATE`, [planId]);
-      if (rows[0] === undefined) throw new Error(`plan ${planId} does not exist`);
-      const next = mutate(decode<StoredPlan>(rows[0].record));
-      await client.query(`UPDATE ${this.table} SET tree_id = $2, funded = $3, record = $4, updated_at = now() WHERE plan_id = $1`, [planId, next.tree_id, next.funded, encode(next)]);
-      await client.query("COMMIT");
-      return next;
-    } catch (e) {
-      await client.query("ROLLBACK");
-      throw e;
-    } finally {
-      client.release();
-    }
+    return withPgClient(this.pool, async (client) => {
+      try {
+        await client.query("BEGIN");
+        const { rows } = await client.query<{ record: unknown }>(`SELECT record FROM ${this.table} WHERE plan_id = $1 FOR UPDATE`, [planId]);
+        if (rows[0] === undefined) throw new Error(`plan ${planId} does not exist`);
+        const next = mutate(decode<StoredPlan>(rows[0].record));
+        await client.query(`UPDATE ${this.table} SET tree_id = $2, funded = $3, record = $4, updated_at = now() WHERE plan_id = $1`, [planId, next.tree_id, next.funded, encode(next)]);
+        await client.query("COMMIT");
+        return next;
+      } catch (e) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        throw e;
+      }
+    });
   }
 
   async assignTree(planId: string, treeId: string): Promise<"assigned" | "tree_funded"> {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      // Serialises concurrent claims on one tree id, including the case where no row holds it yet.
-      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`${this.table}:${treeId}`]);
-      const { rows } = await client.query<{ plan_id: string; funded: boolean; record: unknown }>(
-        `SELECT plan_id, funded, record FROM ${this.table} WHERE (tree_id = $1 AND plan_id <> $2) OR plan_id = $2 FOR UPDATE`,
-        [treeId, planId],
-      );
-      const target = rows.find((r) => r.plan_id === planId);
-      if (target === undefined) throw new Error(`plan ${planId} does not exist`);
-      const holder = rows.find((r) => r.plan_id !== planId);
-      if (holder?.funded === true) {
-        await client.query("ROLLBACK");
-        return "tree_funded";
+    return withPgClient(this.pool, async (client) => {
+      try {
+        await client.query("BEGIN");
+        // Serialises concurrent claims on one tree id, including the case where no row holds it yet.
+        await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`${this.table}:${treeId}`]);
+        const { rows } = await client.query<{ plan_id: string; funded: boolean; record: unknown }>(
+          `SELECT plan_id, funded, record FROM ${this.table} WHERE (tree_id = $1 AND plan_id <> $2) OR plan_id = $2 FOR UPDATE`,
+          [treeId, planId],
+        );
+        const target = rows.find((r) => r.plan_id === planId);
+        if (target === undefined) throw new Error(`plan ${planId} does not exist`);
+        const holder = rows.find((r) => r.plan_id !== planId);
+        if (holder?.funded === true) {
+          await client.query("ROLLBACK");
+          return "tree_funded";
+        }
+        if (holder !== undefined) {
+          const released = { ...decode<StoredPlan>(holder.record), tree_id: null };
+          await client.query(`UPDATE ${this.table} SET tree_id = NULL, record = $2, updated_at = now() WHERE plan_id = $1`, [holder.plan_id, encode(released)]);
+        }
+        const next = { ...decode<StoredPlan>(target.record), tree_id: treeId };
+        await client.query(`UPDATE ${this.table} SET tree_id = $2, record = $3, updated_at = now() WHERE plan_id = $1`, [planId, treeId, encode(next)]);
+        await client.query("COMMIT");
+        return "assigned";
+      } catch (e) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        throw e;
       }
-      if (holder !== undefined) {
-        const released = { ...decode<StoredPlan>(holder.record), tree_id: null };
-        await client.query(`UPDATE ${this.table} SET tree_id = NULL, record = $2, updated_at = now() WHERE plan_id = $1`, [holder.plan_id, encode(released)]);
-      }
-      const next = { ...decode<StoredPlan>(target.record), tree_id: treeId };
-      await client.query(`UPDATE ${this.table} SET tree_id = $2, record = $3, updated_at = now() WHERE plan_id = $1`, [planId, treeId, encode(next)]);
-      await client.query("COMMIT");
-      return "assigned";
-    } catch (e) {
-      await client.query("ROLLBACK");
-      throw e;
-    } finally {
-      client.release();
-    }
+    });
   }
 
   async awaitingFunding(): Promise<string[]> {
@@ -128,6 +128,7 @@ export class PostgresHireLedger implements HireLedger {
     prefix = "orchestrator",
   ) {
     if (!IDENT.test(prefix)) throw new Error("prefix must be a lowercase SQL identifier");
+    guardPool(pool);
     this.table = `${prefix}_hires`;
   }
 

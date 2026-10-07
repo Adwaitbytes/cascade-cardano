@@ -13,6 +13,7 @@
  */
 import { Client, Connection } from "@temporalio/client";
 import pg from "pg";
+import { guardPool } from "@cascade/agent";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { CascadeClient, loadMasumiScript, loadReferenceScripts } from "@cascade/sdk";
@@ -82,7 +83,7 @@ export async function chainRuntimeFromEnv(llm: LlmClient, onError: (where: strin
     store = new InMemoryPlanStore();
     ledger = new InMemoryHireLedger();
   } else {
-    const pool = new pg.Pool({ connectionString: dbUrl, max: 5 });
+    const pool = guardPool(new pg.Pool({ connectionString: dbUrl, max: 5, keepAlive: true }));
     const prefix = env("CASCADE_ORCHESTRATOR_STATE_PREFIX") ?? "orchestrator";
     await migrateOrchestratorState(pool, prefix);
     store = new PostgresPlanStore(pool, prefix);

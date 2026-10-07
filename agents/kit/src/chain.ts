@@ -7,7 +7,7 @@
  */
 import { CML, type LucidEvolution } from "@lucid-evolution/lucid";
 import { CascadeClient, loadReferenceScripts, type CascadeScripts, type ReferenceScripts } from "@cascade/sdk";
-import { HttpFacilitatorVerifier, type AgentSigner } from "@cascade/agent";
+import { HttpFacilitatorVerifier, guardPool, type AgentSigner } from "@cascade/agent";
 import { sellerFromAgentSigner, withMasumiOffers } from "@cascade/x402";
 import pg from "pg";
 import { PostgresMasumiTermsStorage } from "./masumi-terms.js";
@@ -195,7 +195,7 @@ export async function chainWiringFromEnv(role: string, agentAddress: string, age
   const dbUrl = env("CASCADE_ORCHESTRATOR_DATABASE_URL");
   let requirements = native.requirements;
   if (agentSigner !== undefined && dbUrl !== undefined && masumiOffersSupported(network)) {
-    const storage = new PostgresMasumiTermsStorage(new pg.Pool({ connectionString: dbUrl, max: 3 }));
+    const storage = new PostgresMasumiTermsStorage(guardPool(new pg.Pool({ connectionString: dbUrl, max: 3, keepAlive: true })));
     await storage.migrate();
     const agentIdentifier = env(`CASCADE_AGENT_ID_${role.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`);
     requirements = withMasumiOffers(native.requirements, { network, seller: sellerFromAgentSigner(agentSigner), storage, ...(agentIdentifier === undefined ? {} : { agentIdentifier }) });

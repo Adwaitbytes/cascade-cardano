@@ -11,7 +11,7 @@
 import pg from "pg";
 import type { LucidEvolution } from "@lucid-evolution/lucid";
 import { CascadeClient, type CascadeScripts, type ReferenceScripts } from "@cascade/sdk";
-import type { JobRecord, JsonValue } from "@cascade/agent";
+import { guardPool, type JobRecord, type JsonValue } from "@cascade/agent";
 import {
   composeByMerge,
   createActivities,
@@ -152,7 +152,7 @@ export async function subtreeRunnerFromEnv(role: AgentRoleName, operatorAddress:
   const dbUrl = env("CASCADE_ORCHESTRATOR_DATABASE_URL");
   let ledger: HireLedger = new InMemoryHireLedger();
   if (dbUrl !== undefined) {
-    const pool = new pg.Pool({ connectionString: dbUrl, max: 3 });
+    const pool = guardPool(new pg.Pool({ connectionString: dbUrl, max: 3, keepAlive: true }));
     await migrateOrchestratorState(pool);
     ledger = new PostgresHireLedger(pool);
   }

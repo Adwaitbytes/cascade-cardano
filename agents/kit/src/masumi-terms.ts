@@ -5,6 +5,7 @@
  */
 import type { Pool } from "pg";
 import type { MasumiTermsStorage } from "@x402/cardano";
+import { guardPool, withPgClient } from "@cascade/agent";
 
 type Terms = NonNullable<Awaited<ReturnType<MasumiTermsStorage["get"]>>>;
 type UpdateResult = Awaited<ReturnType<MasumiTermsStorage["updateTerms"]>>;
@@ -15,6 +16,7 @@ export class PostgresMasumiTermsStorage implements MasumiTermsStorage {
     private readonly table = "masumi_terms",
   ) {
     if (!/^[a-z_][a-z0-9_]{0,40}$/.test(table)) throw new Error("table must be a lowercase SQL identifier");
+    guardPool(pool);
   }
 
   async migrate(): Promise<void> {
@@ -27,34 +29,33 @@ export class PostgresMasumiTermsStorage implements MasumiTermsStorage {
   }
 
   async updateTerms(termsDigest: string, update: (current: Terms | undefined) => Terms | undefined): Promise<UpdateResult> {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      // Serialises writers of this digest across processes, including when no row exists yet.
-      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [termsDigest]);
-      const { rows } = await client.query<{ record: string }>(`SELECT record FROM ${this.table} WHERE terms_digest = $1`, [termsDigest]);
-      const current = rows[0] === undefined ? undefined : (JSON.parse(rows[0].record) as Terms);
-      const next = update(current);
-      let status: UpdateResult["status"];
-      if (next === undefined) {
-        if (current !== undefined) await client.query(`DELETE FROM ${this.table} WHERE terms_digest = $1`, [termsDigest]);
-        status = current === undefined ? "unchanged" : "deleted";
-      } else if (next === current) {
-        status = "unchanged";
-      } else {
-        await client.query(
-          `INSERT INTO ${this.table} (terms_digest, record) VALUES ($1, $2) ON CONFLICT (terms_digest) DO UPDATE SET record = EXCLUDED.record, updated_at = now()`,
-          [termsDigest, JSON.stringify(next)],
-        );
-        status = "updated";
+    return withPgClient(this.pool, async (client) => {
+      try {
+        await client.query("BEGIN");
+        // Serialises writers of this digest across processes, including when no row exists yet.
+        await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [termsDigest]);
+        const { rows } = await client.query<{ record: string }>(`SELECT record FROM ${this.table} WHERE terms_digest = $1`, [termsDigest]);
+        const current = rows[0] === undefined ? undefined : (JSON.parse(rows[0].record) as Terms);
+        const next = update(current);
+        let status: UpdateResult["status"];
+        if (next === undefined) {
+          if (current !== undefined) await client.query(`DELETE FROM ${this.table} WHERE terms_digest = $1`, [termsDigest]);
+          status = current === undefined ? "unchanged" : "deleted";
+        } else if (next === current) {
+          status = "unchanged";
+        } else {
+          await client.query(
+            `INSERT INTO ${this.table} (terms_digest, record) VALUES ($1, $2) ON CONFLICT (terms_digest) DO UPDATE SET record = EXCLUDED.record, updated_at = now()`,
+            [termsDigest, JSON.stringify(next)],
+          );
+          status = "updated";
+        }
+        await client.query("COMMIT");
+        return { terms: next, status };
+      } catch (e) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        throw e;
       }
-      await client.query("COMMIT");
-      return { terms: next, status };
-    } catch (e) {
-      await client.query("ROLLBACK");
-      throw e;
-    } finally {
-      client.release();
-    }
+    });
   }
 }

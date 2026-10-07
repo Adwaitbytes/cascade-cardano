@@ -8,6 +8,7 @@ import type { Quote } from "@cascade/shared/browser";
 import { DuplicateJobError, JobNotFoundError, type JobStore } from "./store.js";
 import type { JobStatus } from "./status.js";
 import type { JobRecord } from "./types.js";
+import { guardPool, withPgTransaction } from "./pg-guard.js";
 
 const IDENT_RE = /^[a-z_][a-z0-9_]{0,40}$/;
 
@@ -28,7 +29,7 @@ export class PostgresJobStore implements JobStore {
   constructor(options: PostgresJobStoreOptions) {
     const prefix = options.tablePrefix ?? "cascade_agent";
     if (!IDENT_RE.test(prefix)) throw new Error("tablePrefix must be a lowercase SQL identifier");
-    this.pool = options.pool;
+    this.pool = guardPool(options.pool);
     this.agentId = options.agentId;
     this.jobs = `${prefix}_jobs`;
     this.quotes = `${prefix}_quotes`;
@@ -39,18 +40,10 @@ export class PostgresJobStore implements JobStore {
    * the pg_type catalog row, so the DDL runs in one transaction behind an advisory lock keyed on the table name.
    */
   async migrate(): Promise<void> {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
+    await withPgTransaction(this.pool, async (client) => {
       await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [this.jobs]);
       await this.createTables(client);
-      await client.query("COMMIT");
-    } catch (e) {
-      await client.query("ROLLBACK");
-      throw e;
-    } finally {
-      client.release();
-    }
+    });
   }
 
   private async createTables(client: PoolClient): Promise<void> {
@@ -96,18 +89,7 @@ export class PostgresJobStore implements JobStore {
   }
 
   async update(jobId: string, mutate: (job: JobRecord) => JobRecord): Promise<JobRecord> {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      const next = await this.updateIn(client, jobId, mutate);
-      await client.query("COMMIT");
-      return next;
-    } catch (e) {
-      await client.query("ROLLBACK");
-      throw e;
-    } finally {
-      client.release();
-    }
+    return withPgTransaction(this.pool, (client) => this.updateIn(client, jobId, mutate));
   }
 
   private async updateIn(client: PoolClient, jobId: string, mutate: (job: JobRecord) => JobRecord): Promise<JobRecord> {
