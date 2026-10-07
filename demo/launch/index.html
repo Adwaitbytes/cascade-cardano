@@ -53,7 +53,7 @@
       .brand svg { width: var(--logo); height: var(--logo); display: block; }
       .brand .name { font-size: calc(var(--logo) * 0.9); font-weight: 620; letter-spacing: -0.05em; line-height: 1; }
 
-      .caption { position: absolute; left: 0; right: 0; top: var(--cap-top); text-align: center; font-size: var(--h2); font-weight: 560; letter-spacing: -0.04em; }
+      .caption { position: absolute; left: 0; right: 0; top: var(--cap-top); text-align: center; font-size: var(--cap-fs); padding: 0 40px; font-weight: 560; letter-spacing: -0.04em; }
 
       .stage3d { position: absolute; inset: 0; perspective: 1800px; }
       .card { position: absolute; border-radius: 18px; overflow: hidden; background: #fff;
@@ -64,21 +64,24 @@
       svg.wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
       .wire { fill: none; stroke: #b9c7c0; stroke-width: 3; stroke-linecap: round; }
       .wire.refund { stroke: #c4ccd0; stroke-dasharray: 2 9; }
-      .dot { position: absolute; left: 0; top: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%;
+      .dot { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
         background: radial-gradient(circle at 35% 35%, #4fe0a6, #0f9a62); box-shadow: 0 0 0 6px rgba(18, 162, 106, 0.16), 0 0 24px rgba(18,162,106,0.55); }
-      .dot.up { background: radial-gradient(circle at 35% 35%, #ffffff, #9aa6ac); box-shadow: 0 0 0 6px rgba(120, 134, 140, 0.16), 0 0 20px rgba(120,134,140,0.4); }
+      .dot.up { background: radial-gradient(circle at 35% 35%, #ffd29a, #f08a24); box-shadow: 0 0 0 7px rgba(240, 138, 36, 0.18), 0 0 26px rgba(240,138,36,0.55); }
+      #refund-pill { background: #fff6ec; color: #b45309; box-shadow: 0 0 0 2px rgba(240,138,36,0.35), 0 18px 44px -14px rgba(180, 83, 9, 0.35); font-family: "Geist", sans-serif; font-weight: 600; }
+      #refund-pill .muted { color: #c2410c; font-family: "Geist Mono", monospace; font-weight: 500; }
       .pill { position: absolute; display: flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 999px; background: rgba(255,255,255,0.92);
         box-shadow: 0 2px 6px rgba(16,40,30,0.06), 0 20px 50px -16px rgba(16,60,44,0.3); font-family: "Geist Mono", monospace; font-size: 24px; letter-spacing: -0.01em; white-space: nowrap; }
       .pill .muted { color: var(--ink-3); }
       .check { width: 34px; height: 34px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; flex: none; }
       .check svg { width: 20px; height: 20px; }
+      .glow { position: absolute; left: 68.5%; top: 5.4%; width: 29.6%; height: 7.6%; border-radius: 14px; box-shadow: 0 0 0 3px rgba(18, 162, 106, 0.55), 0 0 36px 8px rgba(18, 162, 106, 0.35); background: rgba(18, 162, 106, 0.06); }
       .cell { position: absolute; border-radius: 6px; background: #fff; box-shadow: 0 10px 24px -10px rgba(16,60,44,0.35); }
       .cell.g { background: linear-gradient(140deg, #57d9a3, #12a26a); }
 
       .eco { display: flex; flex-direction: column; gap: var(--eco-gap); align-items: flex-start; }
-      .row { display: flex; align-items: center; gap: 30px; font-size: var(--h2); letter-spacing: -0.04em; font-weight: 600; }
+      .row { display: flex; align-items: center; gap: calc(var(--mark) * 0.3); font-size: var(--eco-fs); letter-spacing: -0.04em; font-weight: 600; }
       .row .soft { font-weight: 400; }
-      .mark { width: var(--mark); height: var(--mark); border-radius: 22px; background: #fff; display: grid; place-items: center; flex: none;
+      .mark { width: var(--mark); height: var(--mark); border-radius: calc(var(--mark) * 0.24); background: #fff; display: grid; place-items: center; flex: none;
         box-shadow: 0 2px 6px rgba(16,40,30,0.06), 0 18px 40px -16px rgba(16,60,44,0.3); }
       .mark img, .mark svg { width: 58%; height: 58%; display: block; }
 
@@ -146,7 +149,7 @@
         <div class="stage3d" id="proof-stage">
           <div class="cell" id="c1"></div><div class="cell g" id="c2"></div><div class="cell" id="c3"></div><div class="cell g" id="c4"></div><div class="cell" id="c5"></div>
           <div class="card" id="events"><img src="assets/shots/p-events.png" alt="" /></div>
-          <div class="card" id="receipt"><img src="assets/shots/p-receipt.png" alt="" /></div>
+          <div class="card" id="receipt"><img src="assets/shots/p-receipt.png" alt="" /><div class="glow" id="total-glow"></div></div>
           <div class="pill" id="tx-pill">
             <span class="check"><svg viewBox="0 0 20 20"><path id="tick" d="M5 10.5 L8.6 14 L15 6.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
             <span style="font-family: Geist, sans-serif; font-weight: 560; letter-spacing: -0.02em">Root closed and settled</span>
@@ -179,7 +182,7 @@
 
       <section id="s-outro" class="scene clip" data-start="27.15" data-duration="2.85">
         <div class="center">
-          <div id="outro-brand" class="brand">
+          <div id="outro-brand" class="brand" style="--logo: var(--logo-outro)">
             <svg viewBox="0 0 28 28"><rect width="28" height="28" rx="7" fill="#0b0b0c" /><g fill="#f3f6f4"><rect x="10.5" y="6" width="7" height="5" rx="1" /><rect x="13" y="11" width="2" height="3" /><rect x="8" y="13" width="12" height="2" /><rect x="6" y="17" width="6" height="5" rx="1" /><rect x="16" y="17" width="6" height="5" rx="1" opacity="0.45" /></g></svg>
             <div class="name">cascade</div>
           </div>
@@ -202,13 +205,16 @@
       const tall = H > W;
       const u = Math.min(W, H) / 1080;
       const set = (k, v) => root.style.setProperty(k, v);
-      set("--h1", `${(tall ? 88 : 92) * u}px`);
-      set("--h2", `${(tall ? 58 : 60) * u}px`);
-      set("--measure", `${tall ? 940 * u : 1500 * u}px`);
-      set("--logo", `${(tall ? 120 : 132) * u}px`);
-      set("--cap-top", `${(tall ? 150 : 96) * u}px`);
-      set("--mark", `${104 * u}px`);
-      set("--eco-gap", `${44 * u}px`);
+      set("--h1", `${(tall ? 132 : 156) * u}px`);
+      set("--h2", `${(tall ? 84 : 100) * u}px`);
+      set("--cap-fs", `${(tall ? 68 : 100) * u}px`);
+      set("--eco-fs", `${(tall ? 64 : 92) * u}px`);
+      set("--measure", `${tall ? 1000 * u : 1760 * u}px`);
+      set("--logo", `${(tall ? 150 : 170) * u}px`);
+      set("--logo-outro", `${(tall ? 180 : 200) * u}px`);
+      set("--cap-top", `${(tall ? 120 : 70) * u}px`);
+      set("--mark", `${(tall ? 110 : 150) * u}px`);
+      set("--eco-gap", `${(tall ? 48 : 60) * u}px`);
       set("--url-w", `${(tall ? 940 : 1040) * u}px`);
       set("--url-h", `${124 * u}px`);
       set("--url-fs", `${(tall ? 40 : 54) * u}px`);
@@ -287,12 +293,12 @@
       tl.fromTo(brand.querySelector("svg"), { filter: "blur(10px)" }, { filter: "blur(0px)", duration: 0.7, ease: "expo.out", immediateRender: true }, 4.3);
       tl.fromTo(brand.querySelector(".name"), { filter: "blur(10px)" }, { filter: "blur(0px)", duration: 0.7, ease: "expo.out", immediateRender: true }, 4.3);
       // Nudge up to make room: ramp, burst, long tail.
-      const lift = -95 * u;
+      const lift = (tall ? -170 : -150) * u;
       tl.fromTo(brand, { y: 0 }, { y: lift * 0.1, duration: 0.16, ease: "power3.in", immediateRender: false }, 5.25);
       tl.to(brand, { y: lift * 0.75, duration: 0.14, ease: "none" }, 5.41);
       tl.to(brand, { y: lift, duration: 0.5, ease: "power4.out" }, 5.55);
       const tag = split($("#tagline"));
-      gsap.set($("#tagline"), { y: 95 * u });
+      gsap.set($("#tagline"), { y: (tall ? 130 : 120) * u });
       reveal(tag, 5.5, { gap: 0.085, dur: 0.75, y: 28 });
       exitEl(brand, 7.95);
       exitLeft(tag, 7.98, { stagger: 0.012 });
@@ -303,16 +309,17 @@
       const ch = cw * (142 / 302);
       const rw = (tall ? 360 : 420) * u;
       const rh = rw * (142 / 302);
-      const rootPos = { x: W / 2, y: tall ? H * 0.34 : H * 0.36 };
+      const rootPos = { x: W / 2, y: tall ? H * 0.4 : H * 0.4 };
+      const ROOT_BIG = 1.45;
       const kids = ["#n-scribe", "#n-scribe2", "#n-checker", "#n-scout", "#n-pricer"];
       let slots;
       if (tall) {
         const cols = [W / 2 - cw / 2 - 18 * u, W / 2 + cw / 2 + 18 * u];
-        const rowY = [H * 0.57, H * 0.57 + ch + 34 * u, H * 0.57 + 2 * (ch + 34 * u)];
+        const rowY = [H * 0.62, H * 0.62 + ch + 34 * u, H * 0.62 + 2 * (ch + 34 * u)];
         slots = [[cols[0], rowY[0]], [cols[1], rowY[0]], [cols[0], rowY[1]], [cols[1], rowY[1]], [W / 2, rowY[2]]];
       } else {
         const gap = 22 * u, total = 5 * cw + 4 * gap;
-        slots = kids.map((_, i) => [W / 2 - total / 2 + cw / 2 + i * (cw + gap), H * 0.7]);
+        slots = kids.map((_, i) => [W / 2 - total / 2 + cw / 2 + i * (cw + gap), H * 0.74]);
       }
       const place = (sel, x, y, w, h) => Object.assign($(sel).style, { left: `${x - w / 2}px`, top: `${y - h / 2}px`, width: `${w}px`, height: `${h}px` });
       place("#n-root", rootPos.x, rootPos.y, rw, rh);
@@ -348,13 +355,13 @@
       const cur = $("#cursor");
       const cs = 134 * u;
       Object.assign(cur.style, { width: `${cs}px`, height: `${cs}px` });
-      const tipX = rootPos.x + rw * 0.12 - cs * 0.21, tipY = rootPos.y + rh * 0.05 - cs * 0.14;
+      const tipX = rootPos.x + rw * 0.2 * ROOT_BIG - cs * 0.21, tipY = rootPos.y + rh * 0.05 * ROOT_BIG - cs * 0.14;
       const CLICK = 10.05;
       tl.fromTo(cur, { x: tipX + 120 * u, y: H * 1.15 }, { x: tipX, y: tipY, duration: 0.85, ease: "power3.out", immediateRender: true }, 9.0);
       tl.to(cur, { scale: 0.84, duration: 0.1, ease: "power2.in", transformOrigin: "21% 14%" }, CLICK);
       tl.to(cur, { scale: 1, duration: 0.22, ease: "power2.out", transformOrigin: "21% 14%" }, CLICK + 0.1);
-      tl.to("#n-root", { scale: 0.96, duration: 0.1, ease: "power2.in" }, CLICK);
-      tl.to("#n-root", { scale: 1, duration: 0.4, ease: "back.out(1.6)" }, CLICK + 0.1);
+      tl.fromTo("#n-root", { scale: ROOT_BIG }, { scale: ROOT_BIG * 0.96, duration: 0.1, ease: "power2.in", immediateRender: true }, CLICK);
+      tl.to("#n-root", { scale: 1, duration: 0.7, ease: "power3.inOut" }, CLICK + 0.1);
       tl.to(cur, { x: W * 1.15, y: tipY + 260 * u, duration: 0.6, ease: "power2.in" }, CLICK + 0.55);
 
       paths.forEach((p, i) => {
@@ -403,22 +410,28 @@
       });
       const pill = $("#refund-pill");
       const pr = slots[4];
-      Object.assign(pill.style, { left: `${pr[0]}px`, top: `${pr[1] - ch / 2 - 74 * u}px`, fontSize: `${22 * u}px` });
+      Object.assign(pill.style, { left: `${tall ? pr[0] + cw / 2 + 140 * u : pr[0]}px`, top: `${tall ? pr[1] - 32 * u : pr[1] - ch / 2 - 96 * u}px`, fontSize: `${(tall ? 26 : 28) * u}px` });
       tl.fromTo(pill, { xPercent: -50, y: 24 * u, opacity: 0 }, { xPercent: -50, y: 0, opacity: 1, duration: 0.5, ease: "power3.out", immediateRender: true }, PAY + 1.5);
       tl.to(pill, { y: -40 * u, opacity: 0, duration: 0.5, ease: "power2.in" }, PAY + 2.45);
 
       // Camera: a slow push toward the tree while money moves, then the tree leaves on the current.
-      tl.fromTo("#tree-stage", { scale: 1 }, { scale: 1.03, duration: 5.2, ease: "power1.inOut", immediateRender: true }, 10.0);
+      // Camera: the stage floats with a slight 3D tilt and pushes in slowly, then closes on the
+      // money moving (root, wires and the refund on the right) for the payouts beat.
+      const focus = tall ? { x: W / 2, y: H * 0.45, z: 1.05 } : { x: W * 1.156, y: H * 0.49, z: 1.5 };
+      gsap.set("#tree-stage", { transformOrigin: `${focus.x}px ${focus.y}px`, transformPerspective: 2000 });
+      tl.fromTo("#tree-stage", { scale: 0.97, rotationX: 10, rotationY: -6 }, { scale: 1.02, rotationX: 5, rotationY: -2, duration: 3.7, ease: "power1.inOut", immediateRender: true }, 8.3);
+      tl.to("#tree-stage", { scale: focus.z, rotationX: 3, rotationY: -1, duration: 1.1, ease: "power3.inOut" }, 12.0);
+      tl.to("#tree-stage", { scale: focus.z * 1.03, duration: 2.2, ease: "none" }, 13.1);
       exitEl("#tree-group", 15.26);
       exitLeft(c3, 15.24, { stagger: 0.015 });
 
       // 3c. Proof: receipt and event log float in depth, the closing tx lands on top.
       const T4 = 15.6;
-      const rcW = (tall ? 860 : 980) * u, rcH = rcW * (1645 / 2062);
+      const rcW = (tall ? 1000 : 1240) * u, rcH = rcW * (1645 / 2062);
       const evW = (tall ? 300 : 330) * u, evH = evW * (1240 / 720);
-      const rc = { x: tall ? W / 2 : W * 0.46, y: tall ? H * 0.5 : H * 0.55 };
+      const rc = { x: tall ? W / 2 : W * 0.45, y: tall ? H * 0.53 : H * 0.215 + rcH / 2 };
       Object.assign($("#receipt").style, { left: `${rc.x - rcW / 2}px`, top: `${rc.y - rcH / 2}px`, width: `${rcW}px`, height: `${rcH}px` });
-      const ev = { x: tall ? W / 2 - 280 * u : W * 0.76, y: tall ? H * 0.33 : H * 0.5 };
+      const ev = { x: tall ? W / 2 - 300 * u : W * 0.8, y: tall ? H * 0.46 : H * 0.5 };
       Object.assign($("#events").style, { left: `${ev.x - evW / 2}px`, top: `${ev.y - evH / 2}px`, width: `${evW}px`, height: `${evH}px` });
       const c4 = split($("#cap4"));
       c4.forEach((w, i) => tl.fromTo(w, { x: 230 * u, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, ease: "power4.out", immediateRender: true }, T4 + i * 0.05));
@@ -435,8 +448,10 @@
           { x: -220 * u * travel, y: -30 * u * (i % 2 ? 1 : -1), rotation: i * 17 + 40, opacity: 1, z, duration: 4.7, ease: "none", immediateRender: true }, T4);
       });
       const tx = $("#tx-pill");
-      Object.assign(tx.style, { left: `${rc.x}px`, top: `${rc.y + rcH / 2 - 40 * u}px`, fontSize: `${(tall ? 21 : 24) * u}px` });
+      Object.assign(tx.style, { left: `${rc.x}px`, top: `${tall ? rc.y + rcH / 2 - 40 * u : H - 120 * u}px`, fontSize: `${(tall ? 22 : 28) * u}px` });
       tl.fromTo(tx, { xPercent: -50, y: 60 * u, opacity: 0 }, { xPercent: -50, y: 0, opacity: 1, duration: 0.6, ease: "power3.out", immediateRender: true }, 16.9);
+      tl.fromTo("#total-glow", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out", immediateRender: true }, 16.35);
+      tl.fromTo(tx, { boxShadow: "0 0 0 0px rgba(18,162,106,0), 0 20px 50px -16px rgba(16,60,44,0.3)" }, { boxShadow: "0 0 0 3px rgba(18,162,106,0.5), 0 0 44px 6px rgba(18,162,106,0.35)", duration: 0.6, ease: "power2.out", immediateRender: true }, 17.3);
       const tick = $("#tick");
       const tlen = tick.getTotalLength();
       tl.fromTo(tick, { strokeDasharray: tlen, strokeDashoffset: tlen }, { strokeDashoffset: 0, duration: 0.35, ease: "power2.out", immediateRender: true }, 17.25);
@@ -472,8 +487,8 @@
       const ob = $("#outro-brand");
       tl.fromTo(ob, { scale: 1.25, opacity: 0.15 }, { scale: 1, opacity: 1, duration: 0.9, ease: "expo.out", immediateRender: true }, 27.15);
       tl.fromTo(ob.querySelector(".name"), { filter: "blur(10px)" }, { filter: "blur(0px)", duration: 0.8, ease: "expo.out", immediateRender: false }, 27.15);
-      gsap.set($("#outro-line"), { y: 110 * u });
-      gsap.set(ob, { y: -50 * u });
+      gsap.set($("#outro-line"), { y: (tall ? 140 : 150) * u });
+      gsap.set(ob, { y: -70 * u });
       const ol = split($("#outro-line"));
       reveal(ol, 28.1, { gap: 0.1, dur: 0.8, y: 22 });
 
