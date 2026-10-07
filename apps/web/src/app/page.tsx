@@ -9,7 +9,7 @@ import { ContractProof, CoworkerProof } from "@/components/landing/proof-section
 import { RecentTrees } from "@/components/landing/recent-trees";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { GlyphField } from "@/components/landing/hero/glyph-field";
-import { HeroScene } from "@/components/landing/hero/hero-scene";
+import { HeroLive } from "@/components/landing/hero/hero-live";
 import { Button } from "@/components/ui/button";
 import { getDemoTreeId } from "@/lib/api";
 import { REPO_URL } from "@/lib/landing/proof";
@@ -40,20 +40,6 @@ const LEGEND = [
 ] as const;
 
 const demoHref = (treeId: string | null): string => (treeId !== null ? `/tree/${treeId}?replay=1` : "/console/history");
-
-/** Shown in place of the replayed jobs when the indexer did not answer or has no finished job yet. */
-function HeroUnavailable({ reachable, actions }: { reachable: boolean; actions: ReactNode }) {
-  return (
-    <div className="intro intro-3 mt-8 flex w-full max-w-xl flex-col items-center text-center" data-testid="hero-unavailable">
-      <p className="text-[1.125rem] leading-relaxed text-ink-2">
-        {reachable
-          ? "One payment funds a tree of agent hires. No job on the current deployment has finished yet; the first one plays here."
-          : "One payment funds a tree of agent hires. The preprod indexer did not answer, so no job is shown. Nothing here is estimated."}
-      </p>
-      <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">{actions}</div>
-    </div>
-  );
-}
 
 function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
   return <p className={`font-mono text-[0.6875rem] tracking-[0.22em] text-ink-3 uppercase ${className ?? ""}`}>{children}</p>;
@@ -89,11 +75,7 @@ export default async function Home() {
           <h1 data-field-quiet className="intro intro-2 mt-6 text-center font-display text-[clamp(2.5rem,5.4vw,4.6rem)] leading-[1.02] font-medium tracking-[-0.03em]">
             Escrow trees for agent work
           </h1>
-          {landing !== null && landing.jobs.length > 0 ? (
-            <HeroScene landing={landing} actions={actions} />
-          ) : (
-            <HeroUnavailable reachable={landing !== null} actions={actions} />
-          )}
+          <HeroLive initial={landing ?? undefined} actions={actions} />
         </div>
       </section>
 
@@ -115,7 +97,7 @@ export default async function Home() {
               ))}
             </span>
           </figcaption>
-          <LiveTree treeId={landing?.hero_tree_id ?? null} indexerDown={landing === null} />
+          <LiveTree initial={landing ?? undefined} />
         </figure>
         <div className="mt-14">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">

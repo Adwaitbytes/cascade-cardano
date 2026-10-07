@@ -8,9 +8,11 @@ import { usePrefersReducedMotion } from "@/hooks/use-tree";
 import { getDataSource } from "@/lib/api";
 import type { Tree } from "@/lib/api/schemas";
 import { formatAmount } from "@/lib/assets";
+import type { LandingData } from "@/lib/landing/data";
 import { describeEvent, replayTree, type DisplayState } from "@/lib/tree/replay";
 import { CARD_MIN_W, fitCard } from "@/lib/tree/hero";
 import { tidyLayout } from "@/lib/tree/tidy";
+import { useLanding } from "./use-landing";
 
 const BOX_H = 46;
 const GAP_X = 16;
@@ -50,9 +52,12 @@ const orthogonal = (x1: number, y1: number, x2: number, y2: number): string => {
  * The landing hero: a real preprod tree replayed from its indexed events. Money moves down on
  * hires and back up on refunds and settlements, exactly as the chain recorded it.
  */
-export function LiveTree({ treeId, indexerDown = false }: { treeId: string | null; indexerDown?: boolean }) {
+export function LiveTree({ initial }: { initial?: LandingData }) {
+  const landing = useLanding(initial);
+  const treeId = landing.data?.hero_tree_id ?? null;
   const hero = useQuery({ queryKey: ["hero-tree", treeId], queryFn: () => loadHeroTree(treeId ?? ""), enabled: treeId !== null, staleTime: 60_000 });
-  if (indexerDown || hero.isError) return <LiveTreeNotice body="The preprod indexer did not answer, so there is no tree to replay right now. Every tree is still on chain: open one by its id further down." />;
+  if ((landing.data === undefined && landing.isError) || hero.isError) return <LiveTreeNotice body="The preprod indexer did not answer, so there is no tree to replay right now. Every tree is still on chain: open one by its id further down." />;
+  if (landing.data === undefined) return <LiveTreeSkeleton />;
   if (treeId === null) return <LiveTreeNotice body="No tree on the current deployment has settled a node yet. The first one to settle replays here." />;
   if (hero.data === undefined) return <LiveTreeSkeleton />;
   if (hero.data.events.length === 0) return <LiveTreeNotice body="This tree has no indexed events yet. They appear here as the indexer reads them." />;

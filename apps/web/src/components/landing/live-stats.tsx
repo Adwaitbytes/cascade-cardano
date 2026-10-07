@@ -1,13 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { AmountTicker, CountTicker } from "@/components/ticker";
-import { getDataSource } from "@/lib/api";
 import { formatAmount } from "@/lib/assets";
 import { plural } from "@/lib/console/history";
 import type { LandingData } from "@/lib/landing/data";
-
-const loadLanding = async (): Promise<LandingData> => (await getDataSource()).getLanding();
+import { useLanding } from "./use-landing";
 
 const OUTCOMES = [
   { key: "closed", label: "Closed with payouts", bar: "bg-accepted" },
@@ -20,7 +17,7 @@ const OUTCOMES = [
  * went back to buyers with the reason. Server-rendered data when given, else read in the browser.
  */
 export function LiveStats({ data }: { data?: LandingData }) {
-  const query = useQuery({ queryKey: ["landing"], queryFn: loadLanding, initialData: data, refetchInterval: 60_000, staleTime: 30_000 });
+  const query = useLanding(data);
   // A failed refresh keeps the data already shown; only a first read that fails shows the notice.
   const d = query.data;
   if (d === undefined && query.isError) {
