@@ -1,0 +1,37 @@
+{
+ "source": "tests/adversarial/report.json, every case submitted to a Yaci DevKit node",
+ "generated_at": "2026-10-05T20:21:16.865Z",
+ "commit": "fe84dd559f37da82315e1cb6bf1117ce3e379ad5",
+ "cases": 64,
+ "unexpected_successes": 0,
+ "by_action": {
+  "Draw": 15,
+  "FundRoot": 9,
+  "Cancel": 5,
+  "TopUp": 5,
+  "CloseReceipt": 4,
+  "Resolve": 3,
+  "CloseRoot": 3,
+  "SettleChild": 3,
+  "Accept": 2,
+  "OwnerReclaim": 2,
+  "Challenge": 2,
+  "Redeem": 2,
+  "Escalate": 2,
+  "Freeze": 2,
+  "Refund": 2,
+  "Submit": 2,
+  "Unfreeze": 1
+ },
+ "outcomes": {
+  "rejected_by_script": 64
+ },
+ "preprod": {
+  "source": "evidence/A19/preprod-adversarial.json",
+  "commit": "2e83cf243f5b3a81394a0d1818783febdb4a0872",
+  "cases": 9,
+  "outcomes": {
+   "rejected_by_script": 9
+  }
+ }
+}
