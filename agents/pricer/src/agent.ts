@@ -74,17 +74,24 @@ export interface PricerDeps {
 
 const isRecord = (v: JsonValue | undefined): v is Record<string, JsonValue> => typeof v === "object" && v !== null && !Array.isArray(v);
 
-/** Brands Scout found, from its result passed under `context.depends_on.scout`. */
-function competitorBrands(scout: JsonValue | undefined): string[] {
-  const list = isRecord(scout) ? scout["competitors"] : undefined;
+/** Brands a research result found, from its `competitors` list. */
+function competitorBrands(research: JsonValue | undefined): string[] {
+  const list = isRecord(research) ? research["competitors"] : undefined;
   if (!Array.isArray(list)) return [];
   return list.flatMap((c) => (isRecord(c) && typeof c["brand"] === "string" ? [c["brand"]] : []));
 }
 
-function brandsFrom(input: Record<string, JsonValue>): string[] {
+/**
+ * Brands to price: listed in the input, or the competitors of any upstream research result. A
+ * plan's research slot is keyed by its spec id (`market-research`), not by `scout`, so every
+ * dependency is read.
+ */
+export function brandsFrom(input: Record<string, JsonValue>): string[] {
   const context = readContext(input);
   const listed = [input["brands"], context["brands"]].flatMap((v) => (typeof v === "string" ? v.split(",") : []));
-  const all = [...listed, ...competitorBrands(dependency(context, "scout"))].map((b) => b.trim()).filter((b) => b.length > 0);
+  const deps = context["depends_on"];
+  const upstream = isRecord(deps) ? Object.keys(deps).flatMap((id) => competitorBrands(dependency(context, id))) : [];
+  const all = [...listed, ...upstream].map((b) => b.trim()).filter((b) => b.length > 0);
   return [...new Set(all)].slice(0, 20);
 }
 
@@ -107,8 +114,10 @@ export function createPricerAgent(deps: PricerDeps): CascadeAgent {
     ...(deps.onChallenge === undefined ? {} : { onChallenge: deps.onChallenge }),
     handler: async (input, ctx) => {
       const brands = brandsFrom(input);
-      if (brands.length === 0) throw new Error("no brands to price: pass `brands` or Scout's competitors in `context`");
+      // On the metered rail a job with no named brands (a plan that runs pricing beside research,
+      // preprod tree b945c5e3) prices labelled benchmark brands from the free catalog instead of failing.
       if (deps.metered !== undefined && ctx.node !== null) return { result: await meteredPrices(deps.metered, ctx, brands, readContext(input)) };
+      if (brands.length === 0) throw new Error("no brands to price: pass `brands` or Scout's competitors in `context`");
       if (deps.lookups === undefined) throw new Error("Lookup API purchases need the x402 buy side (@cascade/x402, W2), which is not wired yet");
       const table: JsonValue[] = [];
       let calls = 0;
@@ -160,8 +169,8 @@ export async function buyPriceHistory(o: { brands: string[]; lookupDay: (brand: 
   };
   const missing: string[] = [];
   for (const brand of o.brands) if (!(await priceHistory(brand, false))) missing.push(brand);
-  if (missing.length > 0) {
-    notes.push(`the Lookup API dataset has no rows for ${missing.join(", ")}; their prices are not verified`);
+  if (missing.length > 0 || o.brands.length === 0) {
+    notes.push(missing.length > 0 ? `the Lookup API dataset has no rows for ${missing.join(", ")}; their prices are not verified` : "no competitor brands were named upstream");
     const listed = await o.catalog();
     const extra = Array.isArray(listed) ? listed.filter((b): b is string => typeof b === "string" && !o.brands.includes(b)).slice(0, MAX_BENCHMARK_BRANDS) : [];
     if (extra.length === 0) notes.push("no benchmark brands: the Lookup API catalog was unavailable or empty");

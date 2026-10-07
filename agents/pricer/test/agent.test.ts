@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { localKeySigner, type PaymentRequired } from "@cascade/agent";
 import { buyAndRun, ScriptedVerifier, testPayment, testRequirements, testRuntime } from "@cascade/agent-kit/testing";
 import { createLookupApiAgent } from "@cascade/agent-lookup-api";
-import { buyPriceHistory, createPricerAgent, HISTORY_DAYS, MAX_BENCHMARK_BRANDS, x402LookupClient, type X402Buyer } from "../src/agent.js";
+import { brandsFrom, buyPriceHistory, createPricerAgent, HISTORY_DAYS, MAX_BENCHMARK_BRANDS, x402LookupClient, type X402Buyer } from "../src/agent.js";
 
 const signer = localKeySigner(new Uint8Array(32).fill(44));
 const payments = () => ({ requirements: testRequirements(signer.address), verifier: new ScriptedVerifier() });
@@ -35,6 +35,14 @@ describe("Pricer", () => {
   });
 });
 
+describe("brandsFrom", () => {
+  it("reads competitors from any upstream research slot, not only one keyed `scout`", () => {
+    const context = JSON.stringify({ depends_on: { "market-research": { competitors: [{ brand: "Common Man Coffee" }, { brand: "Nylon" }] } } });
+    expect(brandsFrom({ context })).toEqual(["Common Man Coffee", "Nylon"]);
+    expect(brandsFrom({ brands: "A, B", context: JSON.stringify({ depends_on: { scout: { competitors: [{ brand: "B" }, { brand: "C" }] } } }) })).toEqual(["A", "B", "C"]);
+  });
+});
+
 describe("buyPriceHistory (metered rail)", () => {
   const lookupApi = createLookupApiAgent({ runtime: testRuntime("lookup-api"), signer: localKeySigner(new Uint8Array(32).fill(45)), verifier: new ScriptedVerifier() });
   const catalog = async () => ((await (await lookupApi.fetch(new Request("http://lookup-api.test/catalog"))).json()) as { brands: unknown }).brands;
@@ -52,6 +60,13 @@ describe("buyPriceHistory (metered rail)", () => {
     // Two competitors and four absent benchmark brands at one call each, one full history.
     expect(got.calls).toBe(2 + (MAX_BENCHMARK_BRANDS - 1) + HISTORY_DAYS);
     expect(got.notes[0]).toBe("the Lookup API dataset has no rows for N Juice, Kold Press; their prices are not verified");
+  });
+
+  it("prices labelled benchmarks when no competitor was named upstream (preprod tree b945c5e3 failed instead)", async () => {
+    const got = await buyPriceHistory({ brands: [], lookupDay, catalog });
+    expect(got.rows.length).toBeGreaterThan(0);
+    expect(got.rows.every((r) => r.benchmark)).toBe(true);
+    expect(got.notes[0]).toBe("no competitor brands were named upstream");
   });
 
   it("prices a competitor the dataset carries as a competitor row, with no benchmarks", async () => {
