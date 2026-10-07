@@ -463,6 +463,20 @@
           "lovelace": "706255273"
         }
       ]
+    },
+    {
+      "at": "2026-10-07T03:20:38.892Z",
+      "txHash": "5eafadb1ae756dc2fd6a6f61a4c902cb69aca2faee92124d4dba4510f03425d2",
+      "explorer": "https://preprod.cardanoscan.io/transaction/5eafadb1ae756dc2fd6a6f61a4c902cb69aca2faee92124d4dba4510f03425d2",
+      "provider": "blockfrost",
+      "totalLovelace": "16422725",
+      "outputs": [
+        {
+          "role": "watchtower",
+          "address": "addr_test1qrkatytzk8vqger2z8q3lujnsnapr9kxxl0aud9chd2nxjytuluwmupv39ukg8x06r4cvme40xus6qvvlyt29gyke2zqn3h3g3",
+          "lovelace": "16422725"
+        }
+      ]
     }
   ]
 }
