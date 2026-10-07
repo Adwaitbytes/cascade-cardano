@@ -5,7 +5,7 @@
  */
 import { beforeAll, describe, expect, it } from "vitest";
 import type { BuiltTx, NativeChild } from "@cascade/sdk";
-import { localTx, party, submitBuilt, submitPermissionless, waitUntilAfter, type Party } from "../lib/devnet.js";
+import { buildPermissionless, localTx, party, submitBuilt, submitPermissionless, waitUntilAfter, type Party } from "../lib/devnet.js";
 import { ADA, h32, TreeLab, type Plan } from "../lib/tree-fixture.js";
 
 const ROOT_FEE = 5n * ADA;
@@ -39,8 +39,11 @@ async function send(built: BuiltTx, ...keys: Party[]): Promise<string> {
  * SettleChild or CloseRoot of `nodeId`. The local watchtower may crank it first (devnet.ts); its tx
  * fee is then the watchtower's, so the buyer's conservation check below still counts only `txs`.
  */
-async function sendPermissionless(built: BuiltTx, nodeId: string): Promise<void> {
-  const hash = await submitPermissionless(lab.client, built, keysFor(built, []), async () => !(await onChain(lab.client.policyId + nodeId)));
+async function sendPermissionless(build: () => Promise<BuiltTx>, nodeId: string): Promise<void> {
+  const madeByOther = async (): Promise<boolean> => !(await onChain(lab.client.policyId + nodeId));
+  const built = await buildPermissionless(build, madeByOther);
+  if (built === null) return;
+  const hash = await submitPermissionless(lab.client, built, keysFor(built, []), madeByOther);
   if (hash !== null) txs.push(hash);
 }
 
@@ -70,7 +73,7 @@ function childSpec(leafIndex: number, worker: Party, budget: bigint, fee: bigint
 async function complete(nodeId: string, worker: Party, parentOperator: Party): Promise<void> {
   await send(await lab.client.submit(nodeId, h32(`result/${nodeId}`)), worker);
   await send(await lab.client.accept(nodeId, [parentOperator.vkh]), parentOperator);
-  await sendPermissionless(await lab.client.settleChild(nodeId), nodeId);
+  await sendPermissionless(() => lab.client.settleChild(nodeId), nodeId);
 }
 
 beforeAll(async () => {
@@ -147,7 +150,7 @@ describe("Wave 1 native tree on Yaci", () => {
     await complete(b, workerB, operator);
     await send(await lab.client.submit(root, h32("root-result")), operator);
     await send(await lab.client.accept(root, [buyer.vkh]));
-    await sendPermissionless(await lab.client.closeRoot(root), root);
+    await sendPermissionless(() => lab.client.closeRoot(root), root);
 
     // Every node, and the config, is gone from the chain.
     for (const id of [root, a, b, a1, a2, b1, b2, b2Replacement]) {

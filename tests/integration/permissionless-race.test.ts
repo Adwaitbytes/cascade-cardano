@@ -3,10 +3,11 @@
  * as soon as it sees it, so a test's own SettleChild can find its inputs spent. Here a second party
  * settles first from the same chain state; `submitPermissionless` must report that (null) rather
  * than fail, and must still fail a tx whose inputs are unknown while the node stays live.
+ * `buildPermissionless` covers the same race one step earlier, when the node is gone at build time.
  */
 import { beforeAll, describe, expect, it } from "vitest";
 import type { BuiltTx } from "@cascade/sdk";
-import { submitBuilt, submitPermissionless, type Party } from "../lib/devnet.js";
+import { buildPermissionless, submitBuilt, submitPermissionless, type Party } from "../lib/devnet.js";
 import { ADA, h32, TreeLab, type Plan } from "../lib/tree-fixture.js";
 
 let lab: TreeLab;
@@ -55,6 +56,11 @@ describe("permissionless transitions raced by another party", () => {
     // The same rejection with a node that is still live is a real failure, not a lost race.
     await expect(submitPermissionless(lab.client, ours, keysFor(ours), async () => false, 5_000)).rejects.toThrow(/unknownOutputReferences|unknown UTxO references/);
     expect(await submitPermissionless(lab.client, ours, keysFor(ours), async () => !(await onChain(child)))).toBeNull();
+    // Building after the other party settled finds no node: a lost race once the burn is confirmed,
+    // a real failure while nothing confirms it.
+    const settledByOther = async (): Promise<boolean> => !(await onChain(child));
+    await expect(buildPermissionless(() => lab.client.settleChild(child), async () => false, 5_000)).rejects.toThrow(`node ${child} not found`);
+    expect(await buildPermissionless(() => lab.client.settleChild(child), settledByOther)).toBeNull();
     expect((await lab.client.node(treeId)).datum.children_open).toBe(0n);
   }, 900_000);
 });

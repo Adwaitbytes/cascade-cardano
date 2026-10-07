@@ -174,6 +174,32 @@ export async function submitPermissionless(
   }
 }
 
+/** The node is gone at build time: not found by the SDK, or spent before Ogmios evaluated the tx. */
+const NODE_GONE = /^node [0-9a-f]+ not found$|Unknown transaction input \(missing from UTxO set\)/;
+
+/**
+ * Builds a permissionless transition that the local watchtower may already have made: it can burn
+ * the node between our last confirmed tx and this build, so the SDK finds no node to spend, or
+ * spends it while Ogmios evaluates our draft (its inputs are then missing from the UTxO set). That
+ * counts as the other party's transition only once `madeByOther` confirms it; then this returns
+ * null. Any other build failure, or no such confirmation within `timeoutMs`, rethrows.
+ */
+export async function buildPermissionless(
+  build: () => Promise<BuiltTx>,
+  madeByOther: () => Promise<boolean>,
+  timeoutMs = 60_000,
+): Promise<BuiltTx | null> {
+  try {
+    return await build();
+  } catch (err) {
+    if (!(err instanceof Error && NODE_GONE.test(err.message))) throw err;
+    for (const deadline = Date.now() + timeoutMs; Date.now() < deadline; await sleep(2000)) {
+      if (await madeByOther()) return null;
+    }
+    throw err;
+  }
+}
+
 export function chainTimeMs(lucid: LucidEvolution): bigint {
   return BigInt(lucid.slotToUnixTime(lucid.currentSlot()));
 }

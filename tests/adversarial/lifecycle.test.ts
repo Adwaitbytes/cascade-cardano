@@ -139,7 +139,6 @@ describe("child lifecycle (tree T)", () => {
     const drawn = await lab.client.draw(treeId, [
       lab.nativeChild(plan, 1, workerA, 10n * ADA, 2n * ADA, parentSubmitBy, accept, 300_000n),
       lab.nativeChild(plan, 2, workerB, 10n * ADA, 2n * ADA, parentSubmitBy, accept, 300_000n),
-      lab.nativeChild(plan, 3, workerB, 10n * ADA, 2n * ADA, parentSubmitBy, accept, 5_000n),
       {
         kind: "metered",
         leaf: metered.leaf,
@@ -158,7 +157,7 @@ describe("child lifecycle (tree T)", () => {
       },
     ]);
     await lab.submit(drawn);
-    [challenged, settled, refunded, receipt] = drawn.childIds as [string, string, string, string];
+    [challenged, settled, receipt] = drawn.childIds as [string, string, string];
   }, 900_000);
 
   it("Submit", async () => {
@@ -247,6 +246,12 @@ describe("child lifecycle (tree T)", () => {
   });
 
   it("Refund", async () => {
+    // Drawn here, not in beforeAll: the local watchtower refunds a child 30 s past refund_after, and
+    // the cases above take longer than that, so an early draw left nothing to refund.
+    const { workerB, operator } = lab.parties;
+    const draw = await lab.client.draw(treeId, [lab.nativeChild(plan, 3, workerB, 10n * ADA, 2n * ADA, await rootSubmitBy(treeId), { type: "ParentAccept", key: operator.vkh }, 5_000n)]);
+    await lab.submit(draw);
+    refunded = draw.childIds[0]!;
     await waitUntilAfter(lab.client.lucid, (await lab.client.node(refunded)).datum.refund_after);
     const childUnit = lab.client.policyId + refunded;
     const honest = await expectAllRejected(() => lab.client.refund(refunded), [

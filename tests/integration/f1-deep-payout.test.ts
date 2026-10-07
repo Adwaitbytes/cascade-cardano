@@ -5,7 +5,7 @@
  */
 import { beforeAll, describe, expect, it } from "vitest";
 import type { BuiltTx } from "@cascade/sdk";
-import { party, submitBuilt, submitPermissionless, type Party } from "../lib/devnet.js";
+import { buildPermissionless, party, submitBuilt, submitPermissionless, type Party } from "../lib/devnet.js";
 import { ADA, h32, TreeLab, type Plan } from "../lib/tree-fixture.js";
 
 let lab: TreeLab;
@@ -21,8 +21,10 @@ async function send(built: BuiltTx): Promise<string> {
 }
 
 /** SettleChild or CloseRoot of `nodeId`; the local watchtower may crank it first (devnet.ts). */
-async function sendPermissionless(built: BuiltTx, nodeId: string): Promise<void> {
-  await submitPermissionless(lab.client, built, keysFor(built), async () => !(await onChain(lab.client.policyId + nodeId)));
+async function sendPermissionless(build: () => Promise<BuiltTx>, nodeId: string): Promise<void> {
+  const madeByOther = async (): Promise<boolean> => !(await onChain(lab.client.policyId + nodeId));
+  const built = await buildPermissionless(build, madeByOther);
+  if (built !== null) await submitPermissionless(lab.client, built, keysFor(built), madeByOther);
 }
 
 async function lovelaceAt(p: Party): Promise<bigint> {
@@ -70,20 +72,20 @@ describe("F1: payouts below a node do not lock the tree", () => {
 
     await send(await lab.client.submit(g, h32("g-result")));
     await send(await lab.client.accept(g, [workerA.vkh]));
-    await sendPermissionless(await lab.client.settleChild(g), g);
+    await sendPermissionless(() => lab.client.settleChild(g), g);
     const aAfter = (await lab.client.node(a)).datum;
     expect(aAfter.children_open).toBe(0n);
     expect(aAfter.committed, "committed returns to 0 once every child is closed").toBe(0n);
 
     await send(await lab.client.submit(a, h32("a-result")));
     await send(await lab.client.accept(a, [operator.vkh]));
-    await sendPermissionless(await lab.client.settleChild(a), a);
+    await sendPermissionless(() => lab.client.settleChild(a), a);
     const rootAfter = (await lab.client.node(treeId)).datum;
     expect(rootAfter.committed).toBe(0n);
 
     await send(await lab.client.submit(treeId, h32("root-result")));
     await send(await lab.client.accept(treeId, [buyer.vkh]));
-    await sendPermissionless(await lab.client.closeRoot(treeId), treeId);
+    await sendPermissionless(() => lab.client.closeRoot(treeId), treeId);
 
     for (const id of [treeId, a, g]) expect(await onChain(lab.client.policyId + id), `node ${id} still on chain`).toBe(false);
     expect(await lovelaceAt(grandchildWorker)).toBe(2n * ADA);
