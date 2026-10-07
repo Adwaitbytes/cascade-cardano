@@ -16,11 +16,11 @@ import { Panel } from "@/components/ui/panel";
 import { getDataSource } from "@/lib/api";
 import type { Tree } from "@/lib/api/schemas";
 import { cn } from "@/lib/cn";
+import { isUnscored, rankAgents } from "@/lib/reputation/rank";
 import { describeEvent } from "@/lib/tree/replay";
 
 const RECENT_TREES = 6;
 const EVENTS_SHOWN = 12;
-const TOP_AGENTS = 8;
 
 /** Legend order and wording for the event tones, in the order a node moves through them. */
 const TONE_LABELS: [string, string][] = [
@@ -54,7 +54,7 @@ async function recentActivity(): Promise<StreamItem[]> {
 export function EconomyView() {
   const agents = useQuery({ queryKey: ["economy-agents"], queryFn: async () => (await getDataSource()).searchAgents({}), refetchInterval: 60_000 });
   const activity = useQuery({ queryKey: ["economy-activity"], queryFn: recentActivity, refetchInterval: 10_000 });
-  const top = [...(agents.data ?? [])].sort((a, b) => b.reputation.score - a.reputation.score).slice(0, TOP_AGENTS);
+  const top = rankAgents(agents.data ?? []);
   const items = activity.data ?? [];
 
   return (
@@ -86,8 +86,8 @@ export function EconomyView() {
           </Panel>
         </section>
 
-        <section aria-labelledby="economy-top" className="min-w-0">
-          <SectionTitle id="economy-top" title="Top agents" note="By reputation" />
+        <section id="agents" aria-labelledby="economy-top" className="min-w-0 scroll-mt-24">
+          <SectionTitle id="economy-top" title="Agents" note="Ranked by reputation" />
           <Panel className="overflow-hidden">
             {agents.isLoading ? (
               <AgentsSkeleton />
@@ -99,7 +99,8 @@ export function EconomyView() {
               <>
                 <ol className="divide-y divide-line" data-testid="economy-agents">
                   {top.map((a, i) => {
-                    const score = Math.round(a.reputation.score * 100);
+                    const unscored = isUnscored(a);
+                    const score = unscored ? 0 : Math.round(a.reputation.score * 100);
                     return (
                       <li key={a.agent_asset_id}>
                         <Link href={`/agents/${a.agent_asset_id}`} className="group flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-surface-2 focus-visible:bg-surface-2 active:bg-surface-2">
@@ -114,14 +115,18 @@ export function EconomyView() {
                               <span className={cn("block h-full rounded-full", i === 0 ? "bg-accent" : "bg-ink-3")} style={{ width: `${score}%` }} />
                             </span>
                           </span>
-                          <span className="tabular w-9 shrink-0 text-right font-display text-[1.25rem] leading-none">{score}</span>
+                          {unscored ? (
+                            <span className="w-9 shrink-0 text-right font-mono text-[0.75rem] text-ink-3" title="No settled work yet, so no score">new</span>
+                          ) : (
+                            <span className="tabular w-9 shrink-0 text-right font-display text-[1.25rem] leading-none">{score}</span>
+                          )}
                           <ChevronRight aria-hidden className="size-4 shrink-0 text-ink-3 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ink" />
                         </Link>
                       </li>
                     );
                   })}
                 </ol>
-                <p className="border-t border-line px-5 py-3 text-[0.8125rem] text-ink-3">Scores come from settled trees. Each agent links to the signals behind its score.</p>
+                <p className="border-t border-line px-5 py-3 text-[0.8125rem] text-ink-3">Every agent in the preprod directory. Scores come from settled trees; an agent marked new has none yet. Each agent links to the signals behind its score.</p>
               </>
             )}
           </Panel>

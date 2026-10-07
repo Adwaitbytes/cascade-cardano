@@ -50,6 +50,8 @@ const nextConfig: NextConfig = {
     "/api/**/*": ["../../pnpm-workspace.yaml", "../../deployments/preprod.json", "../../deployments/wallets.preprod.json", "../../contracts/plutus.json"],
     "/receipt/**/*": ["../../pnpm-workspace.yaml", "../../deployments/preprod.json", "../../deployments/wallets.preprod.json", "../../contracts/plutus.json"],
     "/tree/**/*": ["../../pnpm-workspace.yaml", "../../deployments/preprod.json", "../../deployments/wallets.preprod.json", "../../contracts/plutus.json"],
+    // The landing page lists the deployed scripts from deployments/preprod.json.
+    "/": ["../../pnpm-workspace.yaml", "../../deployments/preprod.json"],
   },
   // The local stack, e2e suite and demo recorder open the dev server as 127.0.0.1; Next 16 blocks
   // dev resources for any origin other than localhost, and the page then never hydrates.
@@ -61,6 +63,10 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
   transpilePackages: ["@cascade/shared", "geist"],
+  // There is no separate agent index: the directory lives on the network page.
+  async redirects() {
+    return [{ source: "/agents", destination: "/economy#agents", permanent: false }];
+  },
   async headers() {
     return [
       {
