@@ -152,6 +152,36 @@ describe("demo fallback draft (PRD 21.2)", () => {
     expect(normalizeDraft(d).notes).toEqual([]);
   });
 
+  it("normalizeDraft gives a pricing slot the metered child Pricer buys through (preprod tree 4b50da32)", () => {
+    // Task 01a114cd: the LLM planned competitor-pricing with no children. Pricer failed the job at
+    // once ("the plan has no metered child under node 0d3cb802...") and the slot was refunded.
+    const base = { verifies: "", contingency_for: "", after: [] as string[], rail: "native" as const, may_sub_hire: false, acceptance: "ParentAccept" as const, effort_minutes: 15 };
+    const out = [{ name: "result", type: "object" as const, description: "Result" }];
+    const VERDICT = [{ name: "verdict", type: "object" as const, description: "Signed verdict" }];
+    const llm: PlanDraft = {
+      summary: "Singapore specialty coffee brief",
+      tasks: [
+        { ...base, id: "market-research", parent: "root", title: "Research", category: "research", output_fields: out, acceptance: "VerifierQuorum", budget_weight: 40 },
+        { ...base, id: "competitor-pricing", parent: "root", title: "Price five brands", category: "pricing", output_fields: out, acceptance: "VerifierQuorum", may_sub_hire: true, budget_weight: 30 },
+        { ...base, id: "verification-market", parent: "root", title: "Check research", category: "verification", output_fields: VERDICT, budget_weight: 5, verifies: "market-research", after: ["market-research"] },
+        { ...base, id: "verification-pricing", parent: "root", title: "Check pricing", category: "verification", output_fields: VERDICT, budget_weight: 5, verifies: "competitor-pricing", after: ["competitor-pricing"] },
+        { ...base, id: "market-entry-brief", parent: "root", title: "Write the brief", category: "writing", output_fields: out, budget_weight: 10, after: ["market-research", "competitor-pricing"] },
+        { ...base, id: "chinese-summary", parent: "root", title: "Simplified Chinese summary", category: "translation", output_fields: out, budget_weight: 10, after: ["market-entry-brief"] },
+      ],
+    };
+    const { draft, notes } = normalizeDraft(llm);
+    expect(draft.tasks.find((t) => t.parent === "competitor-pricing")).toMatchObject({ id: "competitor-pricing-lookup", rail: "metered", category: "data-lookup", may_sub_hire: false });
+    expect(notes).toContain("task competitor-pricing: added metered child competitor-pricing-lookup, the channel its pricing agent buys lookups through");
+    expect(normalizeDraft(draft).notes).toEqual([]);
+    expect(normalizeDraft(demoDraft()).notes).toEqual([]);
+    const fundBy = 1_791_352_492_086;
+    const res = buildPlan(draft, intake({ asset: "lovelace", budget: "60000000", max_depth: 2, fund_by: fundBy, submit_by: fundBy + 160 * MIN }), agents, DEFAULT_POLICY, verifierKeyOf);
+    if (!res.ok) throw new Error(res.errors.join("; "));
+    const pricing = res.built.plan.root.children.find((c) => c.spec.id === "competitor-pricing")!;
+    expect(pricing.children.map((c) => `${c.spec.id}:${c.spec.rail}`)).toEqual(["competitor-pricing-lookup:metered"]);
+    expect(validatePlanFull(res.built.plan)).toEqual([]);
+  });
+
   it("validatePlanFull catches a missing reserve", () => {
     const res = buildPlan(demoDraft(), intake(), agents, { ...DEFAULT_POLICY, reserve_bps: 0, margin_bps: 0 }, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
     if (!res.ok) throw new Error(res.errors.join("; "));

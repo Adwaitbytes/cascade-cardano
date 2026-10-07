@@ -112,7 +112,43 @@ export function normalizeDraft(draft: PlanDraft): { draft: PlanDraft; notes: str
     }
     return t;
   });
-  return { draft: { ...draft, tasks }, notes };
+  return { draft: { ...draft, tasks: withMeteredLookups(tasks, notes) }, notes };
+}
+
+/**
+ * Pricer buys its data only through the voucher channel of a metered child of its own slot
+ * (`meteredPlanResolver`), so a pricing slot without one can never deliver. Preprod tree 4b50da32
+ * (Task 01a114cd): the LLM planned competitor-pricing with no children, Pricer failed the job at
+ * once with "the plan has no metered child", and the slot was refunded at submit_by.
+ */
+function withMeteredLookups(tasks: DraftTask[], notes: string[]): DraftTask[] {
+  const ids = new Set(tasks.map((t) => t.id));
+  const added: DraftTask[] = [];
+  const repaired = tasks.map((t) => {
+    if (!METERED_PAYER_CATEGORIES.has(t.category) || t.rail !== "native") return t;
+    if (tasks.some((c) => c.parent === t.id && c.rail === "metered")) return t;
+    let id = `${t.id.slice(0, 33)}-lookup`;
+    for (let n = 2; ids.has(id); n++) id = `${t.id.slice(0, 30)}-lookup${n}`;
+    ids.add(id);
+    added.push({
+      id,
+      parent: t.id,
+      title: "Per-call price lookups from the Lookup API",
+      category: "data-lookup",
+      rail: "metered",
+      output_fields: [field("rows", "array", "Price rows returned by the data endpoint")],
+      acceptance: "AutoAfterWindow",
+      effort_minutes: 5,
+      may_sub_hire: false,
+      budget_weight: 40,
+      verifies: "",
+      contingency_for: "",
+      after: [],
+    });
+    notes.push(`task ${t.id}: added metered child ${id}, the channel its pricing agent buys lookups through`);
+    return t.may_sub_hire ? t : { ...t, may_sub_hire: true };
+  });
+  return [...repaired, ...added];
 }
 
 /** Structural checks on a draft. Returns every problem; empty means the draft can be compiled. */
