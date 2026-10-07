@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { LandingJob } from "./data";
 import { hireFor, hireState, inEscrow, jobAt, phaseAt, PHASE_START, PHASES, refundedHires, SCENARIO_MS } from "./scenarios";
-import { landingSnapshot } from "./snapshot";
 
 const job = (over: Partial<LandingJob> = {}): LandingJob => ({
   tree_id: "a".repeat(56),
@@ -57,17 +56,5 @@ describe("hero jobs", () => {
     expect(inEscrow(j, "verify")).toBe(14_500_000n);
     expect(inEscrow(j, "settle")).toBe(0n);
     expect(inEscrow(job({ state: "open" }), "settle")).toBe(14_500_000n);
-  });
-
-  it("plays the bundled snapshot: real tree ids, every hired agent on the bench", () => {
-    const snap = landingSnapshot();
-    expect(snap.source).toBe("snapshot");
-    expect(snap.jobs.length).toBeGreaterThan(0);
-    const bench = new Set(snap.agents.map((a) => a.name));
-    for (const j of snap.jobs) {
-      expect(j.tree_id).toMatch(/^[0-9a-f]{56}$/);
-      expect(BigInt(j.paid)).toBeGreaterThan(0n);
-      for (const h of j.hires) expect(bench.has(h.agent)).toBe(true);
-    }
   });
 });

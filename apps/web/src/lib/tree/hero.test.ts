@@ -1,15 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CARD_MAX_W, CARD_MIN_W, fitCard, heroSnapshot, SNAPSHOT_NODE_COUNT } from "./hero";
-
-describe("heroSnapshot", () => {
-  it("parses the bundled preprod capture with every node and real tx ids", () => {
-    const { tree, events } = heroSnapshot();
-    expect(tree.nodes).toHaveLength(SNAPSHOT_NODE_COUNT);
-    expect(SNAPSHOT_NODE_COUNT).toBeGreaterThanOrEqual(6);
-    expect(events.length).toBeGreaterThan(SNAPSHOT_NODE_COUNT);
-    expect(events.every((e) => /^[0-9a-f]{64}$/.test(e.tx_id))).toBe(true);
-  });
-});
+import { CARD_MAX_W, CARD_MIN_W, fitCard } from "./hero";
 
 describe("fitCard", () => {
   it("keeps short and medium names whole", () => {

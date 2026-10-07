@@ -70,7 +70,7 @@ const TotalsSchema = z.object({
 export type LandingTotals = z.infer<typeof TotalsSchema>;
 
 export const LandingDataSchema = z.object({
-  source: z.enum(["live", "snapshot"]),
+  source: z.literal("live"),
   generated_at: z.number().int().nonnegative(),
   /** False when the totals cover only the newest trees the public API returns, not every tree. */
   complete: z.boolean(),

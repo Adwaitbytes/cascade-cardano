@@ -150,8 +150,6 @@ function StateChip({ state, fee, paid }: { state: HirePhaseState; fee: string | 
 
 const reputationText = (a: BenchAgent): string => (a.reputation.confidence === 0 ? "new" : `rep ${Math.round(a.reputation.score * 100)}`);
 
-const capturedOn = (ms: number): string => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
-
 export function HeroScene({ actions, landing }: { actions: ReactNode; landing: LandingData }) {
   const { jobs, agents } = landing;
   const reduced = usePrefersReducedMotion();
@@ -412,9 +410,7 @@ export function HeroScene({ actions, landing }: { actions: ReactNode; landing: L
         </div>
       </div>
       <p className="intro intro-9 mt-6 text-center font-mono text-[0.6875rem] text-ink-3">
-        {landing.source === "live"
-          ? "real preprod jobs from the indexer · amounts and outcomes as recorded on chain"
-          : `real preprod jobs, saved ${capturedOn(landing.generated_at)} · the indexer did not answer`}
+        real preprod jobs from the indexer · amounts and outcomes as recorded on chain
       </p>
     </>
   );

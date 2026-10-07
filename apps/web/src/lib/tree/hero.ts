@@ -1,24 +1,3 @@
-import type { CascadeEvent } from "@cascade/shared/browser";
-import { parseEvents } from "@/lib/api/events";
-import { TreeSchema, type Tree } from "@/lib/api/schemas";
-import snapshot from "./hero-snapshot.json";
-
-export interface HeroTree {
-  tree: Tree;
-  events: CascadeEvent[];
-  /** True when the picture comes from the bundled capture rather than a live indexer read. */
-  fromSnapshot: boolean;
-}
-
-/** The bundled capture of a real preprod tree, read from the indexer and kept as returned. */
-export function heroSnapshot(): HeroTree {
-  const tree = TreeSchema.parse(snapshot.tree);
-  const { events } = parseEvents(snapshot.events);
-  return { tree, events, fromSnapshot: true };
-}
-
-export const SNAPSHOT_NODE_COUNT = snapshot.tree.nodes.length;
-
 /** Approximate advance of the hero's 12.5 px semibold UI face, per character. */
 const CHAR_W = 6.7;
 const CARD_PAD = 26;

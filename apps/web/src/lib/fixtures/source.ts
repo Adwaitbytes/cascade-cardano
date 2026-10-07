@@ -3,7 +3,7 @@
  * a build-time `false` in production, so it never ships in a production bundle.
  */
 import { TUSDM_ASSET_ID } from "@/lib/assets";
-import { landingSnapshot } from "@/lib/landing/snapshot";
+import { buildLanding, type LandingData, type TreeRow } from "@/lib/landing/data";
 import { ApiError, type DataSource } from "@/lib/api/source";
 import type { AgentProfile, AgentSummary, Dispute, OpsStatus, ProviderWork, TreeListItem } from "@/lib/api/schemas";
 import { FIXTURE_AGENTS, FIXTURE_PLAN, FIXTURE_PLAN_ENVELOPE, FIXTURE_T0, agentId, hash32 } from "./plan";
@@ -87,6 +87,36 @@ const HISTORY: TreeListItem[] = [
     spend_by_category: { orchestration: "12000000", "market-research": "22000000", "price-collection": "16420000", translation: "15000000", writing: "28000000", verification: "12000000" },
   },
 ];
+
+/** Landing data for sample mode, built from the fixture history by the same code as the live route. */
+function fixtureLanding(): LandingData {
+  const rows: TreeRow[] = HISTORY.map((t) => ({
+    tree_id: t.tree_id,
+    goal: t.goal,
+    state: t.state,
+    asset: t.asset,
+    root_budget: t.root_budget,
+    created_at: t.created_at,
+    node_count: t.node_count,
+    paid: t.paid,
+    returned: t.refunded,
+    structural_returned: "0",
+    payouts: t.agents.length,
+    settled_nodes: t.state === "closed" ? t.node_count : 0,
+    closed_receipts: 0,
+  }));
+  const paidByNode = new Map(FIXTURE_CLOSED.tree.nodes.filter((n) => n.state === "Settled").map((n) => [n.node_id, BigInt(n.fee)] as const));
+  return buildLanding({
+    source: "live",
+    generated_at: FIXTURE_T0,
+    complete: true,
+    trees: rows,
+    jobTrees: [{ tree: FIXTURE_CLOSED.tree, paidByNode }],
+    agents: FIXTURE_AGENTS.map((a) => summary(a.slug)).map((a) => ({ agent_asset_id: a.agent_asset_id, name: a.name, categories: a.categories, price: null, reputation: a.reputation })),
+    txs: FIXTURE_CLOSED.events.length,
+    agentsPaid: FIXTURE_AGENTS.length,
+  });
+}
 
 const writeSpec = (() => {
   const walk = (n: typeof FIXTURE_PLAN.root): typeof n.spec | null => (n.spec.id === "write" ? n.spec : n.children.map(walk).find((s) => s !== null) ?? null);
@@ -247,7 +277,7 @@ export function createFixtureSource(): DataSource {
       throw new ApiError("Sample data cannot build transactions. Connect the orchestrator to act on a real tree.", 501, "/v1/trees/actions");
     },
     listTrees: async (_buyer, limit) => delay(limit === undefined ? HISTORY : HISTORY.slice(0, limit)),
-    getLanding: async () => delay(landingSnapshot()),
+    getLanding: async () => delay(fixtureLanding()),
     listDisputes: async () => delay(DISPUTES),
     buildResolveTx: async () => {
       throw new ApiError("Sample data cannot build a Resolve transaction. Connect the signer service to collect arbiter signatures.", 501, "/v1/disputes/resolve-tx");

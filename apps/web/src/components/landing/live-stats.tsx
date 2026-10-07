@@ -6,7 +6,6 @@ import { getDataSource } from "@/lib/api";
 import { formatAmount } from "@/lib/assets";
 import { plural } from "@/lib/console/history";
 import type { LandingData } from "@/lib/landing/data";
-import { landingSnapshot } from "@/lib/landing/snapshot";
 
 const loadLanding = async (): Promise<LandingData> => (await getDataSource()).getLanding();
 
@@ -16,16 +15,21 @@ const OUTCOMES = [
   { key: "open", label: "Still open", bar: "bg-working" },
 ] as const;
 
-const capturedOn = (ms: number): string => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
-
 /**
  * Preprod totals, led by what settled: payouts to agents, then every tree by outcome, then what
  * went back to buyers with the reason. Server-rendered data when given, else read in the browser.
  */
 export function LiveStats({ data }: { data?: LandingData }) {
   const query = useQuery({ queryKey: ["landing"], queryFn: loadLanding, initialData: data, refetchInterval: 60_000, staleTime: 30_000 });
-  // A failed refresh keeps the data already shown; the snapshot is only for a first read that fails.
-  const d = query.data ?? (query.isError ? landingSnapshot() : undefined);
+  // A failed refresh keeps the data already shown; only a first read that fails shows the notice.
+  const d = query.data;
+  if (d === undefined && query.isError) {
+    return (
+      <p className="rounded-[22px] border border-line bg-surface px-5 py-6 text-[0.9375rem] leading-relaxed text-ink-2" role="status" data-testid="live-stats">
+        The preprod indexer did not answer, so there are no totals to show. Nothing here is estimated: totals return when it does.
+      </p>
+    );
+  }
   if (d === undefined) {
     return (
       <div className="grid gap-3" role="status" aria-label="Loading preprod totals" data-testid="live-stats">
@@ -88,7 +92,7 @@ export function LiveStats({ data }: { data?: LandingData }) {
 
       <p className="px-1 font-mono text-[0.6875rem] leading-relaxed text-ink-3">
         {plural(t.txs, "transaction")}, each one checkable on Cardanoscan.{" "}
-        {d.source === "live" ? "Read from the preprod indexer." : `Saved ${capturedOn(d.generated_at)}; the indexer did not answer.`}
+        Read from the preprod indexer.
         {d.complete ? "" : ` Covers the newest ${t.trees} trees.`}
       </p>
     </div>

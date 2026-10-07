@@ -1,13 +1,13 @@
 import { INDEXER_URL } from "@/lib/env";
 import { LandingDataSchema, type LandingData } from "@/lib/landing/data";
-import { landingSnapshot } from "@/lib/landing/snapshot";
 import { readDirect } from "./read-api";
 
 /**
  * Landing data for server rendering: the indexer database in-process, else an external read API
- * when the site is configured with one, else the bundled snapshot. Never throws.
+ * when the site is configured with one. Null when neither answers, so the page says so instead of
+ * showing figures it did not read. Never throws.
  */
-export async function loadLandingData(): Promise<LandingData> {
+export async function loadLandingData(): Promise<LandingData | null> {
   const direct = LandingDataSchema.safeParse(await readDirect("/v1/landing"));
   if (direct.success) return direct.data;
   if (/^https?:\/\//.test(INDEXER_URL)) {
@@ -16,8 +16,8 @@ export async function loadLandingData(): Promise<LandingData> {
       const remote = LandingDataSchema.safeParse(res.ok ? await res.json() : null);
       if (remote.success) return remote.data;
     } catch {
-      // Unreachable or slow: the snapshot below is labelled as such on the page.
+      // Unreachable or slow: the page shows an outage notice instead.
     }
   }
-  return landingSnapshot();
+  return null;
 }

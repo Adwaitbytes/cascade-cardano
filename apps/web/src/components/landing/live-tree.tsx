@@ -9,7 +9,7 @@ import { getDataSource } from "@/lib/api";
 import type { Tree } from "@/lib/api/schemas";
 import { formatAmount } from "@/lib/assets";
 import { describeEvent, replayTree, type DisplayState } from "@/lib/tree/replay";
-import { CARD_MIN_W, fitCard, heroSnapshot, type HeroTree } from "@/lib/tree/hero";
+import { CARD_MIN_W, fitCard } from "@/lib/tree/hero";
 import { tidyLayout } from "@/lib/tree/tidy";
 
 const BOX_H = 46;
@@ -29,19 +29,16 @@ const STATE_FILL: Record<DisplayState, string> = {
   Disputed: "var(--s-challenged)",
 };
 
-/**
- * The tree the landing data ranked richest in settled nodes, else the bundled capture of a real
- * preprod tree. An indexer outage also falls back to the capture, so the hero never goes blank.
- */
-async function loadHeroTree(treeId: string | null): Promise<HeroTree> {
-  if (treeId === null) return heroSnapshot();
-  try {
-    const source = await getDataSource();
-    const [tree, events] = await Promise.all([source.getTree(treeId), source.getTreeEvents(treeId)]);
-    return events.events.length > 0 ? { tree, events: events.events, fromSnapshot: false } : heroSnapshot();
-  } catch {
-    return heroSnapshot();
-  }
+interface HeroTree {
+  tree: Tree;
+  events: CascadeEvent[];
+}
+
+/** The tree the landing data ranked richest in settled nodes, read live from the indexer. */
+async function loadHeroTree(treeId: string): Promise<HeroTree> {
+  const source = await getDataSource();
+  const [tree, events] = await Promise.all([source.getTree(treeId), source.getTreeEvents(treeId)]);
+  return { tree, events: events.events };
 }
 
 const orthogonal = (x1: number, y1: number, x2: number, y2: number): string => {
@@ -53,10 +50,21 @@ const orthogonal = (x1: number, y1: number, x2: number, y2: number): string => {
  * The landing hero: a real preprod tree replayed from its indexed events. Money moves down on
  * hires and back up on refunds and settlements, exactly as the chain recorded it.
  */
-export function LiveTree({ treeId }: { treeId: string | null }) {
-  const hero = useQuery({ queryKey: ["hero-tree", treeId], queryFn: () => loadHeroTree(treeId), staleTime: 60_000 });
+export function LiveTree({ treeId, indexerDown = false }: { treeId: string | null; indexerDown?: boolean }) {
+  const hero = useQuery({ queryKey: ["hero-tree", treeId], queryFn: () => loadHeroTree(treeId ?? ""), enabled: treeId !== null, staleTime: 60_000 });
+  if (indexerDown || hero.isError) return <LiveTreeNotice body="The preprod indexer did not answer, so there is no tree to replay right now. Every tree is still on chain: open one by its id further down." />;
+  if (treeId === null) return <LiveTreeNotice body="No tree on the current deployment has settled a node yet. The first one to settle replays here." />;
   if (hero.data === undefined) return <LiveTreeSkeleton />;
+  if (hero.data.events.length === 0) return <LiveTreeNotice body="This tree has no indexed events yet. They appear here as the indexer reads them." />;
   return <LiveTreeReplay tree={hero.data.tree} events={hero.data.events} />;
+}
+
+function LiveTreeNotice({ body }: { body: string }) {
+  return (
+    <p className="mx-auto max-w-lg py-10 text-center text-[0.9375rem] leading-relaxed text-ink-2" data-testid="live-tree-empty">
+      {body}
+    </p>
+  );
 }
 
 function LiveTreeSkeleton() {
