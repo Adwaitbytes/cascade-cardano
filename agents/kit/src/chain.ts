@@ -16,7 +16,7 @@ import { cascadeNetworkFromEnv, env } from "./env.js";
 import { x402NetworkFromEnv } from "./config.js";
 import { decodeNodeDatum, jcs, paymentKeyHash, type NodeDatum } from "@cascade/shared";
 import type { CardanoNetwork, JobRecord, JsonValue, NodeRef, PaymentPayload, PaymentRequirements, PaymentRequirementsProvider, PaymentVerifier, PurchaseContext } from "@cascade/agent";
-import type { TxSigner } from "@cascade/orchestrator";
+import type { NotIndexedRetry, TxSigner } from "@cascade/orchestrator";
 
 export interface NativeChildOptions {
   network: CardanoNetwork;
@@ -159,6 +159,15 @@ export const masumiOffersSupported = (network: CardanoNetwork): boolean => netwo
  * the signer service (`CASCADE_SIGNER_URL`, `CASCADE_SIGNER_TOKEN`; the signer must hold this role).
  * Returns null when either service is not configured.
  */
+/**
+ * How long an agent keeps asking the signer while a fresh input is not indexed yet. The client
+ * default (three minutes) sits under the conductor's ten-minute Temporal activity; an agent's handler
+ * has no such cap, only its node's submit_by. On preprod tree 1a9584a2 the indexer stalled on a
+ * Postgres read timeout and indexed Pricer's node 3 min 40 s after its Draw: Pricer's channel open
+ * gave up 16 s before that and the job was refunded. Eight minutes covers that lag with room.
+ */
+export const AGENT_NOT_INDEXED_RETRY: NotIndexedRetry = { budgetMs: 480_000, initialDelayMs: 2_000, maxDelayMs: 30_000 };
+
 /** Chain access for an agent from the environment (Lucid, deployed scripts, signer service). Null when not configured. */
 export async function chainContextFromEnv(): Promise<{
   lucid: LucidEvolution;
@@ -176,7 +185,7 @@ export async function chainContextFromEnv(): Promise<{
   const scripts = cascadeScripts();
   const refs = await loadReferenceScripts(lucid, referenceRefs(net));
   const network = x402NetworkFromEnv();
-  return { lucid, scripts, refs, signer: new HttpTxSigner(signerUrl, env("CASCADE_SIGNER_TOKEN") ?? null), network, facilitatorUrl };
+  return { lucid, scripts, refs, signer: new HttpTxSigner(signerUrl, env("CASCADE_SIGNER_TOKEN") ?? null, fetch, AGENT_NOT_INDEXED_RETRY), network, facilitatorUrl };
 }
 
 export async function chainWiringFromEnv(role: string, agentAddress: string, agentSigner?: AgentSigner): Promise<{

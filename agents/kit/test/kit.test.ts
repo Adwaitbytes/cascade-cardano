@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { HttpTxSigner } from "@cascade/orchestrator";
 import { generateSeedPhrase, walletFromSeed } from "@lucid-evolution/lucid";
 import { jcsSha256, verifyCose1 } from "@cascade/shared/browser";
-import { cascadeNetworkFromEnv, masumiOffersSupported, derivedRoleSigner, loadEnv, runtimeFor, subtreeTaskQueue, UnregisteredAgentError, x402NetworkFromEnv, AGENT_ROLES } from "../src/index.js";
+import { AGENT_NOT_INDEXED_RETRY, cascadeNetworkFromEnv, masumiOffersSupported, derivedRoleSigner, loadEnv, runtimeFor, subtreeTaskQueue, UnregisteredAgentError, x402NetworkFromEnv, AGENT_ROLES } from "../src/index.js";
 
 describe("agent kit", () => {
   it("offers Masumi vested_pay quotes only where @x402/cardano and Masumi run (never on the Yaci devnet)", () => {
@@ -65,5 +66,19 @@ describe("agent kit", () => {
   it("puts each network's sub-hiring worker on its own Temporal task queue", () => {
     expect(subtreeTaskQueue("scout", "local")).not.toBe(subtreeTaskQueue("scout", "preprod"));
     expect(subtreeTaskQueue("scout", "preprod")).not.toBe(subtreeTaskQueue("pricer", "preprod"));
+  });
+});
+
+describe("agent signer retry budget", () => {
+  it("keeps asking through the 3 min 40 s indexer lag that refunded Pricer on preprod tree 1a9584a2", async () => {
+    let clock = 0;
+    const indexedAt = 220_000;
+    const fetchImpl = (async () =>
+      clock < indexedAt
+        ? new Response(JSON.stringify({ decision: "deny", code: "input_not_indexed", tx_body_hash: "5fe8", error: "input_not_indexed: input bbc4#1 is not indexed yet" }), { status: 409 })
+        : new Response(JSON.stringify({ decision: "allow", signed_tx: "signed" }), { status: 200 })) as typeof fetch;
+    const retry = { ...AGENT_NOT_INDEXED_RETRY, now: () => clock, sleep: async (ms: number) => void (clock += ms) };
+    await expect(new HttpTxSigner("http://signer.test", null, fetchImpl, retry).sign("pricer", "00")).resolves.toBe("signed");
+    expect(clock).toBeGreaterThanOrEqual(indexedAt);
   });
 });
