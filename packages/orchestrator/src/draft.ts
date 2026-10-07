@@ -74,6 +74,10 @@ const METERED_PAYER_CATEGORIES: ReadonlySet<string> = new Set<Category>(["pricin
  * the plan record shows what code changed:
  * - a task that names verifiers gets `VerifierQuorum` acceptance;
  * - a `VerifierQuorum` task with no verifier falls back to `ParentAccept`;
+ * - a task with no output fields gets its category's (they only describe the result; the hired
+ *   agent's advertised schema is what is checked). Task 01a11610: gemini-2.5-flash-lite twice gave
+ *   its verifiers none, the whole draft failed its checks, and the fallback plan dropped the
+ *   requested price table and Chinese summary;
  * - a translation runs after its sibling writers (it translates their summary), and a writer never
  *   waits on a translation. Preprod tree b945c5e3 had it the other way round: the translator ran
  *   first with nothing to translate and the writer was never hired.
@@ -101,7 +105,7 @@ export function normalizeDraft(draft: PlanDraft): { draft: PlanDraft; notes: str
     }
     return t;
   });
-  const tasks = sequenced.map((t) => {
+  const tasks = sequenced.map((t) => (t.output_fields.length > 0 ? t : withDefaultOutputFields(t, notes))).map((t) => {
     if (checked.has(t.id) && t.acceptance !== "VerifierQuorum") {
       notes.push(`task ${t.id}: acceptance set to VerifierQuorum because verifiers check it`);
       return { ...t, acceptance: "VerifierQuorum" as const };
@@ -113,6 +117,22 @@ export function normalizeDraft(draft: PlanDraft): { draft: PlanDraft; notes: str
     return t;
   });
   return { draft: { ...draft, tasks: withMeteredLookups(tasks, notes) }, notes };
+}
+
+const DEFAULT_OUTPUT_FIELDS: Record<Category, () => DraftField[]> = {
+  research: () => [field("findings", "array", "Findings, each with a source URL")],
+  analysis: () => [field("findings", "array", "Findings, each with a source URL")],
+  pricing: () => [field("price_table", "array", "Price rows, each with a source")],
+  "data-lookup": () => [field("rows", "array", "Rows returned by the data endpoint")],
+  translation: () => [field("translation", "string", "The translated text")],
+  verification: () => VERDICT_FIELDS,
+  writing: () => [field("report", "string", "Final report")],
+};
+
+function withDefaultOutputFields(t: DraftTask, notes: string[]): DraftTask {
+  const output_fields = DEFAULT_OUTPUT_FIELDS[t.category]();
+  notes.push(`task ${t.id}: had no output fields; set to ${output_fields.map((f) => f.name).join(", ")}`);
+  return { ...t, output_fields };
 }
 
 /**
@@ -415,16 +435,78 @@ export function demoDraft(): PlanDraft {
   };
 }
 
-/** Fallback for goals other than the demo: one research task and one writer. */
-export function genericDraft(goal: string): PlanDraft {
+/** A requested summary language that a translation slot can deliver (Scribe, or Lisan for Arabic). */
+export interface RequestedLanguage {
+  code: "zh" | "ar";
+  name: string;
+}
+
+/** Deliverables a goal asks for that each need their own slot (PRD 10.1 step 2). */
+export interface RequestedDeliverables {
+  prices: boolean;
+  language: RequestedLanguage | null;
+}
+
+const PRICE_REQUEST = /\bpric(e|es|ed|ing)\b/i;
+const LANGUAGES: readonly (RequestedLanguage & { asked: RegExp; named: RegExp })[] = [
+  { code: "zh", name: "Simplified Chinese", asked: /\b(chinese|mandarin)\b|简体|中文/i, named: /chinese|mandarin|(^|[-_])zh($|[-_])/i },
+  { code: "ar", name: "Arabic", asked: /\barabic\b|العربية/i, named: /arabic|(^|[-_])ar($|[-_])/i },
+];
+
+export function requestedDeliverables(goal: string): RequestedDeliverables {
+  const language = LANGUAGES.find((l) => l.asked.test(goal));
+  return { prices: PRICE_REQUEST.test(goal), language: language === undefined ? null : { code: language.code, name: language.name } };
+}
+
+/**
+ * One problem per requested deliverable no task produces. Task 01a11610 asked for a price table and a
+ * Simplified Chinese summary; the plan had only research and a writer, so neither was delivered.
+ */
+export function coverageErrors(draft: PlanDraft, goal: string): string[] {
+  const want = requestedDeliverables(goal);
+  const errors: string[] = [];
+  if (want.prices && !draft.tasks.some((t) => t.category === "pricing")) errors.push("the goal asks for prices: add a pricing task that produces the price table");
+  const language = want.language === null ? undefined : LANGUAGES.find((l) => l.code === want.language?.code);
+  if (language !== undefined && !draft.tasks.some((t) => t.category === "translation" && t.contingency_for === "" && language.named.test(`${t.id} ${t.title}`))) {
+    errors.push(`the goal asks for a ${language.name} summary: add a translation task into ${language.name}`);
+  }
+  return errors;
+}
+
+const SUBJECT_CHARS = 140;
+
+/** The goal's first line (the buyer's request or its title), capped so task titles stay under 200 characters. */
+export function goalSubject(goal: string): string {
+  const first = goal.split("\n").map((l) => l.trim()).find((l) => l !== "") ?? goal.trim();
+  return first.length > SUBJECT_CHARS ? `${first.slice(0, SUBJECT_CHARS - 3).replace(/\s+\S*$/, "")}...` : first;
+}
+
+/**
+ * Fallback for goals other than the demo: research, then one slot per requested deliverable
+ * (pricing with its metered lookups, a translated summary), then the writer. Every title names the
+ * goal's subject, so no agent is ever handed a task without one (Task 01a11610: Scout got "Research
+ * the goal with cited sources" and returned the global AI market).
+ */
+export function genericDraft(goal: string, maxDepth = 3): PlanDraft {
   const base = { verifies: "", contingency_for: "", after: [] as string[], may_sub_hire: false, acceptance: "ParentAccept" as const, rail: "native" as const };
-  return {
-    summary: `Research then write: ${goal.slice(0, 200)}`,
-    tasks: [
-      { ...base, id: "research", parent: "root", title: "Research the goal with cited sources", category: "research", output_fields: [field("findings", "array", "Findings, each with a source URL")], effort_minutes: 20, budget_weight: 60 },
-      { ...base, id: "write", parent: "root", title: "Write the final report", category: "writing", output_fields: [field("report", "string", "Final report")], effort_minutes: 10, budget_weight: 40, after: ["research"] },
-    ],
-  };
+  const subject = goalSubject(goal);
+  const want = requestedDeliverables(goal);
+  // Pricer buys through a metered child, one level below its own slot.
+  const pricing = want.prices && maxDepth >= 2;
+  const tasks: DraftTask[] = [
+    { ...base, id: "research", parent: "root", title: `Research with cited sources: ${subject}`, category: "research", output_fields: [field("findings", "array", "Findings, each with a source URL")], effort_minutes: 20, budget_weight: 40 },
+  ];
+  if (pricing) {
+    tasks.push(
+      { ...base, id: "pricing", parent: "root", title: `Collect competitor prices for: ${subject}`, category: "pricing", may_sub_hire: true, output_fields: [field("price_table", "array", "Price rows, each with a source")], effort_minutes: 10, budget_weight: 25, after: ["research"] },
+      { ...base, id: "pricing-lookup", parent: "pricing", title: "Per-call price lookups from the Lookup API", category: "data-lookup", rail: "metered", acceptance: "AutoAfterWindow", output_fields: [field("rows", "array", "Price rows returned by the data endpoint")], effort_minutes: 5, budget_weight: 40 },
+    );
+  }
+  tasks.push({ ...base, id: "write", parent: "root", title: `Write the final report: ${subject}`, category: "writing", output_fields: [field("report", "string", "Final report")], effort_minutes: 10, budget_weight: 25, after: pricing ? ["research", "pricing"] : ["research"] });
+  if (want.language !== null) {
+    tasks.push({ ...base, id: `translate-${want.language.code}`, parent: "root", title: `Translate the executive summary into ${want.language.name}`, category: "translation", output_fields: [field("translation", "string", `${want.language.name} translation of the executive summary`)], effort_minutes: 5, budget_weight: 10, after: ["write"] });
+  }
+  return { summary: `Research then write: ${goal.slice(0, 200)}`, tasks };
 }
 
 export const isDemoGoal = (goal: string): boolean => /juice/i.test(goal) && /dubai/i.test(goal);

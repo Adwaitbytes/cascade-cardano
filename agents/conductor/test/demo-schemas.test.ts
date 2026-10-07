@@ -183,7 +183,9 @@ describe("plan output schemas are the hired agents' advertised schemas", () => {
   });
 
   it("an LLM draft with invented fields (tree 86f6eb46): the research leaf takes Scout's schema, Scout's real result passes L0, and the committed leaf matches", async () => {
-    const out = await planJob(intake(), { llm: llmReturning(INVENTED), agents: referenceAgentSource(IDS), verifierKeyOf, masumiPurchaserHash: PURCHASER });
+    // A goal that asks for no price table or translation, so the two-task draft covers every deliverable.
+    const goal = "Market-entry brief for cold-pressed juice in Dubai: competitors, channels and sourced findings.";
+    const out = await planJob(intake({ goal }), { llm: llmReturning(INVENTED), agents: referenceAgentSource(IDS), verifierKeyOf, masumiPurchaserHash: PURCHASER });
     expect(out.llm).toBe("test/planner");
     expect(mismatches(out.built.plan)).toEqual([]);
     const leaf = out.built.plan.root.children.find((c) => c.spec.id === "market-research")!;
@@ -194,6 +196,15 @@ describe("plan output schemas are the hired agents' advertised schemas", () => {
     expect(committed).toEqual(planLeafFor(leaf.spec, out.built.plan.root.spec));
     expect(committed.spec_hash).toBe(specHash(leaf.spec));
     expect(verifyMerkleProof(committed, proof, out.built.plan.plan_root)).toBe(true);
+  });
+
+  it("Task 01a11610's goal, planned without an LLM at 60 ADA and depth 2, hires Scout, Pricer with its lookups, Scribe and a Chinese translation at their list prices", async () => {
+    const goal = "Singapore specialty coffee market-entry brief\n\nWrite a market-entry brief for a specialty coffee subscription brand launching in Singapore: market size and trends, a competitor price table with at least five brands, target customers, distribution channels, and a short Simplified Chinese summary.";
+    const out = await planJob(intake({ goal, budget: "60000000", max_depth: 2 }), { llm: new LlmClient({}), agents: referenceAgentSource(IDS), verifierKeyOf, masumiPurchaserHash: PURCHASER });
+    const hires = planNodesPreOrder(out.built.plan.root).slice(1).map(({ node }) => `${node.spec.id}:${node.agents.primary.agent_id === IDS.scout ? "scout" : node.agents.primary.agent_id === IDS.pricer ? "pricer" : node.agents.primary.agent_id === IDS.scribe ? "scribe" : node.agents.primary.agent_id === IDS["lookup-api"] ? "lookup-api" : "other"}`);
+    expect(hires).toEqual(["research:scout", "pricing:pricer", "pricing-lookup:lookup-api", "write:scribe", "translate-zh:scribe"]);
+    expect(mismatches(out.built.plan)).toEqual([]);
+    expect(out.built.plan.root.children[0]!.spec.task).toContain("Singapore specialty coffee");
   });
 
   it("a Masumi slot's wrapped MIP-003 string result passes its schema", () => {

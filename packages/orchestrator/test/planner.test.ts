@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { computePlanRoot, jcsSha256Hex, planLeafFor, planNodesPreOrder, planProof, PlanSchema, specHash, verifyMerkleProof, type AgentRef } from "@cascade/shared/browser";
 import { buildPlan, DEFAULT_POLICY, type AgentSource, type JobIntake } from "../src/build-plan.js";
-import { demoDraft, draftErrors, genericDraft, normalizeDraft, type DraftTask, type PlanDraft } from "../src/draft.js";
+import { coverageErrors, demoDraft, draftErrors, genericDraft, normalizeDraft, requestedDeliverables, type DraftTask, type PlanDraft } from "../src/draft.js";
 import { DETERMINISTIC_FALLBACK, LlmClient } from "../src/llm.js";
 import { planJob, PlanningError } from "../src/planner.js";
 import { parseSubAgentOutput } from "../src/subagent-output.js";
@@ -425,5 +425,71 @@ describe("agent list prices (preprod A2 and A18: Scout lists 10 ADA and refused 
     const err = await planJob(lovelace(5n * ADA), { llm: new LlmClient({}), agents: listed, verifierKeyOf, masumiPurchaserHash: PURCHASER }).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(PlanningError);
     expect((err as PlanningError).errors.join("; ")).toMatch(/raise the budget to at least \d+/);
+  });
+});
+
+/**
+ * Task 01a11610: "market-entry brief for a specialty coffee subscription brand launching in
+ * Singapore ... a competitor price table with at least five brands ... a short Simplified Chinese
+ * summary". gemini-2.5-flash-lite twice drafted verifiers with no output fields, the planner fell
+ * back to a two-task plan whose research slot read "Research the goal with cited sources", and the
+ * price table and Chinese summary were never hired.
+ */
+describe("every requested deliverable gets a slot (Task 01a11610)", () => {
+  const SINGAPORE = [
+    "Singapore specialty coffee market-entry brief",
+    "",
+    "Write a market-entry brief for a specialty coffee subscription brand launching in Singapore: market size and trends, a competitor price table with at least five brands, target customers, distribution channels, and a short Simplified Chinese summary. Cite sources for every figure and label any estimate.",
+    "",
+    "Deliverable: a market-entry brief: competitors with positioning, a price table, sourced findings, risks, and a recommendation with concrete next steps.",
+  ].join("\n");
+  const singapore = (over: Partial<JobIntake> = {}) => intake({ goal: SINGAPORE, budget: "60000000", max_depth: 2, asset: "lovelace", ...over });
+
+  it("reads the price table and the Simplified Chinese summary off the goal", () => {
+    expect(requestedDeliverables(SINGAPORE)).toEqual({ prices: true, language: { code: "zh", name: "Simplified Chinese" } });
+    expect(requestedDeliverables("Summarise EU battery rules")).toEqual({ prices: false, language: null });
+  });
+
+  it("the fallback plan has research, pricing with its lookups, writer and Chinese translation, each naming the subject", () => {
+    const draft = genericDraft(SINGAPORE, 2);
+    expect(draft.tasks.map((t) => `${t.id}:${t.category}:${t.parent}`)).toEqual([
+      "research:research:root",
+      "pricing:pricing:root",
+      "pricing-lookup:data-lookup:pricing",
+      "write:writing:root",
+      "translate-zh:translation:root",
+    ]);
+    for (const t of draft.tasks.filter((t) => t.category !== "data-lookup" && t.category !== "translation")) expect(t.title).toContain("Singapore specialty coffee");
+    expect(draft.tasks.find((t) => t.id === "translate-zh")?.title).toMatch(/translate.*simplified chinese/i);
+    expect(draftErrors(draft, 2)).toEqual([]);
+    expect(coverageErrors(draft, SINGAPORE)).toEqual([]);
+    const built = buildPlan(draft, singapore(), agents, DEFAULT_POLICY, verifierKeyOf);
+    if (!built.ok) throw new Error(built.errors.join("; "));
+    expect(validatePlanFull(built.built.plan)).toEqual([]);
+  });
+
+  it("a draft without the requested pricing or translation fails coverage", () => {
+    const thin: PlanDraft = { summary: "x", tasks: genericDraft("Summarise EU battery rules").tasks };
+    expect(coverageErrors(thin, SINGAPORE)).toEqual([
+      "the goal asks for prices: add a pricing task that produces the price table",
+      "the goal asks for a Simplified Chinese summary: add a translation task into Simplified Chinese",
+    ]);
+  });
+
+  it("repairs verifiers drafted with no output fields instead of discarding the LLM plan", () => {
+    const verifier = (id: string): DraftTask => ({ ...genericDraft("x").tasks[0]!, id, category: "verification", title: "Check the research", output_fields: [], verifies: "research", after: ["research"] });
+    const draft: PlanDraft = { summary: "x", tasks: [{ ...genericDraft(SINGAPORE, 2).tasks[0]!, acceptance: "VerifierQuorum" }, verifier("verification-market"), verifier("verification-pricing")] };
+    const { draft: repaired, notes } = normalizeDraft(draft);
+    expect(draftErrors(repaired, 2)).toEqual([]);
+    expect(repaired.tasks[1]!.output_fields.map((f) => f.name)).toEqual(["verdict", "reasons"]);
+    expect(notes).toContain("task verification-market: had no output fields; set to verdict, reasons");
+  });
+
+  it("an LLM plan that drops a requested deliverable falls back to the covering plan", async () => {
+    const thin = JSON.stringify(genericDraft("Summarise EU battery rules"));
+    const out = await planJob(singapore(), { llm: new LlmClient({ apiKey: "k", fetch: replay(thin) }), agents, verifierKeyOf });
+    expect(out.llm).toBe(DETERMINISTIC_FALLBACK);
+    expect(out.fallback_reason).toMatch(/pricing task|translation task/);
+    expect(out.draft.tasks.map((t) => t.id)).toEqual(["research", "pricing", "pricing-lookup", "write", "translate-zh"]);
   });
 });

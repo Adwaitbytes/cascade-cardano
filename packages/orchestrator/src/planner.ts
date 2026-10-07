@@ -4,12 +4,12 @@
  * that does not compile or validate, falls back to a deterministic draft and says so.
  */
 import { buildPlan, DEFAULT_POLICY, type AgentSource, type BuiltPlan, type JobIntake, type PlanPolicy, type VerifierKeyOf } from "./build-plan.js";
-import { CATEGORIES, demoDraft, draftErrors, genericDraft, isDemoGoal, normalizeDraft, PLAN_DRAFT_JSON_SCHEMA, type PlanDraft } from "./draft.js";
+import { CATEGORIES, coverageErrors, demoDraft, draftErrors, genericDraft, isDemoGoal, normalizeDraft, PLAN_DRAFT_JSON_SCHEMA, type PlanDraft } from "./draft.js";
 import { DETERMINISTIC_FALLBACK, type LlmCallRecord, type LlmClient } from "./llm.js";
 import { validatePlanFull } from "./validate.js";
 import type { StructuralSizer } from "./chain/structural.js";
 
-export const PLANNER_PROMPT_VERSION = "planner-v4";
+export const PLANNER_PROMPT_VERSION = "planner-v5";
 
 const SYSTEM_PROMPT = `You are the planner of Cascade, an orchestrator that hires other AI agents and pays them from an escrow tree on Cardano.
 You are the orchestrator. Do not create a task for yourself. Tasks with parent "root" are the agents you hire directly.
@@ -25,7 +25,9 @@ Rules:
 - "after" lists task ids whose results the task needs.
 Quality:
 - Read the goal's "Deliverable:" line when present and make sure one task produces exactly that deliverable; the last writing task depends ("after") on every research task it uses.
-- Prefer the smallest team that delivers: research, one fact check when the goal makes factual claims, one writer. Add pricing or translation tasks only when the goal asks for prices or another language.
+- Every deliverable the goal asks for gets its own task: a "pricing" task when it asks for prices or a price table, a "translation" task naming the language when it asks for a summary in another language. Never drop one to save budget.
+- Prefer the smallest team that delivers: research, one fact check when the goal makes factual claims, one writer, plus the tasks above.
+- Every task has at least one output field; a verification task's are "verdict" (object) and "reasons" (array).
 - Task titles are specific instructions an agent can act on, naming the market, place, language or time period from the goal (for example "Collect retail prices of cold-pressed juice in Dubai supermarkets"), never "Do research".
 - Fit the plan inside minutes_available: the longest chain of effort_minutes along "after" links must leave at least a third of the time spare.
 Return only JSON that matches the schema.`;
@@ -60,7 +62,7 @@ export interface PlannerDeps {
   structural?: StructuralSizer;
 }
 
-export const fallbackDraft = (goal: string): PlanDraft => (isDemoGoal(goal) ? demoDraft() : genericDraft(goal));
+export const fallbackDraft = (goal: string, maxDepth?: number): PlanDraft => (isDemoGoal(goal) ? demoDraft() : genericDraft(goal, maxDepth));
 
 function userPrompt(intake: JobIntake): string {
   return JSON.stringify({
@@ -95,8 +97,11 @@ export async function planJob(intake: JobIntake, deps: PlannerDeps): Promise<Pla
     schemaName: "plan_draft",
     schema: PLAN_DRAFT_JSON_SCHEMA,
     maxTokens: 3_000,
-    check: (d) => draftErrors(normalizeDraft(d).draft, intake.max_depth),
-    fallback: () => fallbackDraft(intake.goal),
+    check: (d) => {
+      const normalized = normalizeDraft(d).draft;
+      return [...draftErrors(normalized, intake.max_depth), ...coverageErrors(normalized, intake.goal)];
+    },
+    fallback: () => fallbackDraft(intake.goal, intake.max_depth),
   });
 
   const attempt = (draft: PlanDraft, draftedBy: "llm" | "code"): { built: BuiltPlan } | { errors: string[] } => {
@@ -120,7 +125,7 @@ export async function planJob(intake: JobIntake, deps: PlannerDeps): Promise<Pla
     };
   }
   if (drafted.llm === DETERMINISTIC_FALLBACK) throw new PlanningError(first.errors);
-  const draft = fallbackDraft(intake.goal);
+  const draft = fallbackDraft(intake.goal, intake.max_depth);
   const second = attempt(draft, "code");
   if ("errors" in second) throw new PlanningError([...first.errors, ...second.errors]);
   return {
