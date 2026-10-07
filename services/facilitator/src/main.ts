@@ -38,7 +38,7 @@ async function main(): Promise<void> {
   initTracing("cascade-facilitator");
   const cfg = loadNetworkConfig();
   await assertRuntimeCurrent(cfg);
-  const pool = createPool(cfg.databaseUrl);
+  const pool = createPool(cfg.databaseUrl, 10, log);
   await migrate(pool, log);
   const network: Network = cfg.network === "local" ? LOCAL_NETWORK : PREPROD_NETWORK;
   const bf = cfg.blockfrostUrl === null ? null : { url: cfg.blockfrostUrl, projectId: cfg.network === "local" ? null : cfg.blockfrostProjectId };

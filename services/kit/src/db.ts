@@ -15,15 +15,46 @@ export type Queryable = Pick<pg.Pool, "query"> | Pick<pg.PoolClient, "query">;
 // Transaction-scoped; differs from the old session-lock key so a leaked session lock cannot block it.
 const MIGRATION_LOCK_KEY = 0x0c45cadf;
 
-export function createPool(connectionString: string, max = 10): Pool {
-  const pool = new pg.Pool({ connectionString, max, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 10_000 });
+/** Code and message only: a pg error never carries the connection string, and query text stays out of logs. */
+function logConnectionError(log: Logger | undefined, source: "pool" | "client", err: Error): void {
+  const code = (err as { code?: unknown }).code;
+  log?.warn({ source, code: typeof code === "string" ? code : undefined, error: err.message }, "postgres connection error; the pool replaces the client");
+}
+
+export function createPool(connectionString: string, max = 10, log?: Logger): Pool {
+  const pool = new pg.Pool({ connectionString, max, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 10_000, keepAlive: true });
   // An idle client error must not crash the process; the pool replaces the client.
-  pool.on("error", () => undefined);
+  pool.on("error", (err) => logConnectionError(log, "pool", err));
   return pool;
 }
 
-export async function withTransaction<T>(pool: Pool, fn: (client: PoolClient) => Promise<T>): Promise<T> {
+/**
+ * Checks out a client with an 'error' listener for as long as it is held. pg-pool only listens on
+ * idle clients; a socket reset (Neon dropping a TLS connection) on a checked-out client otherwise
+ * surfaces as an unhandled 'error' event and kills the process. A client that errored is released
+ * with the error so the pool destroys it.
+ */
+export async function withClient<T>(pool: Pool, fn: (client: PoolClient) => Promise<T>, log?: Logger): Promise<T> {
   const client = await pool.connect();
+  let broken: Error | undefined;
+  const onError = (err: Error): void => {
+    broken = err;
+    logConnectionError(log, "client", err);
+  };
+  client.on("error", onError);
+  try {
+    return await fn(client);
+  } finally {
+    client.off("error", onError);
+    client.release(broken ?? false);
+  }
+}
+
+export function withTransaction<T>(pool: Pool, fn: (client: PoolClient) => Promise<T>, log?: Logger): Promise<T> {
+  return withClient(pool, (client) => transaction(client, fn), log);
+}
+
+async function transaction<T>(client: PoolClient, fn: (client: PoolClient) => Promise<T>): Promise<T> {
   try {
     await client.query("BEGIN");
     const result = await fn(client);
@@ -32,8 +63,6 @@ export async function withTransaction<T>(pool: Pool, fn: (client: PoolClient) =>
   } catch (e) {
     await client.query("ROLLBACK").catch(() => undefined);
     throw e;
-  } finally {
-    client.release();
   }
 }
 
@@ -42,8 +71,11 @@ export async function withTransaction<T>(pool: Pool, fn: (client: PoolClient) =>
  * session lock would leak through a transaction-pooling endpoint (Neon's `-pooler`, PgBouncer) when
  * a process is killed mid-migration and block every later start; a transaction lock cannot.
  */
-export async function migrate(pool: Pool, log?: Logger, migrations: readonly Migration[] = MIGRATIONS): Promise<number[]> {
-  const client = await pool.connect();
+export function migrate(pool: Pool, log?: Logger, migrations: readonly Migration[] = MIGRATIONS): Promise<number[]> {
+  return withClient(pool, (client) => migrateOn(client, migrations, log), log);
+}
+
+async function migrateOn(client: PoolClient, migrations: readonly Migration[], log?: Logger): Promise<number[]> {
   const applied: number[] = [];
   try {
     await client.query("BEGIN");
@@ -68,8 +100,6 @@ export async function migrate(pool: Pool, log?: Logger, migrations: readonly Mig
   } catch (e) {
     await client.query("ROLLBACK").catch(() => undefined);
     throw e;
-  } finally {
-    client.release();
   }
   return applied;
 }

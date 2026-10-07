@@ -46,7 +46,7 @@ async function main(): Promise<void> {
   const cfg = loadNetworkConfig();
   await assertRuntimeCurrent(cfg);
   if (cfg.scripts.node === null) throw new ConfigError("cascade_node hash is not in the deployments file; nothing to sign for yet");
-  const pool = createPool(cfg.databaseUrl);
+  const pool = createPool(cfg.databaseUrl, 10, log);
   await migrate(pool, log);
 
   const mnemonic = requireEnv("CASCADE_TREASURY_MNEMONIC");

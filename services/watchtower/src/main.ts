@@ -91,7 +91,7 @@ async function main(): Promise<void> {
   initTracing("cascade-watchtower");
   const cfg = loadNetworkConfig();
   await assertRuntimeCurrent(cfg);
-  const pool = createPool(cfg.databaseUrl, 4);
+  const pool = createPool(cfg.databaseUrl, 4, log);
   await migrate(pool, log);
   // The executor loads reference scripts over the provider, which can be slow after a restart; the
   // loop and health endpoint start at once and select cranks until it is ready (retried each minute).

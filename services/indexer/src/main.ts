@@ -56,7 +56,7 @@ async function main(): Promise<void> {
   initTracing("cascade-indexer");
   const cfg = loadNetworkConfig();
   await assertRuntimeCurrent(cfg);
-  const pool = createPool(cfg.databaseUrl);
+  const pool = createPool(cfg.databaseUrl, 10, log);
   log.info({ network: cfg.network, db: safeUrl(cfg.databaseUrl), ogmios: cfg.ogmiosWs }, "starting indexer");
   await migrate(pool, log);
 
