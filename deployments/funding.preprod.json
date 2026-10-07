@@ -449,6 +449,20 @@
           "lovelace": "78012652"
         }
       ]
+    },
+    {
+      "at": "2026-10-06T12:31:53.498Z",
+      "txHash": "4eb4dc090d478a433c99cb096ccac2dd3f1034481b6564947e5c6effe34579c5",
+      "explorer": "https://preprod.cardanoscan.io/transaction/4eb4dc090d478a433c99cb096ccac2dd3f1034481b6564947e5c6effe34579c5",
+      "provider": "blockfrost",
+      "totalLovelace": "706255273",
+      "outputs": [
+        {
+          "role": "coworker-buyer",
+          "address": "addr_test1qq6se0qpca9khv96r8wqdgvzctf44p94lxt796m5yft824khl0jqp6fec0l446m47sly5tsjv4d58l0yx8g6gz7tunxqmvn7pv",
+          "lovelace": "706255273"
+        }
+      ]
     }
   ]
 }

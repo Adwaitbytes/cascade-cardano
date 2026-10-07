@@ -51,7 +51,7 @@ export const FUNDING_TARGETS_ADA: Readonly<Record<Exclude<WalletRole, "treasury"
   "buyer-a19": 150,
   "buyer-a20": 0,
   // One Cascade tree per Sokosumi Task: 80 ADA budget plus structural ADA, mostly returned at close.
-  "coworker-buyer": 300,
+  "coworker-buyer": 800,
 };
 
 /** On Yaci the treasury is topped up too, since it pays for the test-token mint. */
