@@ -100,3 +100,13 @@ To try it: `sokosumi --preprod tasks create --personal --coworker-id 01a110cd-4e
 - Cascade tree funding: https://preprod.cardanoscan.io/transaction/ffe6216e97f7fd70027a545ad4e0d0e2af17a351edd9b03e19c22ab4cf7d71ed
 
 Honest notes: this Task ran before the hackathon redeploy, so its Cascade tree used the earlier script hashes, and the delivered result was partial because the child agents went offline mid-run. It proves the Sokosumi to Masumi escrow to seller payout path. Paid Task 2 below runs on today's deployment with a full result.
+
+### Paid Task 2 (2026-10-07): full deliverable, paid out
+
+- Task: `01a11176-0b37-75cb-a4d9-d568b3fd9cdb`, a market-entry brief for a cold-pressed juice brand in Dubai. Full result: [docs/samples/task-01a11176-dubai-juice-brief.md](samples/task-01a11176-dubai-juice-brief.md)
+- Masumi escrow lock: https://preprod.cardanoscan.io/transaction/a7a8afe4a4092d4d048616feb97865c9f11f6864bf82c3acabd01b4e18787950
+- Result hash on chain: https://preprod.cardanoscan.io/transaction/ac5706a15d9cad115f62488668949822302797385d4b7c51c426fe7a9e2af952
+- Seller collection, state Withdrawn: https://preprod.cardanoscan.io/transaction/f37ffe31f43bbbbb5c5f2c3834c62cf791c7bd218fe2e7ee9855be55830f769e
+- Cascade tree funding: https://preprod.cardanoscan.io/transaction/49d52a7576be879c3f0aca14ad572265b0431ba94b402c3c6adf18639329307e
+
+Note: this Task ran overnight before the switch to the redeployed scripts, so its Cascade tree uses the earlier script hashes; all its Masumi transactions are inside the hackathon window. Paid Task 3 runs on today's deployment.
