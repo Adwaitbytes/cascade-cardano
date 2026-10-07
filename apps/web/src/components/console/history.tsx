@@ -15,7 +15,7 @@ import type { TreeListItem } from "@/lib/api/schemas";
 import { cn } from "@/lib/cn";
 import { TREE_READ_LIMIT, jobTitle, paginate, parseBuyer, plural } from "@/lib/console/history";
 
-const TREE_STATE = {
+export const TREE_STATE = {
   open: { label: "Running", text: "text-funded", bg: "bg-funded-bg", dot: "bg-funded" },
   closed: { label: "Closed", text: "text-accepted", bg: "bg-accepted-bg", dot: "bg-accepted" },
   cancelled: { label: "Cancelled", text: "text-refunded", bg: "bg-refunded-bg", dot: "bg-refunded" },
