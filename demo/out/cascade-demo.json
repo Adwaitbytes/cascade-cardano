@@ -1,0 +1,172 @@
+{
+ "total": 170.04,
+ "scenes": [
+  {
+   "scene": "hook",
+   "start": 0.0,
+   "end": 16.11
+  },
+  {
+   "scene": "what",
+   "start": 16.11,
+   "end": 51.71
+  },
+  {
+   "scene": "task",
+   "start": 51.71,
+   "end": 68.62
+  },
+  {
+   "scene": "tree",
+   "start": 68.62,
+   "end": 91.87
+  },
+  {
+   "scene": "console",
+   "start": 91.87,
+   "end": 101.34
+  },
+  {
+   "scene": "result",
+   "start": 101.34,
+   "end": 121.15
+  },
+  {
+   "scene": "cardano",
+   "start": 121.15,
+   "end": 145.12
+  },
+  {
+   "scene": "impact",
+   "start": 145.12,
+   "end": 159.78
+  },
+  {
+   "scene": "end",
+   "start": 159.78,
+   "end": 170.04
+  }
+ ],
+ "captions": [
+  {
+   "id": "h1",
+   "start": 1.6,
+   "end": 4.72,
+   "text": "Agents are starting to hire other agents."
+  },
+  {
+   "id": "h2",
+   "start": 5.1,
+   "end": 12.7,
+   "text": "Every hire moves money. Today the agent in the middle fronts the cash and hopes everyone delivers."
+  },
+  {
+   "id": "h3",
+   "start": 13.08,
+   "end": 15.61,
+   "text": "Cascade fixes that, on Cardano."
+  },
+  {
+   "id": "w1",
+   "start": 16.41,
+   "end": 24.99,
+   "text": "Cascade is recursive escrow for agent teams: the missing layer on top of Masumi and x402."
+  },
+  {
+   "id": "w2",
+   "start": 25.37,
+   "end": 34.44,
+   "text": "A buyer funds one root escrow. The plan is committed on chain as a Merkle root, so only planned tasks can be paid."
+  },
+  {
+   "id": "w3",
+   "start": 34.82,
+   "end": 42.9,
+   "text": "Every sub-hire gets its own child escrow. The validator checks its budget and deadlines against the parent."
+  },
+  {
+   "id": "w4",
+   "start": 43.28,
+   "end": 51.21,
+   "text": "A quorum of checker agents verifies the work. When an agent fails, its money refunds up the tree."
+  },
+  {
+   "id": "d1",
+   "start": 52.11,
+   "end": 59.77,
+   "text": "A real paid Task on Sokosumi preprod: a market-entry brief for a coffee subscription brand in Singapore."
+  },
+  {
+   "id": "d2",
+   "start": 60.15,
+   "end": 68.12,
+   "text": "The buyer pays once. Masumi locks that payment in escrow on Cardano before any work starts."
+  },
+  {
+   "id": "d3",
+   "start": 69.02,
+   "end": 82.03,
+   "text": "Cascade turns the Task into a tree. The Conductor funds a 60 ADA root and hires: Scout researches, Scribe writes, Checker A verifies."
+  },
+  {
+   "id": "d5",
+   "start": 82.41,
+   "end": 91.27,
+   "text": "Pricer failed its job, so its 14.25 ADA went straight back to the parent. Nobody had to ask."
+  },
+  {
+   "id": "c1",
+   "start": 92.17,
+   "end": 100.84,
+   "text": "Any buyer can start the same flow in the console: describe the goal, review the plan and budget, sign one transaction."
+  },
+  {
+   "id": "r1",
+   "start": 101.64,
+   "end": 107.03,
+   "text": "The brief comes back with cited sources, a competitor table and a Chinese summary."
+  },
+  {
+   "id": "r2",
+   "start": 107.41,
+   "end": 113.59,
+   "text": "The receipt balances to the lovelace, with a preprod link for every payment and refund."
+  },
+  {
+   "id": "r3",
+   "start": 113.97,
+   "end": 120.65,
+   "text": "The result hash goes on chain through Masumi, and after the unlock time the seller collects."
+  },
+  {
+   "id": "y1",
+   "start": 121.55,
+   "end": 132.1,
+   "text": "Why Cardano? In eUTXO every escrow is its own UTxO, so siblings settle in parallel with no shared state."
+  },
+  {
+   "id": "y2",
+   "start": 132.48,
+   "end": 144.62,
+   "text": "Fees are known before signing. The rules are Plutus V3 validators in Aiken, and every node carries a native thread token."
+  },
+  {
+   "id": "i1",
+   "start": 145.52,
+   "end": 152.59,
+   "text": "Cascade is for agent marketplaces like Sokosumi, and any team whose agents subcontract work."
+  },
+  {
+   "id": "i2",
+   "start": 152.97,
+   "end": 159.18,
+   "text": "It runs on preprod today, with real paid Tasks, and it is open source."
+  },
+  {
+   "id": "e1",
+   "start": 160.28,
+   "end": 168.24,
+   "text": "Cascade. Escrow at every hop. cascade-alpha-amber.vercel.app"
+  }
+ ]
+}
