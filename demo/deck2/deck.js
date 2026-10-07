@@ -109,7 +109,7 @@ document.querySelectorAll("section.slide").forEach((s) => {
   circle(slide, 84, 494, 200, 90, C.orange);
   note(slide, 330, 500, "a bar too thin to see at this scale", 340, 24);
   arrow(slide, "M 325 525 C 300 520, 290 525, 282 532", "green");
-  note(slide, 560, 868, "over 1,600× in about a year", 460, 30);
+  note(slide, 330, 872, "over 1,600× in about a year (x402.org, read 7 Oct 2026)", 760, 27);
 }
 
 // 4 Today vs Cascade.
@@ -194,24 +194,23 @@ document.querySelectorAll("section.slide").forEach((s) => {
   arrow(slide, "M 790 945 C 760 940, 745 880, 745 815", "green");
 }
 
-// 6 Product flow on real screens.
+// 6 Product flow on real screens: full-width captures in a 2x2 grid, each window offset to its key region.
 {
   const flow = document.getElementById("flow");
-  const items = [["landing-crop.png", "1 Describe a goal or open a Task"], ["console-crop.png", "2 Fund it; every job lists its cost"], ["tree-crop.png", "3 Watch each escrow live"], ["receipt-crop.png", "4 Receipt, reconciled to chain"]];
-  items.forEach(([img, label], i) => {
-    const x = i * 440;
+  const W = 840, H = 270, scale = W / 2880;
+  const items = [["landing.png", 250, "1 Describe a goal or open a Task"], ["console.png", 600, "2 Fund it; every job lists its cost"], ["tree.png", 650, "3 Watch each escrow live"], ["receipt.png", 450, "4 Receipt, reconciled to chain"]];
+  items.forEach(([img, offset, label], i) => {
     const d = document.createElement("div");
     d.className = "abs";
-    d.style.cssText = `left:${x}px;top:0;width:400px`;
-    d.innerHTML = `<div class="shot" style="height:300px"><img src="shots/${img}" style="height:100%;width:100%;object-fit:cover;object-position:center top"></div><div style="font-size:24px;font-weight:600;margin-top:22px"><span style="color:#1F7A50">${label.slice(0, 1)}</span>${label.slice(1)}</div>`;
+    d.style.cssText = `left:${(i % 2) * 880}px;top:${Math.floor(i / 2) * 340}px;width:${W}px`;
+    d.innerHTML = `<div class="shot" style="height:${H}px"><img src="shots/${img}" style="width:${W}px;margin-top:-${Math.round(offset * scale)}px"></div><div style="font-size:24px;font-weight:600;margin-top:12px"><span style="color:#1F7A50">${label.slice(0, 1)}</span>${label.slice(1)}</div>`;
     flow.appendChild(d);
-    if (i < 3) arrow(S(6), `M ${100 + x + 404} 520 C ${100 + x + 416} 512, ${100 + x + 424} 512, ${100 + x + 436} 520`, "green");
   });
   const slide = S(6);
-  circle(slide, 1225, 528, 145, 80, C.orange);
-  note(slide, 1170, 740, "Pricer missed its deadline: refunded", 260, 22);
-  circle(slide, 1600, 412, 200, 60, C.orange);
-  note(slide, 1610, 740, "85.36 ADA in, every lovelace reconciled", 240, 22);
+  circle(slide, 712, 858, 140, 76, C.orange);
+  note(slide, 520, 965, "Pricer missed its deadline: refunded", 420, 22);
+  circle(slide, 1458, 722, 200, 52, C.orange);
+  note(slide, 1420, 965, "85.36 ADA in, every lovelace reconciled", 420, 22);
 }
 
 // 7 Demo: play badge over the poster.
