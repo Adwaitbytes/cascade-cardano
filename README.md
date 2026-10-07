@@ -26,9 +26,9 @@ It is the missing layer on top of Masumi and x402: a committed plan, validator-c
 
 | Proof | Link |
 | --- | --- |
-| Sample completed Sokosumi Task | `{{SOKOSUMI_TASK_ID}}` (see [docs/sokosumi-coworker.md](docs/sokosumi-coworker.md)) |
-| Seller payment receipt | `{{SOKOSUMI_RECEIPT}}` |
-| Masumi escrow for that Task | `{{MASUMI_LOCK_TX}}` on preprod Cardanoscan |
+| Sample completed Sokosumi Task | `01a114cd-37f6-75fc-a2a4-3859ed85b11b` (see [docs/sokosumi-coworker.md](docs/sokosumi-coworker.md)) |
+| Seller payment receipt | `Sokosumi completion event 01a11529-e05d-7778-b032-4da2d79ebb0f` |
+| Masumi escrow for that Task | `3585e64c0afb16d19c711ced384180170d2c256090c68cdc81aee076598a1623` on preprod Cardanoscan |
 | Coworker's Masumi registration | [27f2aa49f924...](https://preprod.cardanoscan.io/transaction/27f2aa49f9245d826b1837745d2a54d247f857ced77a7a2ef36856da7b8906a3) |
 | Every escrow-tree redeemer on preprod | [table below](#every-redeemer-on-preprod) |
 | Failed agent refunded into its parent | [fb8280c71a52...](https://preprod.cardanoscan.io/transaction/fb8280c71a523c5d423af87edc355f191feea126ba1e1722d514e66a279d6472) |

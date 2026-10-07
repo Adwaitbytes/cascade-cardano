@@ -68,13 +68,13 @@ Cascade enforces escrow at every level of the hiring chain, on chain.
 
 | Item | Value |
 | --- | --- |
-| Sample completed Task | `{{SOKOSUMI_TASK_ID}}` |
-| Seller payment receipt (Sokosumi) | `{{SOKOSUMI_RECEIPT}}` |
-| Masumi escrow lock for that Task | [{{MASUMI_LOCK_TX}}](https://preprod.cardanoscan.io/transaction/{{MASUMI_LOCK_TX}}) |
-| Seller withdrawal | [{{MASUMI_WITHDRAW_TX}}](https://preprod.cardanoscan.io/transaction/{{MASUMI_WITHDRAW_TX}}) |
-| Cascade tree for that Task | https://cascade-alpha-amber.vercel.app/tree/{{TREE_ID}} |
-| Tree receipt | https://cascade-alpha-amber.vercel.app/receipt/{{TREE_ID}} |
-| Root funded | [{{FUND_TX}}](https://preprod.cardanoscan.io/transaction/{{FUND_TX}}) |
+| Sample completed Task | `01a114cd-37f6-75fc-a2a4-3859ed85b11b` |
+| Seller payment receipt (Sokosumi) | `Sokosumi completion event 01a11529-e05d-7778-b032-4da2d79ebb0f` |
+| Masumi escrow lock for that Task | [3585e64c0afb16d19c711ced384180170d2c256090c68cdc81aee076598a1623](https://preprod.cardanoscan.io/transaction/3585e64c0afb16d19c711ced384180170d2c256090c68cdc81aee076598a1623) |
+| Seller withdrawal | [db84039e31a7706f4454380de0a26815df26fb4b856534839ba3000ddd8d5f77](https://preprod.cardanoscan.io/transaction/db84039e31a7706f4454380de0a26815df26fb4b856534839ba3000ddd8d5f77) |
+| Cascade tree for that Task | https://cascade-alpha-amber.vercel.app/tree/4b50da32cf987ecdccbf0b421b5269161e3ac84651476ed30bb045bf |
+| Tree receipt | https://cascade-alpha-amber.vercel.app/receipt/4b50da32cf987ecdccbf0b421b5269161e3ac84651476ed30bb045bf |
+| Root funded | [f22e344be8d2002d9d7995f8103f61239f3e1a2c232519f4d72429376d282512](https://preprod.cardanoscan.io/transaction/f22e344be8d2002d9d7995f8103f61239f3e1a2c232519f4d72429376d282512) |
 
 Proof already on chain, independent of the Task above:
 
