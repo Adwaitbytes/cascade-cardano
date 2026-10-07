@@ -8,7 +8,7 @@ import { cascadeAgent, type AgentSigner, type CascadeAgent,
 import { acceptedChildResults, CONTEXT_FIELD, loggedJson, readContext, type AgentRuntime, type SubtreeHire } from "@cascade/agent-kit";
 import { DETERMINISTIC_FALLBACK, type LlmClient } from "@cascade/orchestrator/llm";
 
-export const SCOUT_PROMPT_VERSION = "scout-v2";
+export const SCOUT_PROMPT_VERSION = "scout-v3";
 
 export const SCOUT_OUTPUT_SCHEMA = {
   type: "object",
@@ -39,6 +39,7 @@ const SCOUT_SYSTEM = [
   "findings: up to 6 specific, checkable claims, each with a number, a date or a named source (market size, growth rate, regulation, channel share, consumer behaviour). One claim per finding, at most 30 words.",
   "source_url: a real https page you are confident exists and supports the claim (regulator, statistics office, company site, established publication). If you are not confident, omit the finding: never invent or guess a URL.",
   "No generic statements such as \"the market is growing\", no marketing language, no duplicates. Fewer, solid items beat six weak ones.",
+  "State a figure (with its year and currency) only when you are confident that exact source states it, never an estimate of your own.",
 ].join("\n");
 
 const isRecord = (v: JsonValue | undefined): v is Record<string, JsonValue> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -106,7 +107,11 @@ export function createScoutAgent(deps: ScoutDeps): CascadeAgent {
       if (sub === null) {
         notes.push("price table pending: this job has no sub-hired children (no tree node, or none in the plan)");
       } else {
-        for (const r of acceptedChildResults(sub)) if (isRecord(r.result) && Array.isArray(r.result["price_table"])) priceTable = [...priceTable, ...r.result["price_table"]];
+        for (const r of acceptedChildResults(sub)) {
+          if (!isRecord(r.result)) continue;
+          if (Array.isArray(r.result["price_table"])) priceTable = [...priceTable, ...r.result["price_table"]];
+          if (Array.isArray(r.result["notes"])) for (const n of r.result["notes"]) if (typeof n === "string") notes.push(`${r.spec_id}: ${n}`);
+        }
         notes.push(`sub-hired ${sub.children.length} children under node ${sub.node_id}${sub.partial ? " (partial)" : ""}`);
       }
       return { result: { competitors: research.value.competitors, price_table: priceTable, findings: research.value.findings, notes, llm: research.llm } };

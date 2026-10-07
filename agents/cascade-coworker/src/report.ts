@@ -5,6 +5,7 @@
  * with Cascade and preprod explorer links. Deterministic: the inputs are schema-parsed outcomes and
  * indexer views, never free LLM text about payments, and no model runs here.
  */
+import { isArabicText } from "@cascade/orchestrator/deliverable";
 import type { RootOutcome, TreeReceipt, TreeView } from "./cascade.js";
 
 const scan = (tx: string) => `https://preprod.cardanoscan.io/transaction/${tx}`;
@@ -55,6 +56,18 @@ function collect(value: unknown, spec: string, into: Deliverables, depth: number
   const masumiText = str(value["result"]);
   if (masumiText !== null && isTranslationSpec(spec)) {
     into.translations.push({ label: "Translation", text: masumiText });
+    return;
+  }
+  // A translation slot delivers only its translation. Scribe hired to translate echoes `brief` and
+  // `summary`; they count as the translation when in Arabic script, and an English echo is dropped
+  // so the Task shows one brief, not the writer's brief twice.
+  if (isTranslationSpec(spec) || value["language"] === "ar") {
+    for (const [field, label] of Object.entries(TRANSLATION_FIELDS)) {
+      const text = str(value[field]);
+      if (text !== null) into.translations.push({ label, text });
+    }
+    const echoed = [value["summary"], value["brief"]].map(str).find((t): t is string => t !== null && isArabicText(t));
+    if (echoed !== undefined) into.translations.push({ label: "Arabic summary", text: echoed });
     return;
   }
   const brief = str(value["brief"]);

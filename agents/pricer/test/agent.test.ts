@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { localKeySigner, type PaymentRequired } from "@cascade/agent";
 import { buyAndRun, ScriptedVerifier, testPayment, testRequirements, testRuntime } from "@cascade/agent-kit/testing";
 import { createLookupApiAgent } from "@cascade/agent-lookup-api";
-import { createPricerAgent, x402LookupClient, type X402Buyer } from "../src/agent.js";
+import { buyPriceHistory, createPricerAgent, HISTORY_DAYS, MAX_BENCHMARK_BRANDS, x402LookupClient, type X402Buyer } from "../src/agent.js";
 
 const signer = localKeySigner(new Uint8Array(32).fill(44));
 const payments = () => ({ requirements: testRequirements(signer.address), verifier: new ScriptedVerifier() });
@@ -32,5 +32,31 @@ describe("Pricer", () => {
     const run = await buyAndRun(pricer, { brands: "Sample Brand A" });
     expect(run.status).toBe("failed");
     expect((await pricer.store.get(run.job_id))?.error).toMatch(/@cascade\/x402/);
+  });
+});
+
+describe("buyPriceHistory (metered rail)", () => {
+  const lookupApi = createLookupApiAgent({ runtime: testRuntime("lookup-api"), signer: localKeySigner(new Uint8Array(32).fill(45)), verifier: new ScriptedVerifier() });
+  const catalog = async () => ((await (await lookupApi.fetch(new Request("http://lookup-api.test/catalog"))).json()) as { brands: unknown }).brands;
+  const dataset: Record<string, { brand: string; product: string; size_ml: number; price_aed: number }[]> = {
+    "Sample Brand A": [{ brand: "Sample Brand A", product: "Green detox", size_ml: 250, price_aed: 18 }],
+  };
+  const asked: string[] = [];
+  const lookupDay = async (brand: string, day: number) => (asked.push(`${brand}@${day}`), dataset[brand] ?? []);
+
+  it("pays one call for a competitor the dataset lacks, then prices labelled benchmarks from the free catalog", async () => {
+    // The showcase tree's real competitors: none is in the sample dataset, so 252 calls bought nothing.
+    const got = await buyPriceHistory({ brands: ["N Juice", "Kold Press"], lookupDay, catalog });
+    expect(asked.filter((a) => a.startsWith("N Juice"))).toEqual(["N Juice@1"]);
+    expect(got.rows).toEqual([{ brand: "Sample Brand A", product: "Green detox", size_ml: 250, avg_price_aed: 18, days: HISTORY_DAYS, sample: true, benchmark: true }]);
+    // Two competitors and four absent benchmark brands at one call each, one full history.
+    expect(got.calls).toBe(2 + (MAX_BENCHMARK_BRANDS - 1) + HISTORY_DAYS);
+    expect(got.notes[0]).toBe("the Lookup API dataset has no rows for N Juice, Kold Press; their prices are not verified");
+  });
+
+  it("prices a competitor the dataset carries as a competitor row, with no benchmarks", async () => {
+    const got = await buyPriceHistory({ brands: ["Sample Brand A"], lookupDay, catalog: async () => { throw new Error("catalog must not be read"); } });
+    expect(got.rows[0]?.benchmark).toBe(false);
+    expect(got.notes).toEqual([]);
   });
 });

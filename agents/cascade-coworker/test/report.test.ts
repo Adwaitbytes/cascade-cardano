@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { formatAda, renderReport, type ReportInput } from "../src/report.js";
 
@@ -85,4 +86,28 @@ describe("renderReport", () => {
     expect(empty).not.toMatch(/\s$/);
   });
   it("uses no em dashes", () => expect(text).not.toContain("—"));
+});
+
+describe("renderReport on the showcase Task (preprod tree c011aadb)", () => {
+  const showcase = JSON.parse(readFileSync(new URL("./fixtures/showcase-c011aadb.json", import.meta.url), "utf8")) as { goal: string; tree_id: string; result_hash: string; result: never };
+  const text = renderReport({ ...input, goal: showcase.goal, treeId: showcase.tree_id, outcome: { node_id: showcase.tree_id, result_hash: showcase.result_hash, partial: false, children: [], result: showcase.result } });
+  it("is one brief, answer first, then how it was made, with no per-agent dumps", () => {
+    expect(text).not.toMatch(/^## (scout|scribe|translate-ar)$/m);
+    expect(text.match(/^# /gm)).toHaveLength(1);
+    expect(text).not.toContain("## Further detail");
+    // The English brief Scribe echoed from the translation slot (with its invented competitors) is dropped.
+    expect(text).not.toContain("Naked Juice");
+    expect(text).not.toMatch(/^## (Translation|Arabic summary)$/m);
+    const order = ["## Executive summary", "## Key findings", "## Brief", "## How this was made"].map((h) => text.indexOf(h));
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+  it("shows an Arabic translation from a translation slot", () => {
+    const arabic = "لدى دبي مجال واسع لعلامة عصير معصور على البارد في الفئة المتوسطة إلى الممتازة.";
+    const result = { result: { ...(showcase.result as { result: Record<string, unknown> }).result, "translate-ar": { brief: arabic, summary: arabic, arabic_summary: arabic, language: "ar", llm: "m" } } };
+    const withArabic = renderReport({ ...input, goal: showcase.goal, treeId: showcase.tree_id, outcome: { node_id: showcase.tree_id, result_hash: showcase.result_hash, partial: false, children: [], result: result as never } });
+    expect(withArabic.match(/^## Arabic summary$/gm)).toHaveLength(1);
+    expect(withArabic).toContain(arabic);
+    expect(withArabic.match(/^## Brief$/gm)).toHaveLength(1);
+  });
 });

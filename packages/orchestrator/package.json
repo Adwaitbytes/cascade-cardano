@@ -19,6 +19,10 @@
     "./workflows": {
       "types": "./dist/workflows/index.d.ts",
       "import": "./dist/workflows/index.js"
+    },
+    "./deliverable": {
+      "types": "./dist/deliverable.d.ts",
+      "import": "./dist/deliverable.js"
     }
   },
   "files": [

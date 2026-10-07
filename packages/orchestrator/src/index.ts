@@ -2,6 +2,7 @@ export * from "./activities.js";
 export * from "./agent-client.js";
 export * from "./build-plan.js";
 export * from "./compose.js";
+export * from "./deliverable.js";
 export * from "./draft.js";
 export * from "./llm.js";
 export * from "./planner.js";

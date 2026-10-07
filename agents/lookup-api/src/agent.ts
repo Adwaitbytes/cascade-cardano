@@ -115,6 +115,9 @@ export function createLookupApiAgent(deps: LookupDeps): CascadeAgent {
         return c.json({ tx_cbor: await deps.channels.cosign(body.tx_cbor) });
       });
 
+      // Free: which brands the dataset carries, so a buyer pays only for lookups that can return rows.
+      app.get("/catalog", (c) => c.json({ dataset: DATASET_ID, brands: brands() }));
+
       app.get("/lookup", async (c) => {
         const brand = c.req.query("brand");
         if (brand === undefined || brand.length === 0 || brand.length > 64) return c.json({ error: "invalid_brand" }, 400);
