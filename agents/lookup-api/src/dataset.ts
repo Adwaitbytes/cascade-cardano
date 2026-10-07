@@ -2,6 +2,8 @@
  * The data the Lookup API sells. These rows are illustrative sample values for the demo, not
  * market data: brand names are placeholders and every row carries `sample: true`.
  */
+import { brandKey } from "@cascade/orchestrator/deliverable";
+
 export const DATASET_ID = "cascade-demo-juice-prices-v1 (illustrative sample values, not market data)";
 
 export interface PriceRow {
@@ -33,9 +35,11 @@ export const ROWS: readonly PriceRow[] = [
   row("Sample Brand E", "Mango passion", 300, 19),
 ];
 
+/** Rows for a brand, matched on `brandKey`, so "N Juice" finds rows filed under "N'Juice". */
 export function lookup(brand: string): PriceRow[] {
-  const q = brand.trim().toLowerCase();
-  return ROWS.filter((r) => r.brand.toLowerCase() === q);
+  const q = brandKey(brand);
+  if (q === "") return [];
+  return ROWS.filter((r) => brandKey(r.brand) === q);
 }
 
 export const brands = (): string[] => [...new Set(ROWS.map((r) => r.brand))];

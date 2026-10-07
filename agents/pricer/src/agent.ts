@@ -8,6 +8,7 @@ import { cascadeAgent, type AgentSigner, type CascadeAgent,
 import { CONTEXT_FIELD, dependency, readContext, type AgentRuntime, type VoucherChannel } from "@cascade/agent-kit";
 import type { NodeSpec, Plan } from "@cascade/shared/browser";
 import { jcsSha256Hex } from "@cascade/shared/browser";
+import { brandKey } from "@cascade/orchestrator/deliverable";
 
 export const PRICER_OUTPUT_SCHEMA = {
   type: "object",
@@ -92,7 +93,8 @@ export function brandsFrom(input: Record<string, JsonValue>): string[] {
   const deps = context["depends_on"];
   const upstream = isRecord(deps) ? Object.keys(deps).flatMap((id) => competitorBrands(dependency(context, id))) : [];
   const all = [...listed, ...upstream].map((b) => b.trim()).filter((b) => b.length > 0);
-  return [...new Set(all)].slice(0, 20);
+  const seen = new Set<string>();
+  return all.filter((b) => !seen.has(brandKey(b)) && seen.add(brandKey(b))).slice(0, 20);
 }
 
 export function createPricerAgent(deps: PricerDeps): CascadeAgent {
@@ -128,7 +130,7 @@ export function createPricerAgent(deps: PricerDeps): CascadeAgent {
         ctx.log({ tool: "lookup-api.lookup", input_sha256: jcsSha256Hex({ brand }), output_sha256: jcsSha256Hex(got.rows), meta: got.tx_id === null ? {} : { tx_id: got.tx_id } });
         table.push(...got.rows);
       }
-      const missing = brands.filter((b) => !table.some((r) => isRecord(r) && r["brand"] === b));
+      const missing = brands.filter((b) => !table.some((r) => isRecord(r) && typeof r["brand"] === "string" && brandKey(r["brand"]) === brandKey(b)));
       return { result: { price_table: table, lookups: calls, notes: missing.map((b) => `no rows for ${b}`), llm: "none" } };
     },
   });
@@ -172,7 +174,8 @@ export async function buyPriceHistory(o: { brands: string[]; lookupDay: (brand: 
   if (missing.length > 0 || o.brands.length === 0) {
     notes.push(missing.length > 0 ? `the Lookup API dataset has no rows for ${missing.join(", ")}; their prices are not verified` : "no competitor brands were named upstream");
     const listed = await o.catalog();
-    const extra = Array.isArray(listed) ? listed.filter((b): b is string => typeof b === "string" && !o.brands.includes(b)).slice(0, MAX_BENCHMARK_BRANDS) : [];
+    const named = new Set(o.brands.map(brandKey));
+    const extra = Array.isArray(listed) ? listed.filter((b): b is string => typeof b === "string" && !named.has(brandKey(b))).slice(0, MAX_BENCHMARK_BRANDS) : [];
     if (extra.length === 0) notes.push("no benchmark brands: the Lookup API catalog was unavailable or empty");
     else notes.push(`priced ${extra.join(", ")} from the dataset as labelled benchmarks`);
     for (const brand of extra) await priceHistory(brand, true);

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { JsonValue } from "@cascade/shared/browser";
-import { ARABIC_HEADING, arabicSummaryOf, collectResearch, enforceFacts, factCheck, isArabicText, isChineseText, renderDeliverable, translatedSummaryOf, UNVERIFIED, writerBriefOf } from "../src/deliverable.js";
+import { ARABIC_HEADING, arabicSummaryOf, benchmarkTable, brandKey, collectResearch, competitorTable, enforceFacts, factCheck, isArabicText, isChineseText, renderDeliverable, translatedSummaryOf, UNVERIFIED, writerBriefOf } from "../src/deliverable.js";
 
 /** The merged root result of preprod tree c011aadb (Sokosumi Task 01a11176), as delivered. */
 const showcase = JSON.parse(readFileSync(new URL("./fixtures/showcase-c011aadb.json", import.meta.url), "utf8")) as { goal: string; result: { result: Record<string, JsonValue> } };
@@ -87,5 +87,36 @@ describe("renderDeliverable on the showcase result", () => {
     expect(out.indexOf(CHINESE)).toBeLessThan(out.indexOf("## Appendix: sources"));
     const missing = renderDeliverable(results, ["market-research", "chinese-summary", "market-entry-brief"]) ?? "";
     expect(missing).toContain("did not deliver a Simplified Chinese summary in Han characters");
+  });
+});
+
+describe("price rows map to competitors by normalized brand", () => {
+  const research = (prices: JsonValue[]) =>
+    collectResearch({
+      "market-research": { competitors: [{ brand: "N Juice", positioning: "Premium" }, { brand: "The Daily Dose", positioning: "Mid-range" }, { brand: "Kold", positioning: "Premium" }] },
+      "competitor-pricing": { price_table: prices },
+    });
+
+  it("reduces case, punctuation, accents, spacing and a leading The", () => {
+    expect(brandKey("N Juice")).toBe(brandKey("N'Juice"));
+    expect(brandKey("N Juice")).toBe(brandKey("NJUICE"));
+    expect(brandKey("The Daily Dose")).toBe(brandKey("daily-dose"));
+    expect(brandKey("Café & Co")).toBe(brandKey("cafe and co"));
+    expect(brandKey("Kold")).not.toBe(brandKey("Kold Press"));
+  });
+
+  it("prices a competitor whose dataset name is spelled differently", () => {
+    const r = research([{ brand: "N'Juice", product: "Green", size_ml: 250, avg_price_aed: 18.5, sample: true, benchmark: false }, { brand: "daily dose", product: "Celery", size_ml: 500, avg_price_aed: 29, sample: true, benchmark: false }]);
+    const table = competitorTable(r).join("\n");
+    expect(table).toMatch(/\| N Juice \| Premium \| 18\.50 \/ 250 ml \(sample\) \|/);
+    expect(table).toMatch(/\| The Daily Dose \| Mid-range \| 29 \/ 500 ml \(sample\) \|/);
+    expect(table).toMatch(/\| Kold \| Premium \| No verified price \|/);
+    expect(benchmarkTable(r)).toEqual([]);
+  });
+
+  it("lists dataset brands that match no competitor as labelled benchmarks, never as a competitor's price", () => {
+    const r = research([{ brand: "Sample Brand A", product: "Green detox", size_ml: 250, avg_price_aed: 18, sample: true, benchmark: true }]);
+    expect(competitorTable(r).join("\n")).not.toContain("18");
+    expect(benchmarkTable(r).join("\n")).toContain("| Sample Brand A | Green detox | 250 ml |");
   });
 });

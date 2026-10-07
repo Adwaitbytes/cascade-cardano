@@ -74,4 +74,15 @@ describe("buyPriceHistory (metered rail)", () => {
     expect(got.rows[0]?.benchmark).toBe(false);
     expect(got.notes).toEqual([]);
   });
+
+  it("never prices a named competitor again as a benchmark when the catalog spells it differently", async () => {
+    const got = await buyPriceHistory({ brands: ["N Juice"], lookupDay, catalog: async () => ["NJUICE", "Sample Brand A"] });
+    expect(got.notes[1]).toBe("priced Sample Brand A from the dataset as labelled benchmarks");
+  });
+});
+
+describe("brandsFrom", () => {
+  it("drops a brand repeated under another spelling", () => {
+    expect(brandsFrom({ brands: "N Juice, N'Juice, the Daily Dose, Daily Dose" })).toEqual(["N Juice", "the Daily Dose"]);
+  });
 });

@@ -111,7 +111,7 @@ export function collectResearch(value: JsonValue | undefined, depth = 0): Resear
       return true;
     });
   return {
-    competitors: once(out.competitors, (c) => `c|${c.brand.toLowerCase()}`),
+    competitors: once(out.competitors, (c) => `c|${brandKey(c.brand)}`),
     findings: once(out.findings, (f) => `f|${f.source_url}|${f.claim}`),
     prices: once(out.prices, (p) => `p|${p.brand}|${p.product}|${p.size_ml ?? ""}|${p.price_aed}`),
     notes: once(out.notes, (n) => `n|${n}`),
@@ -313,10 +313,30 @@ export function priceProvenance(prices: PricePoint[]): string[] {
   });
 }
 
+/**
+ * A brand name reduced to what identifies it: case, accents, punctuation, spacing, "&" and a leading
+ * "The" do not, so Scout's "N Juice" finds the dataset's "N'Juice" or "NJUICE".
+ */
+export function brandKey(brand: string): string {
+  return brand
+    .normalize("NFKD")
+    .replace(/\p{M}+/gu, "")
+    .toLowerCase()
+    .trim()
+    .replace(/^the\s+/, "")
+    .replace(/&/g, "and")
+    .replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+export const sameBrand = (a: string, b: string): boolean => {
+  const k = brandKey(a);
+  return k !== "" && k === brandKey(b);
+};
+
 /** The competitor table: positioning from research, a price only where a lookup returned one for that brand. */
 export function competitorTable(research: Research): string[] {
   if (research.competitors.length === 0) return [];
-  const priceFor = (brand: string) => research.prices.filter((p) => p.brand.toLowerCase() === brand.toLowerCase() && !p.benchmark);
+  const priceFor = (brand: string) => research.prices.filter((p) => sameBrand(p.brand, brand) && !p.benchmark);
   const rows = research.competitors.map((c) => {
     const prices = priceFor(c.brand);
     const price = prices.length === 0 ? "No verified price" : prices.map((p) => `${formatAed(p.price_aed)}${p.size_ml === null ? "" : ` / ${p.size_ml} ml`}${p.sample ? " (sample)" : ""}`).join("; ");
@@ -327,7 +347,7 @@ export function competitorTable(research: Research): string[] {
 
 /** Benchmark rows (prices not tied to a named competitor), labelled as the sample data they are. */
 export function benchmarkTable(research: Research): string[] {
-  const rows = research.prices.filter((p) => p.benchmark || !research.competitors.some((c) => c.brand.toLowerCase() === p.brand.toLowerCase()));
+  const rows = research.prices.filter((p) => p.benchmark || !research.competitors.some((c) => sameBrand(c.brand, p.brand)));
   if (rows.length === 0) return [];
   return [
     "| Dataset brand | Product | Size | Price (AED) |",

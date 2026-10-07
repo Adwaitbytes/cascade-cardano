@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { decodeHeader, encodeHeader, localKeySigner, type PaymentRequired } from "@cascade/agent";
 import { buyAndRun, ScriptedVerifier, testPayment, testRuntime } from "@cascade/agent-kit/testing";
 import { createLookupApiAgent, PER_CALL_LOVELACE } from "../src/agent.js";
-import { DATASET_ID, ROWS } from "../src/dataset.js";
+import { DATASET_ID, lookup, ROWS } from "../src/dataset.js";
 
 const signer = localKeySigner(new Uint8Array(32).fill(55));
 
@@ -41,5 +41,16 @@ describe("Lookup API", () => {
     const agent = createLookupApiAgent({ runtime: testRuntime("lookup-api"), signer, verifier: new ScriptedVerifier() });
     const run = await buyAndRun(agent, { brands: "Sample Brand C,Sample Brand D" });
     expect((run.bundle?.["result"] as { rows: unknown[] }).rows).toHaveLength(ROWS.filter((r) => ["Sample Brand C", "Sample Brand D"].includes(r.brand)).length);
+  });
+});
+
+describe("dataset lookup", () => {
+  it("matches a brand regardless of case, punctuation and spacing", () => {
+    const rows = lookup("Sample Brand A");
+    expect(rows.length).toBeGreaterThan(0);
+    expect(lookup("sample-brand a")).toEqual(rows);
+    expect(lookup("  SAMPLEBRAND A ")).toEqual(rows);
+    expect(lookup("Sample Brand")).toEqual([]);
+    expect(lookup("--")).toEqual([]);
   });
 });
