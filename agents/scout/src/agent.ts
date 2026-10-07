@@ -8,7 +8,7 @@ import { cascadeAgent, type AgentSigner, type CascadeAgent,
 import { acceptedChildResults, CONTEXT_FIELD, loggedJson, readContext, type AgentRuntime, type SubtreeHire } from "@cascade/agent-kit";
 import { DETERMINISTIC_FALLBACK, type LlmClient } from "@cascade/orchestrator/llm";
 
-export const SCOUT_PROMPT_VERSION = "scout-v3";
+export const SCOUT_PROMPT_VERSION = "scout-v4";
 
 export const SCOUT_OUTPUT_SCHEMA = {
   type: "object",
@@ -34,7 +34,8 @@ const RESEARCH_SCHEMA = {
 };
 
 const SCOUT_SYSTEM = [
-  "You are a market researcher. Research the market in the user message and return JSON only.",
+  "You are a market researcher. Research exactly the market named in the user message (`market`, read with the buyer's `goal` when given) and return JSON only.",
+  "Never research a different or broader market, a default topic or an example: every competitor and finding is about that product or service in that place. If you know nothing solid about it, return empty arrays.",
   "competitors: up to 6 real brands that sell in that market. positioning is one line naming price tier, main channel and differentiator, for example \"Premium; mall kiosks and delivery apps; organic certified\".",
   "findings: up to 6 specific, checkable claims, each with a number, a date or a named source (market size, growth rate, regulation, channel share, consumer behaviour). One claim per finding, at most 30 words.",
   "source_url: a real https page you are confident exists and supports the claim (regulator, statistics office, company site, established publication). If you are not confident, omit the finding: never invent or guess a URL.",
@@ -45,6 +46,39 @@ const SCOUT_SYSTEM = [
 const isRecord = (v: JsonValue | undefined): v is Record<string, JsonValue> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 type Research = { competitors: { brand: string; positioning: string }[]; findings: { claim: string; source_url: string }[] };
+
+export class MissingSubjectError extends Error {
+  constructor() {
+    super("Scout needs a research subject: a `market`, a context.goal, or a context.task that names the market. It never picks a topic itself");
+    this.name = "MissingSubjectError";
+  }
+}
+
+/** Words that name the research act, not its subject: a task made only of these names no market. */
+const GENERIC_WORDS = new Set(
+  "a an and any as at by do for from goal goals in into is it its market markets of on or the this to with research researching cited cite source sources sourced find findings collect gather analyse analyze analysis report final write brief overview topic subject task job deliverable information data result results please".split(" "),
+);
+
+/** True when the text names something to research beyond generic task words. */
+export function namesSubject(text: string): boolean {
+  return (text.toLowerCase().match(/\p{L}[\p{L}\p{N}'-]*/gu) ?? []).some((w) => !GENERIC_WORDS.has(w));
+}
+
+/**
+ * What Scout researches: the `market` field, else the slot's task and the buyer's goal from the
+ * context. Task 01a11610: the slot task was "Research the goal with cited sources", Scout researched
+ * that sentence alone, and the LLM returned the global AI market. Without a subject Scout fails.
+ */
+export function researchSubject(input: Record<string, JsonValue>, context: Record<string, JsonValue>): { market: string; goal?: string } {
+  const text = (v: JsonValue | undefined): string => (typeof v === "string" ? v.trim() : "");
+  const goal = text(context["goal"]);
+  const market = text(input["market"]);
+  if (market !== "" && namesSubject(market)) return goal === "" ? { market } : { market, goal };
+  const task = text(context["task"]);
+  if (goal !== "" && namesSubject(goal)) return { market: namesSubject(task) ? task : goal, goal };
+  if (namesSubject(task)) return { market: task };
+  throw new MissingSubjectError();
+}
 
 
 export interface ScoutDeps {
@@ -86,13 +120,12 @@ export function createScoutAgent(deps: ScoutDeps): CascadeAgent {
     ...(deps.onChallenge === undefined ? {} : { onChallenge: deps.onChallenge }),
     handler: async (input, ctx) => {
       const context = readContext(input);
-      const market = typeof input["market"] === "string" ? input["market"] : typeof context["task"] === "string" ? context["task"] : "";
-      if (market.trim() === "") throw new Error("Scout needs a market (field `market` or context.task)");
+      const subject = researchSubject(input, context);
       const research = await loggedJson<Research>(deps.llm, ctx, {
         role: "worker",
         promptVersion: SCOUT_PROMPT_VERSION,
         system: SCOUT_SYSTEM,
-        user: JSON.stringify({ market }),
+        user: JSON.stringify(subject),
         schemaName: "market_research",
         schema: RESEARCH_SCHEMA,
         maxTokens: 900,
