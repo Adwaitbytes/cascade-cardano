@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cascade pitch</title>
+<style>
+@font-face { font-family: "Inter Tight"; src: url("assets/inter-tight-normal.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Inter Tight"; src: url("assets/inter-tight-italic.woff2") format("woff2"); font-weight: 100 900; font-style: italic; }
+:root {
+  --bg: #F2EEEA; --ink: #161514; --ink2: #4A4642; --muted: #7A746E; --line: #D8D0C8; --card: #E9E3DD;
+  --green: #1F7A50; --green-soft: #CFE3D7; --green-dot: #3FAE73; --orange: #F2994A; --burnt: #B9511D; --orange-soft: #F7DCC4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #888; font-family: "Inter Tight", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+.slide { width: 1920px; height: 1080px; background: var(--bg); position: relative; overflow: hidden; margin: 0 auto 40px; padding: 150px 100px 90px; }
+.brand { position: absolute; top: 58px; left: 100px; display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 24px; letter-spacing: -0.01em; }
+.brand svg { width: 34px; height: 34px; }
+.pno { position: absolute; right: 100px; bottom: 50px; font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.kicker { font-size: 21px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); margin-bottom: 20px; }
+h1 { font-size: 62px; line-height: 1.06; font-weight: 620; letter-spacing: -0.035em; max-width: 1640px; }
+h1 em, .em { font-style: italic; font-weight: 760; }
+.sub { font-size: 28px; color: var(--ink2); margin-top: 22px; letter-spacing: -0.01em; line-height: 1.35; max-width: 1400px; }
+.track { display: flex; gap: 0; margin-top: 30px; border-bottom: 1.5px solid var(--line); padding-bottom: 14px; width: 1720px; }
+.track div { flex: 1; font-size: 20px; color: var(--muted); }
+.track div.on { color: var(--ink); font-weight: 650; position: relative; }
+.track div.on::after { content: ""; position: absolute; left: 0; bottom: -18px; width: 300px; height: 5px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 6' preserveAspectRatio='none'><path d='M2 4 C 60 1, 140 5, 298 2' stroke='%231F7A50' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>") no-repeat; background-size: 100% 100%; }
+.note { font-style: italic; color: var(--green); font-size: 26px; font-weight: 520; line-height: 1.25; }
+.src { font-size: 16px; color: var(--muted); line-height: 1.4; }
+.label { font-size: 19px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); }
+.big { font-size: 150px; font-weight: 700; letter-spacing: -0.05em; line-height: 0.95; color: var(--burnt); }
+.big.g { color: var(--green); }
+.honest { display: inline-block; font-size: 24px; font-weight: 600; padding-bottom: 6px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 8' preserveAspectRatio='none'><path d='M2 5 C 80 2, 180 7, 298 3' stroke='%23F2994A' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>") no-repeat bottom; background-size: 100% 8px; }
+.shot { border-radius: 14px; overflow: hidden; box-shadow: 0 1px 2px rgba(40,30,20,.08), 0 14px 40px rgba(40,30,20,.12); background: #fff; border: 1px solid #ddd5cc; }
+.shot img { display: block; width: 100%; }
+.abs { position: absolute; }
+.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.86em; letter-spacing: 0; }
+svg text { font-family: "Inter Tight", sans-serif; }
+.rough { position: absolute; pointer-events: none; overflow: visible; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+.card { background: var(--card); border-radius: 14px; padding: 24px 30px; }
+.card .label { color: var(--muted); font-size: 17px; }
+.stat { font-size: 56px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin: 14px 0 12px; }
+.stat.o { color: var(--burnt); } .stat.g { color: var(--green); }
+.small { font-size: 21px; color: var(--ink2); line-height: 1.35; }
+.legend { display: flex; gap: 30px; font-size: 20px; color: var(--ink2); align-items: center; }
+.dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; margin-right: 8px; vertical-align: -2px; }
+.placeholder { border: 3px dashed var(--orange); border-radius: 14px; padding: 40px; font-size: 40px; font-weight: 650; color: var(--burnt); }
+</style>
+</head>
+<body>
+
+<!-- 1 TITLE -->
+<section class="slide" data-n="1">
+  <div class="brand" style="top:90px;font-size:44px;gap:22px"><svg viewBox="0 0 28 28" style="width:72px;height:72px"><use href="#logo"/></svg>Cascade</div>
+  <h1 style="margin-top:250px;font-size:84px;max-width:1500px">One budget. A whole team of AI agents. <em>Every</em> hire escrowed on Cardano.</h1>
+  <p class="sub" style="margin-top:40px;font-size:30px">A Sokosumi Coworker that turns one Task into a tree of hired agents, each paid from its own escrow, only for checked work.</p>
+  <div class="abs" style="left:100px;bottom:90px;display:flex;gap:46px;align-items:center;font-size:22px;color:var(--ink2)">
+    <span>TOKEN2049 Origins · Cardano Agentic Commerce</span>
+    <span style="display:flex;gap:26px;align-items:center">
+      <img src="assets/cardano.svg" style="height:38px;filter:invert(23%) sepia(60%) saturate(2000%) hue-rotate(210deg)">
+      <img src="assets/masumi.svg" style="height:40px">
+      <img src="assets/sokosumi.png" style="height:42px;border-radius:9px">
+    </span>
+    <span class="mono">cascade-alpha-amber.vercel.app</span>
+  </div>
+</section>
+
+<!-- 2 PROBLEM -->
+<section class="slide" data-n="2">
+  <div class="kicker">Problem</div>
+  <h1>Agents hire agents, and every hop is a new place to lose money: <em>7 of 22</em> hires in our runs did not deliver.</h1>
+  <div class="abs" style="left:100px;top:470px;width:760px">
+    <div class="big">7 of 22</div>
+    <p class="small" style="font-size:27px;margin-top:26px;color:var(--ink)">hired agents in our 4 published preprod trees missed their deadline or were cancelled before delivering. Each one's escrow went back up the tree automatically.</p>
+    <p class="small" style="margin-top:26px">Without escrow at every level, the coordinating agent fronts that money and absorbs the loss.</p>
+    <p class="honest" style="margin-top:34px">Testnet data. One of the 7 is a test agent built to fail.</p>
+  </div>
+  <svg class="abs" id="problemDots" style="left:1000px;top:470px" width="820" height="420"></svg>
+  <div class="abs src" style="left:1000px;top:930px;width:820px">Source: live /api/v1/landing on cascade-alpha-amber.vercel.app, read 7 Oct 2026. Trees 4b50da32, ade682cb, b945c5e3, 2752ccc0.</div>
+</section>
+
+<!-- 3 WHY NOW -->
+<section class="slide" data-n="3">
+  <div class="kicker">Why now</div>
+  <h1>Agents already pay each other: <em>75M</em> x402 payments in the last 30 days, up from 46,574 in all of September 2025.</h1>
+  <svg class="abs" id="whyChart" style="left:100px;top:420px" width="1000" height="470"></svg>
+  <div class="abs" style="left:1180px;top:400px;width:640px;display:flex;flex-direction:column;gap:16px">
+    <div class="card"><div class="label">Agentic commerce by 2030</div><div class="stat g">$3T to $5T</div><div class="src">McKinsey, "The agentic commerce opportunity", via Digital Commerce 360, 20 Oct 2025. A forecast, not a measurement.</div></div>
+    <div class="card"><div class="label">Enterprise apps with agentic AI by 2028</div><div class="stat g">33%</div><div class="src">Gartner, 25 Jun 2025, via W.Media. Up from under 1% in 2024. Gartner also expects over 40% of agentic AI projects to be cancelled by end of 2027.</div></div>
+    <div class="card"><div class="label">Masumi on Cardano</div><div class="stat g">1,272</div><div class="src">on-chain transactions in 30 days, cardano.org/apps/masumi, 21 Sep 2026.</div></div>
+  </div>
+  <div class="abs src" style="left:100px;top:960px;width:1000px">x402: 46,574 transactions in September 2025 (ForkLog, 27 Oct 2025); 75.41M transactions and $24.24M volume, last 30 days (x402.org, read 7 Oct 2026).</div>
+</section>
+
+<!-- 4 TODAY VS CASCADE -->
+<section class="slide" data-n="4">
+  <h1>Today a team of agents needs <em>one</em> escrow and one act of trust per hop. Cascade needs one payment.</h1>
+  <div class="abs" style="left:100px;top:400px;width:1080px">
+    <div class="label" style="margin-bottom:30px">Today</div>
+    <svg id="todaySvg" width="1080" height="470"></svg>
+  </div>
+  <div class="abs" style="left:1260px;top:380px;bottom:120px;border-left:1.5px solid var(--line)"></div>
+  <div class="abs" style="left:1330px;top:400px;width:500px">
+    <div class="label" style="margin-bottom:30px;color:var(--green)">Cascade</div>
+    <svg id="cascadeSvg" width="500" height="470"></svg>
+  </div>
+</section>
+
+<!-- 5 HOW IT WORKS -->
+<section class="slide" data-n="5">
+  <h1>How does one <em>60 ADA</em> Task become six checked escrows and a refund?</h1>
+  <svg class="abs" id="funnel" style="left:100px;top:330px" width="1720" height="640"></svg>
+  <div class="abs src" style="left:100px;top:990px">Tree 4b50da32, paid Sokosumi Task 01a114cd, 7 Oct 2026, Cardano preprod. Amounts in test ADA.</div>
+</section>
+
+<!-- 6 PRODUCT FLOW -->
+<section class="slide" data-n="6">
+  <h1>Live today: <em>four</em> screens from a goal to a receipt that reconciles to the lovelace.</h1>
+  <div id="flow" class="abs" style="left:100px;top:370px;width:1720px;height:560px"></div>
+</section>
+
+<!-- 7 DEMO VIDEO -->
+<section class="slide" data-n="7">
+  <div class="kicker">Demo</div>
+  <h1>Watch <em>one</em> Sokosumi Task become a live tree of paid agents.</h1>
+  <div class="abs shot" id="videoFrame" style="left:310px;top:330px;width:1300px;height:731px;border-radius:16px;top:320px">
+    <img src="shots/tree.png" style="width:100%;height:100%;object-fit:cover;object-position:top">
+  </div>
+</section>
+
+<!-- 8 PROOF -->
+<section class="slide" data-n="8">
+  <div class="kicker">Proof it works</div>
+  <h1>A real paid Task, end to end: buyer pays at 10:53, <em>5</em> agents are hired, seller collects at 14:56.</h1>
+  <svg class="abs" id="proofLine" style="left:100px;top:360px" width="1720" height="200"></svg>
+  <div class="abs shot" style="left:100px;top:590px;width:800px"><img src="shots/scan-escrow-crop.png"></div>
+  <div class="abs shot" style="left:1020px;top:590px;width:800px"><img src="shots/scan-withdraw-crop.png"></div>
+  <div class="abs note" style="left:620px;top:870px;width:330px;font-size:24px">Masumi escrow lock,<br>Sokosumi credits</div>
+  <div class="abs note" style="left:1540px;top:870px;width:330px;font-size:24px">Seller withdrawal<br>after unlock</div>
+</section>
+
+<!-- 9 WHY CARDANO -->
+<section class="slide" data-n="9">
+  <h1>Why Cardano? Every node is its own UTxO, and all <em>17</em> tree actions cost under 0.78 ADA, known before signing.</h1>
+  <svg class="abs" id="feeChart" style="left:100px;top:370px" width="1060" height="690"></svg>
+  <div class="abs" style="left:1260px;top:400px;width:560px;display:flex;flex-direction:column;gap:30px">
+    <div><div style="font-size:30px;font-weight:650">eUTXO tree</div><div class="small">Siblings settle in separate transactions with no shared state to fight over.</div></div>
+    <div><div style="font-size:30px;font-weight:650">Deterministic fees</div><div class="small">The fee is known before you sign, and a transaction that would fail is caught before it is sent.</div></div>
+    <div><div style="font-size:30px;font-weight:650">7 Aiken scripts, Plutus V3</div><div class="small">Reference scripts at an address no key can spend.</div></div>
+    <div><div style="font-size:30px;font-weight:650">Masumi and Sokosumi</div><div class="small">Agent identity, vested_pay escrow and a marketplace of buyers, already on Cardano.</div></div>
+  </div>
+</section>
+
+<!-- 10 LEARNED 1 -->
+<section class="slide" data-n="10">
+  <div class="kicker">What we've learned · 1 of 3</div>
+  <h1>Deadlines must nest: in our paid Task all <em>5</em> child deadlines end before the root's, or the chain rejects the hire.</h1>
+  <div class="track"><div class="on">1 Deadlines nest</div><div>2 Attacks fail on chain</div><div>3 Audits find what tests miss</div></div>
+  <svg class="abs" id="gantt" style="left:100px;top:470px" width="1720" height="470"></svg>
+</section>
+
+<!-- 11 LEARNED 2 -->
+<section class="slide" data-n="11">
+  <div class="kicker">What we've learned · 2 of 3</div>
+  <h1>We sent <em>64</em> forged transactions to a real Cardano node. The validators rejected every one.</h1>
+  <div class="track"><div>1 Deadlines nest</div><div class="on">2 Attacks fail on chain</div><div>3 Audits find what tests miss</div></div>
+  <div class="abs" style="left:100px;top:520px;width:560px">
+    <div class="big g" style="font-size:220px;color:var(--ink)">0</div>
+    <p style="font-size:30px;font-weight:600;margin-top:20px">unexpected successes</p>
+    <p class="small" style="margin-top:20px">Each case mutates one field of a valid transaction: a raised fee, a missing thread token, a deadline past the parent's.</p>
+    <p class="src" style="margin-top:20px">tests/adversarial/report.json, Yaci DevKit node, 5 Oct 2026. 9 more cases on preprod, all rejected.</p>
+  </div>
+  <svg class="abs" id="attackChart" style="left:780px;top:500px" width="1040" height="470"></svg>
+</section>
+
+<!-- 12 LEARNED 3 -->
+<section class="slide" data-n="12">
+  <div class="kicker">What we've learned · 3 of 3</div>
+  <h1>An independent audit found <em>2</em> critical bugs our tests had not caught. All 19 review findings are fixed.</h1>
+  <div class="track"><div>1 Deadlines nest</div><div>2 Attacks fail on chain</div><div class="on">3 Audits find what tests miss</div></div>
+  <svg class="abs" id="auditChart" style="left:100px;top:500px" width="1100" height="440"></svg>
+  <div class="abs" style="left:1300px;top:510px;width:520px">
+    <div class="stat" style="font-size:120px">735</div>
+    <div style="font-size:28px;font-weight:600">Aiken tests, 0 failures</div>
+    <div class="small" style="margin-top:12px">672 unit and 63 property tests, 6,972 checks.</div>
+    <div class="stat" style="font-size:120px;margin-top:44px">0</div>
+    <div style="font-size:28px;font-weight:600">open critical or high findings</div>
+    <div class="src" style="margin-top:14px">security/review-report.md, audit 21f7228 and re-review 814cc42; demo/out/aiken-check.json.</div>
+  </div>
+</section>
+
+<!-- 13 WHERE WE ARE -->
+<section class="slide" data-n="13">
+  <div class="kicker">Where we are</div>
+  <h1>Live on Cardano preprod, hired and paid through Sokosumi.</h1>
+  <div class="abs" style="left:100px;top:380px;width:760px">
+    <div class="big g" style="font-size:140px">11 agents</div>
+    <div style="font-size:46px;font-weight:620;letter-spacing:-0.03em;margin-top:18px">4 paid Sokosumi Tasks · 17 contract actions on chain</div>
+    <p class="small" style="margin-top:34px;font-size:25px">On today's scripts: 10 trees, 96 transactions, 17 payouts to 6 agents, 143.45 test ADA paid, 194.55 back to buyers.</p>
+    <p class="honest" style="margin-top:40px">No mainnet users yet. All money so far is test ADA and test USDM.</p>
+    <p class="src" style="margin-top:22px">Live /api/v1/landing and /api/v1/agents, read 7 Oct 2026; docs/sokosumi-coworker.md; README redeemer table.</p>
+  </div>
+  <div class="abs shot" style="left:960px;top:360px;width:860px;height:440px"><img src="shots/economy.png"></div>
+  <div class="abs shot" style="left:1240px;top:640px;width:580px;height:350px"><img src="shots/github-crop.png"></div>
+</section>
+
+<!-- 14 BUSINESS MODEL -->
+<section class="slide" data-n="14">
+  <h1>Where the money comes from: a cut of <em>every</em> tree, already a field in the contract.</h1>
+  <div class="abs" style="left:100px;top:380px;width:760px">
+    <div class="label" style="color:var(--muted);font-size:17px">Our paid Task, 7 Oct 2026</div>
+    <div style="display:flex;gap:70px;margin-top:22px">
+      <div><div style="font-size:66px;font-weight:700;letter-spacing:-0.04em">60 ADA</div><div class="small">buyer budget</div></div>
+      <div><div style="font-size:66px;font-weight:700;letter-spacing:-0.04em;color:var(--green)" id="cfee">6 ADA</div><div class="small">Conductor fee, 10%</div></div>
+    </div>
+    <p class="small" style="margin-top:44px;font-size:25px"><span class="mono">protocol_fee_bps</span> is in every Tree Config and paid by the validators at close. It is 0 on preprod today.</p>
+    <p class="honest" style="margin-top:40px">Not earning yet. Rates below are a plan, not measured revenue.</p>
+  </div>
+  <div class="abs" style="left:960px;top:380px;bottom:110px;border-left:1.5px solid var(--line)"></div>
+  <svg class="abs" id="bizChart" style="left:1020px;top:380px" width="800" height="560"></svg>
+</section>
+
+<!-- 15 ROADMAP + ASK -->
+<section class="slide" data-n="15">
+  <h1>Live on preprod since 6 Oct. Next: <em>one</em> more audit, then mainnet and agents that are not ours.</h1>
+  <svg class="abs" id="roadmap" style="left:100px;top:360px" width="1720" height="330"></svg>
+  <div class="abs" style="left:100px;top:730px;width:1720px">
+    <div class="label" style="color:var(--green);margin-bottom:24px">The ask</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:30px">
+      <div class="card"><div style="font-size:30px;font-weight:650">Design partners</div><div class="small" style="margin-top:8px">Teams whose agents hire other agents and need to pay them safely.</div></div>
+      <div class="card"><div style="font-size:30px;font-weight:650">Masumi agents</div><div class="small" style="margin-top:8px">Plug unmodified Masumi agents in as leaves of a tree.</div></div>
+      <div class="card"><div style="font-size:30px;font-weight:650">A mainnet audit</div><div class="small" style="margin-top:8px">A second contract audit before real money moves.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 TEAM -->
+<section class="slide" data-n="16">
+  <h1>Team</h1>
+  <div class="placeholder abs" style="left:100px;top:330px;width:1720px;height:420px;display:flex;align-items:center;justify-content:center">{{TEAM}}: names, roles and one line each</div>
+  <div class="abs" style="left:100px;top:820px;font-size:30px;line-height:1.6">
+    Try it: <span class="mono">cascade-alpha-amber.vercel.app</span><br>
+    Code: <span class="mono">github.com/Adwaitbytes/cascade-cardano</span><br>
+    Sokosumi Coworker: <span class="mono">01a110cd-4ee0-763b-ae63-4008564c9f8e</span>
+  </div>
+</section>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="logo" viewBox="0 0 28 28">
+      <rect width="28" height="28" rx="7" fill="#161514"/>
+      <g fill="#F2EEEA"><rect x="10.5" y="6" width="7" height="5" rx="1"/><rect x="13" y="11" width="2" height="3"/><rect x="8" y="13" width="12" height="2"/><rect x="6" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1" opacity="0.45"/></g>
+    </symbol>
+    <marker id="ah" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M1 1.5 L10 6 L1 10.5" fill="none" stroke="#1F7A50" stroke-width="1.8" stroke-linecap="round"/></marker>
+    <marker id="ahi" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M1 1.5 L10 6 L1 10.5" fill="none" stroke="#7A746E" stroke-width="1.8" stroke-linecap="round"/></marker>
+    <marker id="aho" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M1 1.5 L10 6 L1 10.5" fill="none" stroke="#B9511D" stroke-width="1.8" stroke-linecap="round"/></marker>
+  </defs>
+</svg>
+
+<script src="deck.js"></script>
+</body>
+</html>
