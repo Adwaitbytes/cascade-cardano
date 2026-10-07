@@ -22,8 +22,12 @@ export function walletAddressOf(network: DeploymentNetwork): (role: string) => s
   };
 }
 
-/** The Lisan operator's V2 selling wallet (deployments/masumi.<network>.json). */
+/**
+ * The Lisan operator's V2 selling wallet (deployments/masumi.preprod.json). The Yaci devnet runs no Masumi
+ * payment service, so there Lisan is paid at its own role wallet.
+ */
 function lisanSellingWallet(network: DeploymentNetwork): string {
+  if (network === "local") return walletAddressOf("local")("lisan");
   const file = JSON.parse(readFileSync(resolve(REPO_ROOT, `deployments/masumi.${network}.json`), "utf8")) as { instances: { id: string; v2SellingWallet: string }[] };
   const lisan = file.instances.find((i) => i.id === "lisan");
   if (lisan === undefined) throw new Error(`deployments/masumi.${network}.json has no lisan instance`);
