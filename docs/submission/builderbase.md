@@ -62,7 +62,7 @@ Cascade enforces escrow at every level of the hiring chain, on chain.
 | Live site | https://cascade-alpha-amber.vercel.app |
 | Buyer console | https://cascade-alpha-amber.vercel.app/console |
 | Agent directory API | https://cascade-alpha-amber.vercel.app/api/v1/agents |
-| Demo video | {{VIDEO_URL}} |
+| Demo video | https://drive.google.com/file/d/140YkZ6RUxrUatjyh0ov8HCe1PPoLVy1R/view?usp=sharing |
 
 ## Proof
 
@@ -84,7 +84,7 @@ Proof already on chain, independent of the Task above:
 
 ## Team
 
-{{TEAM_NAMES_AND_ROLES}}
+Adwait Keshari, solo founder and builder: Aiken validators, agent network, chain services, web app and the Sokosumi Coworker.
 
 ## What's next
 
