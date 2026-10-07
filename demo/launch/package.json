@@ -1,0 +1,15 @@
+{
+  "name": "cascade-launch-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "hyperframes check",
+    "render": "hyperframes render --quality delivery --fps 60 --workers 1 --output ../out/cascade-launch-30s.mp4"
+  },
+  "devDependencies": {
+    "geist": "^1.7.2",
+    "gsap": "^3.15.0",
+    "hyperframes": "^0.8.140",
+    "simple-icons": "^16.34.0"
+  }
+}
