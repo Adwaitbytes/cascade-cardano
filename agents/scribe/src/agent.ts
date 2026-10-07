@@ -13,12 +13,13 @@ import {
   enforceFacts,
   factCheck,
   isArabicText,
+  isChineseText,
   priceProvenance,
   type Research,
 } from "@cascade/orchestrator/deliverable";
 
 export const SCRIBE_PROMPT_VERSION = "scribe-v3";
-export const SCRIBE_TRANSLATE_PROMPT_VERSION = "scribe-translate-v1";
+export const SCRIBE_TRANSLATE_PROMPT_VERSION = "scribe-translate-v2";
 
 export const SCRIBE_OUTPUT_SCHEMA = {
   type: "object",
@@ -30,6 +31,8 @@ export const SCRIBE_OUTPUT_SCHEMA = {
     llm: { type: "string" },
     /** Translation mode only: the Arabic summary, also in `brief` and `summary`. */
     arabic_summary: { type: "string" },
+    /** Translation mode only: the Simplified Chinese summary, also in `brief` and `summary`. */
+    chinese_summary: { type: "string" },
     language: { type: "string" },
   },
 };
@@ -61,7 +64,17 @@ const BRIEF_PARTS_SCHEMA = {
   },
 };
 
-const TRANSLATION_SCHEMA = { type: "object", additionalProperties: false, required: ["arabic_summary"], properties: { arabic_summary: { type: "string" } } };
+const TRANSLATION_SCHEMA = { type: "object", additionalProperties: false, required: ["translation"], properties: { translation: { type: "string" } } };
+
+/** Target languages Scribe translates into, read from the slot's task text. Arabic unless the task names Chinese. */
+const TRANSLATION_TARGETS = {
+  ar: { name: "clear Modern Standard Arabic", script: "Arabic script", field: "arabic_summary", isText: isArabicText },
+  "zh-Hans": { name: "Simplified Chinese (简体中文)", script: "Simplified Chinese characters", field: "chinese_summary", isText: isChineseText },
+} as const;
+
+export function translationTarget(task: string): keyof typeof TRANSLATION_TARGETS {
+  return /chinese|mandarin|简体|中文|\bzh\b/i.test(task) ? "zh-Hans" : "ar";
+}
 
 const WRITER_SYSTEM = [
   "You are a senior market analyst writing a crisp executive market-entry brief for a founder.",
@@ -158,7 +171,8 @@ export const isTranslationTask = (task: JsonValue | undefined): boolean => typeo
 function textToTranslate(context: Record<string, JsonValue>): string | null {
   const deps = context["depends_on"];
   if (!isRecord(deps)) return null;
-  for (const v of Object.values(deps)) if (isRecord(v) && typeof v["summary"] === "string" && v["summary"].trim() !== "" && v["language"] !== "ar") return v["summary"];
+  // A result with a `language` is another translation, never the English source.
+  for (const v of Object.values(deps)) if (isRecord(v) && typeof v["summary"] === "string" && v["summary"].trim() !== "" && v["language"] === undefined) return v["summary"];
   return null;
 }
 
@@ -180,7 +194,7 @@ function writerCheck(goal: string, research: Research) {
 export function createScribeAgent(deps: ScribeDeps): CascadeAgent {
   return cascadeAgent({
     name: "Scribe",
-    description: "Writes the final brief and an executive summary from verified research; translates the summary into Arabic when hired to translate.",
+    description: "Writes the final brief and an executive summary from verified research; translates the summary into Arabic or Simplified Chinese when hired to translate.",
     baseUrl: deps.runtime.baseUrl,
     registryAsset: deps.runtime.registryAsset,
     network: deps.runtime.network,
@@ -188,7 +202,7 @@ export function createScribeAgent(deps: ScribeDeps): CascadeAgent {
     outputSchema: SCRIBE_OUTPUT_SCHEMA,
     pricing: { asset: deps.runtime.asset, amount: "5000000", etaMs: 10 * 60_000 },
     rails: ["native"],
-    capabilities: { roles: ["specialist"], categories: ["writing", "translation"], maxDepth: 5, bondLovelace: "0", tags: ["report", "brief", "arabic"] },
+    capabilities: { roles: ["specialist"], categories: ["writing", "translation"], maxDepth: 5, bondLovelace: "0", tags: ["report", "brief", "arabic", "chinese"] },
     signer: deps.signer,
     ...(deps.payments === undefined ? {} : { payments: deps.payments }),
     ...(deps.store === undefined ? {} : { store: deps.store }),
@@ -202,21 +216,22 @@ export function createScribeAgent(deps: ScribeDeps): CascadeAgent {
         const source = textToTranslate(context);
         // No summary to translate means no honest translation: fail so the slot's contingency (Lisan via Masumi) runs.
         if (source === null) throw new Error("translation task without an upstream summary to translate");
+        const language = translationTarget(context["task"] as string);
+        const target = TRANSLATION_TARGETS[language];
         const out = await loggedJson(deps.llm, ctx, {
           role: "worker",
           promptVersion: SCRIBE_TRANSLATE_PROMPT_VERSION,
-          system:
-            "Translate the text into clear Modern Standard Arabic for a business reader. Keep brand names in Latin script and keep every number exactly. Add nothing and drop nothing. Return only the Arabic text in arabic_summary.",
+          system: `Translate the text into ${target.name} for a business reader. Keep brand names in Latin script and keep every number exactly. Add nothing and drop nothing. Return only the translated text in translation.`,
           user: JSON.stringify({ text: source }),
-          schemaName: "arabic_translation",
+          schemaName: "translation",
           schema: TRANSLATION_SCHEMA,
           maxTokens: 1_200,
-          check: (v) => (isArabicText(v.arabic_summary) ? [] : ["arabic_summary must be Arabic script"]),
-          fallback: () => ({ arabic_summary: "" }),
+          check: (v) => (target.isText(v.translation) ? [] : [`translation must be in ${target.script}`]),
+          fallback: () => ({ translation: "" }),
         });
-        if (!isArabicText(out.value.arabic_summary)) throw new Error(`no Arabic translation was produced (${out.record.fallback_reason ?? "output was not Arabic script"})`);
-        const arabic = out.value.arabic_summary.trim();
-        return { result: { brief: arabic, summary: arabic, arabic_summary: arabic, language: "ar", llm: out.llm } };
+        if (!target.isText(out.value.translation)) throw new Error(`no ${target.name} translation was produced (${out.record.fallback_reason ?? `output was not ${target.script}`})`);
+        const translated = out.value.translation.trim();
+        return { result: { brief: translated, summary: translated, [target.field]: translated, language, llm: out.llm } };
       }
 
       const sub = deps.subtree === undefined ? null : await deps.subtree(ctx.node, context);

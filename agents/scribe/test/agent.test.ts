@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { localKeySigner } from "@cascade/agent";
 import { buyAndRun, fakeOpenRouter, ScriptedVerifier, testRequirements, testRuntime } from "@cascade/agent-kit/testing";
 import { LlmClient } from "@cascade/orchestrator/llm";
-import { isArabicText, UNVERIFIED } from "@cascade/orchestrator/deliverable";
-import { createScribeAgent, templateBrief } from "../src/agent.js";
+import { isArabicText, isChineseText, UNVERIFIED } from "@cascade/orchestrator/deliverable";
+import { createScribeAgent, templateBrief, translationTarget } from "../src/agent.js";
 
 const signer = localKeySigner(new Uint8Array(32).fill(22));
 const payments = () => ({ requirements: testRequirements(signer.address), verifier: new ScriptedVerifier() });
@@ -80,17 +80,39 @@ describe("Scribe translator", () => {
   const ARABIC = "يشهد سوق العصائر في دبي نموا مدفوعا بالاهتمام بالصحة. ننصح بإطلاق مجموعة فاخرة تباع عبر الإنترنت أولا.";
   const task = "Translate the executive summary into Arabic";
   it("translates the writer's summary into Arabic script", async () => {
-    const llm = new LlmClient({ apiKey: "k", fetch: fakeOpenRouter([JSON.stringify({ arabic_summary: ARABIC })]) });
+    const llm = new LlmClient({ apiKey: "k", fetch: fakeOpenRouter([JSON.stringify({ translation: ARABIC })]) });
     const result = await run(llm, { goal, task, depends_on: { scribe: { brief: "# Brief", summary: "Dubai juice demand is rising.", llm: "x" } } });
     expect(result?.["arabic_summary"]).toBe(ARABIC);
     expect(result?.["language"]).toBe("ar");
     expect(isArabicText(result?.["brief"] ?? "")).toBe(true);
   });
   it("fails rather than deliver English as the Arabic summary", async () => {
-    const llm = new LlmClient({ apiKey: "k", maxAttempts: 1, fallbacks: { worker: [] }, fetch: fakeOpenRouter([JSON.stringify({ arabic_summary: "Dubai juice demand is rising." })]) });
+    const llm = new LlmClient({ apiKey: "k", maxAttempts: 1, fallbacks: { worker: [] }, fetch: fakeOpenRouter([JSON.stringify({ translation: "Dubai juice demand is rising." })]) });
     expect(await run(llm, { goal, task, depends_on: { scribe: { brief: "# Brief", summary: "Dubai juice demand is rising.", llm: "x" } } })).toBeUndefined();
   });
   it("fails when there is no summary to translate (the showcase's invented-English case)", async () => {
     expect(await run(new LlmClient({ apiKey: "k", fetch: fakeOpenRouter([]) }), { goal, task, depends_on: {} })).toBeUndefined();
+  });
+
+  // Preprod Task 01a11460 (tree b945c5e3): the slot asked for Simplified Chinese and Scribe only knew Arabic.
+  const CHINESE = "新加坡精品咖啡订阅市场正在增长，消费者重视品质与便利。建议先在线上推出高端订阅，再与写字楼和健身房合作扩大渠道。";
+  const zhTask = "Translate the market-entry brief summary into Simplified Chinese.";
+  it("reads the target language from the task and translates into Simplified Chinese", async () => {
+    expect(translationTarget(zhTask)).toBe("zh-Hans");
+    expect(translationTarget(task)).toBe("ar");
+    const llm = new LlmClient({ apiKey: "k", fetch: fakeOpenRouter([JSON.stringify({ translation: CHINESE })]) });
+    const result = await run(llm, { goal, task: zhTask, depends_on: { "market-entry-brief": { brief: "# Brief", summary: "Singapore coffee subscriptions are growing.", llm: "x" } } });
+    expect(result?.["chinese_summary"]).toBe(CHINESE);
+    expect(result?.["language"]).toBe("zh-Hans");
+    expect(result?.["arabic_summary"]).toBeUndefined();
+    expect(isChineseText(result?.["summary"] ?? "")).toBe(true);
+  });
+  it("fails rather than deliver Arabic or English for a Chinese summary", async () => {
+    const llm = new LlmClient({ apiKey: "k", maxAttempts: 1, fallbacks: { worker: [] }, fetch: fakeOpenRouter([JSON.stringify({ translation: ARABIC })]) });
+    expect(await run(llm, { goal, task: zhTask, depends_on: { "market-entry-brief": { brief: "# Brief", summary: "Singapore coffee subscriptions are growing.", llm: "x" } } })).toBeUndefined();
+  });
+  it("never translates another translation", async () => {
+    const llm = new LlmClient({ apiKey: "k", fetch: fakeOpenRouter([JSON.stringify({ translation: CHINESE })]) });
+    expect(await run(llm, { goal, task: zhTask, depends_on: { "translate-ar": { brief: ARABIC, summary: ARABIC, language: "ar", llm: "x" } } })).toBeUndefined();
   });
 });

@@ -128,27 +128,57 @@ export function isArabicText(text: string): boolean {
   return arabic >= 20 && arabic / (arabic + latin) >= 0.6;
 }
 
-const TRANSLATION_SPEC = /translat|arabic|(^|[-_])ar($|[-_])/i;
+const HAN_CHARACTER = /[\u3400-\u4dbf\u4e00-\u9fff]/gu;
 
-/** The Arabic summary from the translation leaf (Scribe's translation mode or Lisan via Masumi), when it is Arabic script. */
-export function arabicSummaryOf(results: JsonRecord): string | null {
+/** At least 20 Han characters, and they outnumber Latin letters (brand names stay Latin). */
+export function isChineseText(text: string): boolean {
+  const han = text.match(HAN_CHARACTER)?.length ?? 0;
+  const latin = text.match(LATIN_LETTER)?.length ?? 0;
+  return han >= 20 && han > latin;
+}
+
+/** Languages a translation leaf can deliver, with the script check that proves it did. */
+export const SUMMARY_LANGUAGES = {
+  ar: { heading: "## Arabic summary (الملخص بالعربية)", name: "an Arabic", script: "Arabic script", isText: isArabicText, specPattern: /arabic|(^|[-_])ar($|[-_])/i },
+  "zh-Hans": { heading: "## Simplified Chinese summary (简体中文摘要)", name: "a Simplified Chinese", script: "Han characters", isText: isChineseText, specPattern: /chinese|mandarin|(^|[-_])zh($|[-_])/i },
+} as const;
+export type SummaryLanguage = keyof typeof SUMMARY_LANGUAGES;
+
+const TRANSLATION_SPEC = /translat|arabic|chinese|mandarin|(^|[-_])(ar|zh)($|[-_])/i;
+
+/** A translated summary in `language` from the translation leaf (Scribe's translation mode, or Lisan via Masumi for Arabic). */
+export function translatedSummaryOf(results: JsonRecord, language: SummaryLanguage): string | null {
+  const lang = SUMMARY_LANGUAGES[language];
   const candidates = Object.entries(results).flatMap(([spec, out]): string[] => {
     if (typeof out === "string") return TRANSLATION_SPEC.test(spec) ? [out] : [];
     if (!isRecord(out)) return [];
-    const explicit = str(out["arabic_summary"]);
+    const explicit = language === "ar" ? str(out["arabic_summary"]) : null;
     if (explicit !== null) return [explicit];
-    if (!TRANSLATION_SPEC.test(spec) && out["language"] !== "ar") return [];
+    if (!TRANSLATION_SPEC.test(spec) && out["language"] !== language) return [];
     return [out["result"], out["translation"], out["summary"], out["brief"]].flatMap((v) => (str(v) === null ? [] : [str(v) as string]));
   });
-  return candidates.find(isArabicText) ?? null;
+  return candidates.find(lang.isText) ?? null;
 }
 
-/** The writer's brief: a `brief` string from an output that is neither a translation nor Arabic. */
+/** The Arabic summary from the translation leaf, when it is Arabic script. */
+export function arabicSummaryOf(results: JsonRecord): string | null {
+  return translatedSummaryOf(results, "ar");
+}
+
+/** The summary language the plan asked for: Simplified Chinese when a slot or a result names it, else Arabic. */
+export function requestedSummaryLanguage(results: JsonRecord, specIds: readonly string[] = []): SummaryLanguage {
+  const zh = SUMMARY_LANGUAGES["zh-Hans"];
+  if (specIds.some((id) => zh.specPattern.test(id))) return "zh-Hans";
+  for (const [spec, out] of Object.entries(results)) if (zh.specPattern.test(spec) || (isRecord(out) && out["language"] === "zh-Hans")) return "zh-Hans";
+  return "ar";
+}
+
+/** The writer's brief: a `brief` string from an output that is neither a translation nor in another language. */
 export function writerBriefOf(results: JsonRecord): { spec: string; brief: string; summary: string | null } | null {
   for (const [spec, out] of Object.entries(results)) {
-    if (!isRecord(out) || TRANSLATION_SPEC.test(spec) || out["language"] === "ar") continue;
+    if (!isRecord(out) || TRANSLATION_SPEC.test(spec) || typeof out["language"] === "string") continue;
     const brief = str(out["brief"]) ?? str(out["report"]);
-    if (brief !== null && !isArabicText(brief)) return { spec, brief, summary: str(out["summary"]) };
+    if (brief !== null && !isArabicText(brief) && !isChineseText(brief)) return { spec, brief, summary: str(out["summary"]) };
   }
   return null;
 }
@@ -306,20 +336,23 @@ export function benchmarkTable(research: Research): string[] {
   ];
 }
 
-export const ARABIC_HEADING = "## Arabic summary (الملخص بالعربية)";
+export const ARABIC_HEADING = SUMMARY_LANGUAGES.ar.heading;
 
 /**
- * The deliverable in Markdown: the writer's brief, the Arabic summary as its own section, and an
+ * The deliverable in Markdown: the writer's brief, the translated summary (Arabic or Simplified
+ * Chinese, as the plan asked) as its own section, and an
  * appendix with the research sources and price provenance. Null when no writer delivered a brief.
  */
-export function renderDeliverable(results: JsonRecord): string | null {
+export function renderDeliverable(results: JsonRecord, specIds: readonly string[] = []): string | null {
   const writer = writerBriefOf(results);
   if (writer === null) return null;
   const research = collectResearch(results);
-  const arabic = arabicSummaryOf(results);
+  const language = requestedSummaryLanguage(results, specIds);
+  const lang = SUMMARY_LANGUAGES[language];
+  const translated = translatedSummaryOf(results, language);
   const lines: string[] = [writer.brief.trim(), ""];
-  lines.push(ARABIC_HEADING, "");
-  lines.push(arabic === null ? "The translation agent did not deliver an Arabic summary in Arabic script, so none is shown." : arabic.trim(), "");
+  lines.push(lang.heading, "");
+  lines.push(translated === null ? `The translation agent did not deliver ${lang.name} summary in ${lang.script}, so none is shown.` : translated.trim(), "");
   lines.push("## Appendix: sources", "");
   if (research.findings.length === 0) lines.push("The research agent delivered no sourced findings.");
   else {

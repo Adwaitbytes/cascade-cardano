@@ -5,7 +5,7 @@
  * with Cascade and preprod explorer links. Deterministic: the inputs are schema-parsed outcomes and
  * indexer views, never free LLM text about payments, and no model runs here.
  */
-import { isArabicText } from "@cascade/orchestrator/deliverable";
+import { isArabicText, isChineseText } from "@cascade/orchestrator/deliverable";
 import type { RootOutcome, TreeReceipt, TreeView } from "./cascade.js";
 
 const scan = (tx: string) => `https://preprod.cardanoscan.io/transaction/${tx}`;
@@ -43,7 +43,7 @@ interface Deliverables {
 const REPORT_FIELDS = ["report", "answer", "result", "text", "content"] as const;
 const TRANSLATION_FIELDS: Record<string, string> = { translation: "Translation", arabic_summary: "Arabic summary", translated_text: "Translation" };
 
-const isTranslationSpec = (spec: string) => /translat/i.test(spec);
+const isTranslationSpec = (spec: string) => /translat|arabic|chinese|mandarin|(^|[-_])(ar|zh)($|[-_])/i.test(spec);
 
 function collect(value: unknown, spec: string, into: Deliverables, depth: number): void {
   if (depth > 5) return;
@@ -59,15 +59,15 @@ function collect(value: unknown, spec: string, into: Deliverables, depth: number
     return;
   }
   // A translation slot delivers only its translation. Scribe hired to translate echoes `brief` and
-  // `summary`; they count as the translation when in Arabic script, and an English echo is dropped
-  // so the Task shows one brief, not the writer's brief twice.
-  if (isTranslationSpec(spec) || value["language"] === "ar") {
+  // `summary`; they count as the translation when in Arabic script or Han characters, and an English
+  // echo is dropped so the Task shows one brief, not the writer's brief twice.
+  if (isTranslationSpec(spec) || typeof value["language"] === "string") {
     for (const [field, label] of Object.entries(TRANSLATION_FIELDS)) {
       const text = str(value[field]);
       if (text !== null) into.translations.push({ label, text });
     }
-    const echoed = [value["summary"], value["brief"]].map(str).find((t): t is string => t !== null && isArabicText(t));
-    if (echoed !== undefined) into.translations.push({ label: "Arabic summary", text: echoed });
+    const echoed = [value["summary"], value["brief"]].map(str).find((t): t is string => t !== null && (isArabicText(t) || isChineseText(t)));
+    if (echoed !== undefined) into.translations.push({ label: isChineseText(echoed) ? "Simplified Chinese summary" : "Arabic summary", text: echoed });
     return;
   }
   const brief = str(value["brief"]);

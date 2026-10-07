@@ -110,4 +110,12 @@ describe("renderReport on the showcase Task (preprod tree c011aadb)", () => {
     expect(withArabic).toContain(arabic);
     expect(withArabic.match(/^## Brief$/gm)).toHaveLength(1);
   });
+  it("shows a Simplified Chinese translation from a `chinese-summary` slot, not as a second brief (preprod tree b945c5e3)", () => {
+    const chinese = "新加坡精品咖啡订阅市场正在增长，消费者重视品质与便利。建议先在线上推出高端订阅，再与写字楼合作。";
+    const result = { result: { "chinese-summary": { brief: chinese, summary: chinese, chinese_summary: chinese, language: "zh-Hans", llm: "m" }, ...(showcase.result as { result: Record<string, unknown> }).result } };
+    const withChinese = renderReport({ ...input, goal: showcase.goal, treeId: showcase.tree_id, outcome: { node_id: showcase.tree_id, result_hash: showcase.result_hash, partial: false, children: [], result: result as never } });
+    expect(withChinese.match(/^## Simplified Chinese summary$/gm)).toHaveLength(1);
+    expect(withChinese.match(/^## Brief$/gm)).toHaveLength(1);
+    expect(withChinese.indexOf(chinese)).toBeGreaterThan(withChinese.indexOf("## Simplified Chinese summary"));
+  });
 });

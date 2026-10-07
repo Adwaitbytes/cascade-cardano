@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { JsonValue } from "@cascade/shared/browser";
-import { ARABIC_HEADING, arabicSummaryOf, collectResearch, enforceFacts, factCheck, isArabicText, renderDeliverable, UNVERIFIED, writerBriefOf } from "../src/deliverable.js";
+import { ARABIC_HEADING, arabicSummaryOf, collectResearch, enforceFacts, factCheck, isArabicText, isChineseText, renderDeliverable, translatedSummaryOf, UNVERIFIED, writerBriefOf } from "../src/deliverable.js";
 
 /** The merged root result of preprod tree c011aadb (Sokosumi Task 01a11176), as delivered. */
 const showcase = JSON.parse(readFileSync(new URL("./fixtures/showcase-c011aadb.json", import.meta.url), "utf8")) as { goal: string; result: { result: Record<string, JsonValue> } };
@@ -74,4 +74,18 @@ describe("renderDeliverable on the showcase result", () => {
     expect(arabicSummaryOf({ "translate-ar-masumi": { result: ARABIC } })).toBe(ARABIC);
   });
   it("uses no em dashes", () => expect(text).not.toContain("—"));
+  it("renders a Simplified Chinese summary from a `chinese-summary` slot, never as the writer's brief (preprod tree b945c5e3)", () => {
+    const CHINESE = "新加坡精品咖啡订阅市场正在增长，消费者重视品质与便利。建议先在线上推出高端订阅，再与写字楼和健身房合作。";
+    const { scribe, ...rest } = results as Record<string, unknown>;
+    const withChinese = { "chinese-summary": { brief: CHINESE, summary: CHINESE, chinese_summary: CHINESE, language: "zh-Hans", llm: "x" }, ...rest, scribe } as typeof results;
+    expect(isChineseText(CHINESE)).toBe(true);
+    expect(writerBriefOf(withChinese)?.spec).toBe("scribe");
+    expect(translatedSummaryOf(withChinese, "zh-Hans")).toBe(CHINESE);
+    const out = renderDeliverable(withChinese) ?? "";
+    expect(out).toContain("## Simplified Chinese summary");
+    expect(out).not.toContain(ARABIC_HEADING);
+    expect(out.indexOf(CHINESE)).toBeLessThan(out.indexOf("## Appendix: sources"));
+    const missing = renderDeliverable(results, ["market-research", "chinese-summary", "market-entry-brief"]) ?? "";
+    expect(missing).toContain("did not deliver a Simplified Chinese summary in Han characters");
+  });
 });
