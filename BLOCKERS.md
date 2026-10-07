@@ -60,3 +60,7 @@ Append only. Format: id, what is blocked, exact human action needed, workaround 
 ## B7 Vercel CLI cannot reach the team that owns the `cascade` project (2026-10-02)
 The CLI is logged in as `adwaitbytes-projects`; `.vercel/project.json` points to another team. Workaround: production keeps serving the previous deploy (all recorded URLs 200); the demo recording runs against a local `next start` of HEAD. Fix: operator runs `vercel login` with the owning account, then `npx tsx scripts/web-deploy.ts`. Retrying each wave.
 Resolved 2026-10-02: operator logged in to the owning account; b18fe37 deployed, all URLs 200.
+
+## Masumi payment service: collection stuck after a timeout (2026-10-07)
+While the laptop slept, the payment service's withdraw tx for paid Task 01a11460 never reached the chain (a Mesh BlockfrostProvider error surfaced as `XMLHttpRequest is not defined`), and the service marked the payment `WaitingForExternalAction` with `errorType=Unknown`. Its auto-withdraw only retries payments without an error, and `/payment/error-state-recovery` only accepts `WaitingForManualAction`, so nothing could retry it. Workaround: the operator ran two guarded SQL updates that point the payment back at its confirmed ResultSubmitted tx and clear the error; the service then collected it (26f4cb1e). Keep the host awake during payouts. Upstream bug to report to Masumi.
+
