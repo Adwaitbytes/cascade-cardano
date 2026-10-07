@@ -110,3 +110,13 @@ Honest notes: this Task ran before the hackathon redeploy, so its Cascade tree u
 - Cascade tree funding: https://preprod.cardanoscan.io/transaction/49d52a7576be879c3f0aca14ad572265b0431ba94b402c3c6adf18639329307e
 
 Note: this Task ran overnight before the switch to the redeployed scripts, so its Cascade tree uses the earlier script hashes; all its Masumi transactions are inside the hackathon window. Paid Task 3 runs on today's deployment.
+
+### Paid Task 3 (2026-10-07): first paid Task on the redeployed scripts
+
+- Task: `01a11460-d470-75ed-a7cc-18a9eb83bb30`, a Singapore specialty coffee market-entry brief. Result: [docs/samples/task-01a11460-singapore-coffee-brief.md](samples/task-01a11460-singapore-coffee-brief.md)
+- Masumi escrow lock: https://preprod.cardanoscan.io/transaction/08e84e6c7cf037b8fe40f4221c376fb821745f3481c174dbd470c4fd4450284e
+- Cascade tree funding on the tagged scripts: https://preprod.cardanoscan.io/transaction/ca13e45d9c54c41bf80c8c8b46c8566c8b341a752795048e418c90f5a54b2917
+- Result hash on chain: https://preprod.cardanoscan.io/transaction/140621c1e7004cc41a40e192e25e529d9069e18a9bf7e325e6e999b366b643d2
+- Seller collection, state Withdrawn: https://preprod.cardanoscan.io/transaction/26f4cb1eabbbbd7cb189ee1dfbb997b6ba5fd1186d1f79a7f3771f567591e562
+
+Honest note: three of the four sub-tasks came back partial (task ordering, Pricer input and Chinese translation bugs, all fixed the same morning in a5766dd, f80ea93, a289fe5 and fef4ff3). The Masumi collection timed out while the laptop slept and was recovered by clearing the payment service's stale error state; see BLOCKERS.md.
