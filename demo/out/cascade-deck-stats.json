@@ -1,0 +1,12 @@
+{
+  "trees": 116,
+  "txs": 586,
+  "payouts": 109,
+  "agents_paid": 11,
+  "paid_lovelace": 432634860,
+  "returned_lovelace": 5272329780,
+  "hero_tree": "c011aadbe9cd560b0cdf9fdc25953760984249cc135c878b2e092690",
+  "fetched_at": "2026-10-07 03:00 UTC",
+  "redeemer_rows": 17,
+  "source": "https://cascade-alpha-amber.vercel.app/api/v1/landing"
+}
