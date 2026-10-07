@@ -133,6 +133,25 @@ describe("demo fallback draft (PRD 21.2)", () => {
     expect(notes).toHaveLength(2);
   });
 
+  it("normalizeDraft runs a translation after the writer, never before it (preprod tree b945c5e3)", () => {
+    const d = demoDraft();
+    // The LLM's order on preprod: the writer waits on the translation, the translation on research only.
+    const inverted: PlanDraft = {
+      ...d,
+      tasks: d.tasks.map((t) =>
+        t.id === "scribe" ? { ...t, after: [...t.after, "translate-ar"] } : t.id === "translate-ar" || t.id === "translate-ar-masumi" ? { ...t, after: ["scout"] } : t,
+      ),
+    };
+    const { draft, notes } = normalizeDraft(inverted);
+    const byId = new Map(draft.tasks.map((t) => [t.id, t]));
+    expect(byId.get("scribe")?.after).not.toContain("translate-ar");
+    expect(byId.get("translate-ar")?.after).toEqual(["scout", "scribe"]);
+    expect(byId.get("translate-ar-masumi")?.after).toEqual(["scout", "scribe"]);
+    expect(notes.filter((n) => n.includes("translat"))).toHaveLength(3);
+    expect(draftErrors(draft, 3)).toEqual([]);
+    expect(normalizeDraft(d).notes).toEqual([]);
+  });
+
   it("validatePlanFull catches a missing reserve", () => {
     const res = buildPlan(demoDraft(), intake(), agents, { ...DEFAULT_POLICY, reserve_bps: 0, margin_bps: 0 }, verifierKeyOf, { masumiPurchaserHash: PURCHASER });
     if (!res.ok) throw new Error(res.errors.join("; "));

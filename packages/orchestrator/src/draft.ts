@@ -73,12 +73,35 @@ const METERED_PAYER_CATEGORIES: ReadonlySet<string> = new Set<Category>(["pricin
  * Deterministic repairs of common LLM slips, applied before checking. Each repair is reported so
  * the plan record shows what code changed:
  * - a task that names verifiers gets `VerifierQuorum` acceptance;
- * - a `VerifierQuorum` task with no verifier falls back to `ParentAccept`.
+ * - a `VerifierQuorum` task with no verifier falls back to `ParentAccept`;
+ * - a translation runs after its sibling writers (it translates their summary), and a writer never
+ *   waits on a translation. Preprod tree b945c5e3 had it the other way round: the translator ran
+ *   first with nothing to translate and the writer was never hired.
  */
 export function normalizeDraft(draft: PlanDraft): { draft: PlanDraft; notes: string[] } {
   const notes: string[] = [];
   const checked = new Set(draft.tasks.filter((t) => t.verifies !== "").map((t) => t.verifies));
-  const tasks = draft.tasks.map((t) => {
+  const sequenced = draft.tasks.map((t) => {
+    if (t.verifies !== "") return t;
+    const siblings = draft.tasks.filter((o) => o.id !== t.id && o.parent === t.parent && o.verifies === "");
+    const ids = (category: Category) => new Set(siblings.filter((o) => o.category === category).map((o) => o.id));
+    if (t.category === "writing") {
+      const translations = ids("translation");
+      const after = t.after.filter((a) => !translations.has(a));
+      if (after.length === t.after.length) return t;
+      notes.push(`task ${t.id}: no longer waits on translation ${t.after.filter((a) => translations.has(a)).join(", ")}`);
+      return { ...t, after };
+    }
+    if (t.category === "translation") {
+      const writers = [...ids("writing")].filter((w) => w !== t.contingency_for);
+      const missing = writers.filter((w) => !t.after.includes(w));
+      if (missing.length === 0) return t;
+      notes.push(`task ${t.id}: runs after writer ${missing.join(", ")}, whose summary it translates`);
+      return { ...t, after: [...t.after, ...missing] };
+    }
+    return t;
+  });
+  const tasks = sequenced.map((t) => {
     if (checked.has(t.id) && t.acceptance !== "VerifierQuorum") {
       notes.push(`task ${t.id}: acceptance set to VerifierQuorum because verifiers check it`);
       return { ...t, acceptance: "VerifierQuorum" as const };
