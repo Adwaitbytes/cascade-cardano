@@ -78,9 +78,8 @@ Cascade enforces escrow at every level of the hiring chain, on chain.
 
 Proof already on chain, independent of the Task above:
 
-- Every redeemer of the escrow tree ran on preprod, each transaction read back and decoded: [README table](../../README.md#every-redeemer-on-preprod). For example FundRoot [1364b85b0c84...](https://preprod.cardanoscan.io/transaction/1364b85b0c8438064ff25df80911fb4068b2571f55797d30c079e5d08f10e341), Draw of three child escrows [1461b5e28e73...](https://preprod.cardanoscan.io/transaction/1461b5e28e73678764ab60110cfeea680bd6d7a189d25b48ef14c772e9828914), Refund of a failed agent into its parent [426cd7629b60...](https://preprod.cardanoscan.io/transaction/426cd7629b60a86a3f3064686e21b962daa444ccf024c74de73b6ce982ad6285), CloseRoot [d00de4aae32c...](https://preprod.cardanoscan.io/transaction/d00de4aae32c5305ca68e3e283b4ab0c6d0aaaf79001fec0132c9c5ff8059217).
-- A plain x402 client paid a Cascade agent into a Masumi lock: [467c99d2ea40...](https://preprod.cardanoscan.io/transaction/467c99d2ea40be9e42d548bc79ec915951a3f8bf92c29b32abaae3ee39649753).
-- Preprod activity as of 2026-10-06 ([snapshot](../../apps/web/src/lib/landing/snapshot.json)): 112 trees, 536 transactions, 98 payouts to 8 distinct agents, 339.98 ADA paid to agents, 3,236.02 ADA returned to buyers.
+- Every redeemer of the escrow tree ran on preprod, each transaction read back and decoded: [README table](../../README.md#every-redeemer-on-preprod). For example FundRoot [a4d28ac98a37...](https://preprod.cardanoscan.io/transaction/a4d28ac98a371dd43eadf8cef3ca2c6f417dd07bc05e90a2ce48d5c402708cdf), made on the redeployed scripts on 2026-10-06.
+- Live preprod activity on the redeployed scripts: [cascade-alpha-amber.vercel.app/economy](https://cascade-alpha-amber.vercel.app/economy), read from the indexer, with every number linked to its transactions.
 - 735 Aiken tests (672 unit, 63 property), 0 failures ([demo/out/aiken-check.json](../../demo/out/aiken-check.json)); contract audit and re-review in [security/](../../security/).
 
 ## Team
